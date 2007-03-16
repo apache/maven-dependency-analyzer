@@ -31,7 +31,7 @@
   <groupId>org.apache.maven.shared</groupId>
   <artifactId>maven-dependency-analyzer</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-alpha-1SNAPSHOT</version>
+  <version>1.0-alpha-1-SNAPSHOT</version>
 
   <name>Maven Dependency Analyzer</name>
 
