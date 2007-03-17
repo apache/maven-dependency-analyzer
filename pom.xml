@@ -30,7 +30,7 @@
   <groupId>org.apache.maven.shared</groupId>
   <artifactId>maven-dependency-analyzer</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-alpha-1</version>
+  <version>1.0-alpha-2-SNAPSHOT</version>
 
   <name>Maven Dependency Analyzer</name>
 
@@ -91,11 +91,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/maven/shared/tags/maven-dependency-analyzer-1.0-alpha-1</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/shared/tags/maven-dependency-analyzer-1.0-alpha-1</developerConnection>
-    <url>https://svn.apache.org/repos/asf/maven/shared/tags/maven-dependency-analyzer-1.0-alpha-1</url>
-  </scm>
 </project>
