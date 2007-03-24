@@ -115,10 +115,10 @@ public class DefaultProjectDependencyAnalyzer
         for ( Iterator iterator = dependencyArtifacts.iterator(); iterator.hasNext(); )
         {
             Artifact artifact = (Artifact) iterator.next();
-
+            
             File file = artifact.getFile();
 
-            if ( file != null )
+            if ( file != null && file.getName().endsWith( ".jar" ))
             {
                 URL url = file.toURL();
 
