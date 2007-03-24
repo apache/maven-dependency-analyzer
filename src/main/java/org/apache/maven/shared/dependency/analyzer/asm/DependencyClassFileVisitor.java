@@ -71,6 +71,7 @@ public class DependencyClassFileVisitor
         catch (IndexOutOfBoundsException e)
         {
             //some bug inside ASM causes an IOB exception. Log it and move on?
+            //this happens when the class isn't valid.
             System.out.println("Unable to process: "+ className);
         }
     }
