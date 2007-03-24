@@ -68,6 +68,11 @@ public class DependencyClassFileVisitor
         {
             exception.printStackTrace();
         }
+        catch (IndexOutOfBoundsException e)
+        {
+            //some bug inside ASM causes an IOB exception. Log it and move on?
+            System.out.println("Unable to process: "+ className);
+        }
     }
 
     // public methods ---------------------------------------------------------
