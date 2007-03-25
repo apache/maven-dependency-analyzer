@@ -29,7 +29,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.StringUtils;
 
 /**
  * 
@@ -89,10 +91,10 @@ public class DefaultProjectDependencyAnalyzer
             usedDeclaredArtifacts.retainAll( usedArtifacts );
 
             Set usedUndeclaredArtifacts = new HashSet( usedArtifacts );
-            usedUndeclaredArtifacts.removeAll( declaredArtifacts );
+            usedUndeclaredArtifacts = removeAll( usedUndeclaredArtifacts, declaredArtifacts );
 
             Set unusedDeclaredArtifacts = new HashSet( declaredArtifacts );
-            unusedDeclaredArtifacts.removeAll( usedArtifacts );
+            unusedDeclaredArtifacts = removeAll( unusedDeclaredArtifacts, usedArtifacts );
 
             return new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts,
                                                   unusedDeclaredArtifacts );
@@ -101,6 +103,43 @@ public class DefaultProjectDependencyAnalyzer
         {
             throw new ProjectDependencyAnalyzerException( "Cannot analyze dependencies", exception );
         }
+    }
+
+    /**
+     * This method defines a new way to remove the artifacts by using the
+     * conflict id. We don't care about the version here because there can be
+     * only 1 for a given artifact anyway.
+     * 
+     * @param start
+     *            initial set
+     * @param remove
+     *            set to exclude
+     * @return set with remove excluded
+     */
+    private Set removeAll( Set start, Set remove )
+    {
+        Set results = new HashSet( start.size() );
+        Iterator iter = start.iterator();
+        while ( iter.hasNext() )
+        {
+            Artifact artifact = (Artifact) iter.next();
+            Iterator iter2 = remove.iterator();
+            boolean found = false;
+            while ( iter2.hasNext() )
+            {
+                Artifact artifact2 = (Artifact) iter2.next();
+                DefaultArtifact a;
+                if ( artifact.getDependencyConflictId().equals( artifact2.getDependencyConflictId() ) )
+                {
+                    found = true;
+                }
+            }
+            if ( !found )
+            {
+                results.add( artifact );
+            }
+        }
+        return results;
     }
 
     // private methods --------------------------------------------------------
@@ -115,10 +154,10 @@ public class DefaultProjectDependencyAnalyzer
         for ( Iterator iterator = dependencyArtifacts.iterator(); iterator.hasNext(); )
         {
             Artifact artifact = (Artifact) iterator.next();
-            
+
             File file = artifact.getFile();
 
-            if ( file != null && file.getName().endsWith( ".jar" ))
+            if ( file != null && file.getName().endsWith( ".jar" ) )
             {
                 URL url = file.toURL();
 
