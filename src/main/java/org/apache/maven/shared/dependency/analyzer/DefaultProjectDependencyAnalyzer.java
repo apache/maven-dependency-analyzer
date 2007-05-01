@@ -22,6 +22,7 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,6 +68,15 @@ public class DefaultProjectDependencyAnalyzer
     public ProjectDependencyAnalysis analyze( MavenProject project )
         throws ProjectDependencyAnalyzerException
     {
+        File target = new File(project.getBuild().getDirectory());
+
+        //gracefully handle pom projects and files with no target folders
+        if ( "pom".equals( project.getPackaging() ) || !target.exists() )
+        {
+            //TODO: figure out how to log this.
+            return new ProjectDependencyAnalysis(Collections.EMPTY_SET,Collections.EMPTY_SET,Collections.EMPTY_SET);
+        }
+        
         try
         {
             Map artifactClassMap = buildArtifactClassMap( project );

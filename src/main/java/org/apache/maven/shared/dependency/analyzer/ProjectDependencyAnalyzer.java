@@ -35,6 +35,6 @@ public interface ProjectDependencyAnalyzer
 
     // public methods ---------------------------------------------------------
 
-    ProjectDependencyAnalysis analyze( MavenProject project )
+    ProjectDependencyAnalysis analyze( MavenProject project)
         throws ProjectDependencyAnalyzerException;
 }
