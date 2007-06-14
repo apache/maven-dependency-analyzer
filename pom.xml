@@ -23,7 +23,7 @@
   
     <groupId>org.apache.maven.shared</groupId>
     <artifactId>maven-shared-components</artifactId>
-    <version>8-SNAPSHOT</version>
+    <version>7</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -107,4 +107,9 @@
       <scope>test</scope>
     </dependency>	
   </dependencies>
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-analyzer</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-analyzer</developerConnection>
+    <url>http://svn.apache.org/viewcvs.cgi/maven/shared/trunk/maven-dependency-analyzer</url>
+  </scm>
 </project>
