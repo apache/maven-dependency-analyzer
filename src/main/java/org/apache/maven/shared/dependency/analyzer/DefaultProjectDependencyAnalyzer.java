@@ -82,6 +82,11 @@ public class DefaultProjectDependencyAnalyzer
             Set dependencyClasses = buildDependencyClasses( project );
 
             Set declaredArtifacts = project.getDependencyArtifacts();
+            
+            if ( declaredArtifacts == null )
+            {
+                declaredArtifacts = Collections.EMPTY_SET;
+            }
 
             Set usedArtifacts = new HashSet();
 
