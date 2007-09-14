@@ -30,9 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * 
@@ -138,7 +136,6 @@ public class DefaultProjectDependencyAnalyzer
             while ( iter2.hasNext() )
             {
                 Artifact artifact2 = (Artifact) iter2.next();
-                DefaultArtifact a;
                 if ( artifact.getDependencyConflictId().equals( artifact2.getDependencyConflictId() ) )
                 {
                     found = true;
