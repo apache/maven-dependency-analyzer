@@ -161,11 +161,23 @@ public class DefaultProjectDependencyAnalyzer
     private Set buildDependencyClasses( MavenProject project )
         throws IOException
     {
-        String buildDirectory = project.getBuild().getDirectory();
+        Set dependencyClasses = new HashSet();
+        
+        String outputDirectory = project.getBuild().getOutputDirectory();
+        dependencyClasses.addAll( buildDependencyClasses( outputDirectory ) );
+        
+        String testOutputDirectory = project.getBuild().getTestOutputDirectory();
+        dependencyClasses.addAll( buildDependencyClasses( testOutputDirectory ) );
 
-        URL buildDirectoryURL = new File( buildDirectory ).toURI().toURL();
+        return dependencyClasses;
+    }
+    
+    private Set buildDependencyClasses( String path )
+        throws IOException
+    {
+        URL url = new File( path ).toURI().toURL();
 
-        return dependencyAnalyzer.analyze( buildDirectoryURL );
+        return dependencyAnalyzer.analyze( url );
     }
     
     private Set buildDeclaredArtifacts( MavenProject project )
