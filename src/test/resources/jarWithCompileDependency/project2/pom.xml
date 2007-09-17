@@ -26,13 +26,16 @@
 >
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
-	<artifactId>jarWithDependency</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>jarWithCompileDependency2</artifactId>
+	<packaging>jar</packaging>
 	<version>1.0</version>
-	
-	<modules>
-		<module>project1</module>
-		<module>project2</module>
-	</modules>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
+			<artifactId>jarWithCompileDependency1</artifactId>
+			<version>1.0</version>
+		</dependency>
+	</dependencies>	
 	
 </project>

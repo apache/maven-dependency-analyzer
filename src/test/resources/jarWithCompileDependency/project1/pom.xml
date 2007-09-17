@@ -26,16 +26,8 @@
 >
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
-	<artifactId>jarWithDependency2</artifactId>
+	<artifactId>jarWithCompileDependency1</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0</version>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
-			<artifactId>jarWithDependency1</artifactId>
-			<version>1.0</version>
-		</dependency>
-	</dependencies>	
 	
 </project>
