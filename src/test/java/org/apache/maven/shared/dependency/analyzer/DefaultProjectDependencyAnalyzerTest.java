@@ -87,6 +87,26 @@ public class DefaultProjectDependencyAnalyzerTest extends PlexusTestCase
         assertEquals( expectedAnalysis, actualAnalysis );
     }
     
+    public void testJarWithTestDependency() throws TestToolsException, ProjectDependencyAnalyzerException
+    {
+        compileProject( "jarWithTestDependency/pom.xml" );
+        
+        MavenProject project2 = getProject( "jarWithTestDependency/project2/pom.xml" );
+        
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
+        
+        Artifact project1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests", "jarWithTestDependency1", "jar", "1.0", "test");
+        Set usedDeclaredArtifacts = Collections.singleton( project1 );
+        
+        // TODO: remove workaround for SUREFIRE-300 when 2.3.1 released
+        Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test");
+        Set unusedDeclaredArtifacts = Collections.singleton( junit );
+        
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, unusedDeclaredArtifacts );
+        
+        assertEquals( expectedAnalysis, actualAnalysis );
+    }
+    
     // private methods --------------------------------------------------------
     
     private void compileProject( String pomPath ) throws TestToolsException
