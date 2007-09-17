@@ -96,7 +96,9 @@ public class DefaultProjectDependencyAnalyzerTest extends PlexusTestCase
         List goals = Arrays.asList( new String[] { "clean", "install" } );
         File log = new File(pom.getParentFile(), "build.log");
 
+        // TODO: don't install test artifacts to local repository
         InvocationResult result = buildTool.executeMaven( pom, properties, goals, log );
+        
         assertNull( "Error compiling test project", result.getExecutionException() );
         assertEquals( "Error compiling test project", 0, result.getExitCode() );
     }
