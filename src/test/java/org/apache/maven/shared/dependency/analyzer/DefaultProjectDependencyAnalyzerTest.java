@@ -59,6 +59,19 @@ public class DefaultProjectDependencyAnalyzerTest extends PlexusTestCase
 
     // tests ------------------------------------------------------------------
     
+    public void testPom() throws TestToolsException, ProjectDependencyAnalyzerException
+    {
+        compileProject( "pom/pom.xml" );
+        
+        MavenProject project = getProject( "pom/pom.xml" );
+        
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project );
+        
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis();
+        
+        assertEquals( expectedAnalysis, actualAnalysis );
+    }
+    
     public void testJarWithNoDependencies() throws TestToolsException, ProjectDependencyAnalyzerException
     {
         compileProject( "jarWithNoDependencies/pom.xml" );
