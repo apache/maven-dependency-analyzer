@@ -1,4 +1,4 @@
-package jarWithDependency.project2;
+package jarWithCompileDependency.project1;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,20 +19,18 @@ package jarWithDependency.project2;
  * under the License.
  */
 
-import jarWithDependency.project1.Project1;
-
 /**
  * 
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  */
-public class Project2
+public class Project1
 {
     // constructors -----------------------------------------------------------
 
-    public Project2()
+    public Project1()
     {
-        Project1 project = new Project1();
+        // no-op
     }
 }
