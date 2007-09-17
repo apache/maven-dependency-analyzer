@@ -72,7 +72,7 @@ public class DefaultProjectDependencyAnalyzer
         if ( "pom".equals( project.getPackaging() ) || !target.exists() )
         {
             //TODO: figure out how to log this.
-            return new ProjectDependencyAnalysis(Collections.EMPTY_SET,Collections.EMPTY_SET,Collections.EMPTY_SET);
+            return new ProjectDependencyAnalysis();
         }
         
         try
