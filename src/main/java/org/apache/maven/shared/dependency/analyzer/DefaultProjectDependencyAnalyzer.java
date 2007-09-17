@@ -66,15 +66,6 @@ public class DefaultProjectDependencyAnalyzer
     public ProjectDependencyAnalysis analyze( MavenProject project )
         throws ProjectDependencyAnalyzerException
     {
-        File target = new File(project.getBuild().getDirectory());
-
-        //gracefully handle pom projects and files with no target folders
-        if ( "pom".equals( project.getPackaging() ) || !target.exists() )
-        {
-            //TODO: figure out how to log this.
-            return new ProjectDependencyAnalysis();
-        }
-        
         try
         {
             Map artifactClassMap = buildArtifactClassMap( project );

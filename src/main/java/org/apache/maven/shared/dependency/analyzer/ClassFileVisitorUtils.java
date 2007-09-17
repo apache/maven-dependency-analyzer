@@ -69,7 +69,7 @@ public final class ClassFileVisitorUtils
                 {
                     acceptDirectory( file, visitor );
                 }
-                else
+                else if ( file.exists() )
                 {
                     throw new IllegalArgumentException( "Cannot accept visitor on URL: " + url );
                 }
