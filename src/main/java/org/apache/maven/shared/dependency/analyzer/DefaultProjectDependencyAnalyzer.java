@@ -72,25 +72,10 @@ public class DefaultProjectDependencyAnalyzer
 
             Set dependencyClasses = buildDependencyClasses( project );
 
-            Set declaredArtifacts = project.getDependencyArtifacts();
+            Set declaredArtifacts = buildDeclaredArtifacts( project );
             
-            if ( declaredArtifacts == null )
-            {
-                declaredArtifacts = Collections.EMPTY_SET;
-            }
-
-            Set usedArtifacts = new HashSet();
-
-            for ( Iterator dependencyIterator = dependencyClasses.iterator(); dependencyIterator.hasNext(); )
-            {
-                String className = (String) dependencyIterator.next();
-
-                Artifact artifact = findArtifactForClassName( artifactClassMap, className );
-
-                if ( artifact != null )
-                    usedArtifacts.add( artifact );
-            }
-
+            Set usedArtifacts = buildUsedArtifacts( artifactClassMap, dependencyClasses );
+            
             Set usedDeclaredArtifacts = new HashSet( declaredArtifacts );
             usedDeclaredArtifacts.retainAll( usedArtifacts );
 
@@ -181,6 +166,37 @@ public class DefaultProjectDependencyAnalyzer
         URL buildDirectoryURL = new File( buildDirectory ).toURI().toURL();
 
         return dependencyAnalyzer.analyze( buildDirectoryURL );
+    }
+    
+    private Set buildDeclaredArtifacts( MavenProject project )
+    {
+        Set declaredArtifacts = project.getDependencyArtifacts();
+        
+        if ( declaredArtifacts == null )
+        {
+            declaredArtifacts = Collections.EMPTY_SET;
+        }
+        
+        return declaredArtifacts;
+    }
+    
+    private Set buildUsedArtifacts( Map artifactClassMap, Set dependencyClasses )
+    {
+        Set usedArtifacts = new HashSet();
+
+        for ( Iterator dependencyIterator = dependencyClasses.iterator(); dependencyIterator.hasNext(); )
+        {
+            String className = (String) dependencyIterator.next();
+
+            Artifact artifact = findArtifactForClassName( artifactClassMap, className );
+
+            if ( artifact != null )
+            {
+                usedArtifacts.add( artifact );
+            }
+        }
+        
+        return usedArtifacts;
     }
 
     private Artifact findArtifactForClassName( Map artifactClassMap, String className )
