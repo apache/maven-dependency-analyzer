@@ -220,12 +220,9 @@ public class DefaultProjectDependencyAnalyzer
 
             Set artifactClassNames = (Set) artifactClassMap.get( artifact );
 
-            for ( Iterator classNameIterator = artifactClassNames.iterator(); classNameIterator.hasNext(); )
+            if ( artifactClassNames.contains( className ) )
             {
-                String artifactClassName = (String) classNameIterator.next();
-
-                if ( artifactClassName.equals( className ) )
-                    return artifact;
+                return artifact;
             }
         }
 
