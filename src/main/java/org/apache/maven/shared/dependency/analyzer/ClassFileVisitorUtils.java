@@ -59,11 +59,11 @@ public final class ClassFileVisitorUtils
         {
             acceptJar( url, visitor );
         }
-        else if ( url.getProtocol().equals( "file" ) )
+        else if ( url.getProtocol().equalsIgnoreCase( "file" ) )
         {
             try
             {
-                File file = new File( new URI( url.toString() ).getPath() );
+                File file = new File( new URI( url.toString() ) );
 
                 if ( file.isDirectory() )
                 {
