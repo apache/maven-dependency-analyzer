@@ -23,9 +23,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -76,13 +77,13 @@ public class DefaultProjectDependencyAnalyzer
             
             Set usedArtifacts = buildUsedArtifacts( artifactClassMap, dependencyClasses );
             
-            Set usedDeclaredArtifacts = new HashSet( declaredArtifacts );
+            Set usedDeclaredArtifacts = new LinkedHashSet( declaredArtifacts );
             usedDeclaredArtifacts.retainAll( usedArtifacts );
 
-            Set usedUndeclaredArtifacts = new HashSet( usedArtifacts );
+            Set usedUndeclaredArtifacts = new LinkedHashSet( usedArtifacts );
             usedUndeclaredArtifacts = removeAll( usedUndeclaredArtifacts, declaredArtifacts );
 
-            Set unusedDeclaredArtifacts = new HashSet( declaredArtifacts );
+            Set unusedDeclaredArtifacts = new LinkedHashSet( declaredArtifacts );
             unusedDeclaredArtifacts = removeAll( unusedDeclaredArtifacts, usedArtifacts );
 
             return new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts,
@@ -107,7 +108,7 @@ public class DefaultProjectDependencyAnalyzer
      */
     private Set removeAll( Set start, Set remove )
     {
-        Set results = new HashSet( start.size() );
+        Set results = new LinkedHashSet( start.size() );
         Iterator iter = start.iterator();
         while ( iter.hasNext() )
         {
@@ -135,7 +136,7 @@ public class DefaultProjectDependencyAnalyzer
     private Map buildArtifactClassMap( MavenProject project )
         throws IOException
     {
-        Map artifactClassMap = new HashMap();
+        Map artifactClassMap = new LinkedHashMap();
 
         Set dependencyArtifacts = project.getArtifacts();
 

@@ -20,7 +20,7 @@ package org.apache.maven.shared.dependency.analyzer;
  */
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -152,6 +152,6 @@ public class ProjectDependencyAnalysis
     
     private Set safeCopy( Set set )
     {
-        return ( set == null ) ? Collections.EMPTY_SET : Collections.unmodifiableSet( new HashSet( set ) );
+        return ( set == null ) ? Collections.EMPTY_SET : Collections.unmodifiableSet( new LinkedHashSet( set ) );
     }
 }
