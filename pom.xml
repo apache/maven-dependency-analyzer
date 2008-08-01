@@ -129,6 +129,6 @@
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-analyzer</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-analyzer</developerConnection>
-    <url>http://svn.apache.org/viewcvs.cgi/maven/shared/trunk/maven-dependency-analyzer</url>
+    <url>http://svn.apache.org/viewvc/maven/shared/trunk/maven-dependency-analyzer</url>
   </scm>
 </project>
