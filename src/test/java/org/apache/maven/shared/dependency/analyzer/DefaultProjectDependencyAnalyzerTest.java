@@ -35,6 +35,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.test.plugin.BuildTool;
 import org.apache.maven.shared.test.plugin.ProjectTool;
+import org.apache.maven.shared.test.plugin.RepositoryTool;
 import org.apache.maven.shared.test.plugin.TestToolsException;
 import org.codehaus.plexus.PlexusTestCase;
 
@@ -56,6 +57,8 @@ public class DefaultProjectDependencyAnalyzerTest
 
     private ProjectDependencyAnalyzer analyzer;
 
+    private static File localRepo;
+
     // TestCase methods -------------------------------------------------------
 
     /*
@@ -69,6 +72,13 @@ public class DefaultProjectDependencyAnalyzerTest
         buildTool = (BuildTool) lookup( BuildTool.ROLE );
 
         projectTool = (ProjectTool) lookup( ProjectTool.ROLE );
+
+        if ( localRepo == null )
+        {
+            RepositoryTool repositoryTool = (RepositoryTool) lookup( RepositoryTool.ROLE );
+            localRepo = repositoryTool.findLocalRepositoryDirectory().getAbsoluteFile();
+            System.out.println( "Local repository: " + localRepo );
+        }
 
         analyzer = (ProjectDependencyAnalyzer) lookup( ProjectDependencyAnalyzer.ROLE );
     }
