@@ -32,6 +32,7 @@ import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.test.plugin.BuildTool;
 import org.apache.maven.shared.test.plugin.ProjectTool;
@@ -166,7 +167,9 @@ public class DefaultProjectDependencyAnalyzerTest
         File log = new File( pom.getParentFile(), "build.log" );
 
         // TODO: don't install test artifacts to local repository
-        InvocationResult result = buildTool.executeMaven( pom, properties, goals, log );
+        InvocationRequest request = buildTool.createBasicInvocationRequest( pom, properties, goals, log );
+        request.setLocalRepositoryDirectory( localRepo );
+        InvocationResult result = buildTool.executeMaven( request );
 
         assertNull( "Error compiling test project", result.getExecutionException() );
         assertEquals( "Error compiling test project", 0, result.getExitCode() );
