@@ -19,12 +19,17 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.JarOutputStream;
+
+import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.IOUtil;
 
 /**
  * Tests <code>DefaultClassAnalyzer</code>.
@@ -54,4 +59,38 @@ public class DefaultClassAnalyzerTest extends AbstractFileTest
 
         assertEquals( expectedClasses, actualClasses );
     }
+    
+    public void testAnalyzeBadJar() throws IOException
+    {
+        //to reproduce MDEP-143
+        File file = createJar();
+        JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) );
+        writeEntry( out, "a/b/c.class", "class a.b.c" );
+        writeEntry( out, "x/y/z.class", "class x.y.z" );
+        out.close();
+        
+        //corrupt the jar file by alter its contents
+        FileInputStream fis = new FileInputStream( file );
+        ByteArrayOutputStream baos = new ByteArrayOutputStream( 100 );
+        IOUtil.copy( fis, baos, 100 );
+        fis.close();
+        byte [] ba = baos.toByteArray();
+        ba[50] = 1;
+        FileOutputStream fos = new FileOutputStream( file );
+        IOUtil.copy( ba, fos, 100 );
+        fos.close();
+
+        DefaultClassAnalyzer analyzer = new DefaultClassAnalyzer();
+        
+        try
+        {
+            analyzer.analyze( file.toURI().toURL() );
+            fail( "Exception expected" );
+        }
+        catch ( IOException e )
+        {
+            //ideally we need to inspect the exception for the desired message when MDEP-143 is fixed   
+        }
+
+    }    
 }
