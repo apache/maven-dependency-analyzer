@@ -27,13 +27,13 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.JarOutputStream;
+import java.util.zip.ZipException;
 
-import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
 /**
  * Tests <code>DefaultClassAnalyzer</code>.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  * @see DefaultClassAnalyzer
@@ -59,7 +59,7 @@ public class DefaultClassAnalyzerTest extends AbstractFileTest
 
         assertEquals( expectedClasses, actualClasses );
     }
-    
+
     public void testAnalyzeBadJar() throws IOException
     {
         //to reproduce MDEP-143
@@ -68,7 +68,7 @@ public class DefaultClassAnalyzerTest extends AbstractFileTest
         writeEntry( out, "a/b/c.class", "class a.b.c" );
         writeEntry( out, "x/y/z.class", "class x.y.z" );
         out.close();
-        
+
         //corrupt the jar file by alter its contents
         FileInputStream fis = new FileInputStream( file );
         ByteArrayOutputStream baos = new ByteArrayOutputStream( 100 );
@@ -81,16 +81,16 @@ public class DefaultClassAnalyzerTest extends AbstractFileTest
         fos.close();
 
         DefaultClassAnalyzer analyzer = new DefaultClassAnalyzer();
-        
+
         try
         {
             analyzer.analyze( file.toURI().toURL() );
             fail( "Exception expected" );
         }
-        catch ( IOException e )
+        catch ( ZipException e )
         {
-            //ideally we need to inspect the exception for the desired message when MDEP-143 is fixed   
+            assertTrue( e.getMessage().startsWith( "Cannot process Jar entry on URL:" ) );
         }
 
-    }    
+    }
 }

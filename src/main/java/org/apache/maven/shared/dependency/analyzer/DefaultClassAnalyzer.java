@@ -22,10 +22,11 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
+import java.util.zip.ZipException;
 
 /**
- * 
- * 
+ *
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  * @plexus.component role="org.apache.maven.shared.dependency.analyzer.ClassAnalyzer"
@@ -43,7 +44,18 @@ public class DefaultClassAnalyzer
     {
         CollectorClassFileVisitor visitor = new CollectorClassFileVisitor();
 
-        ClassFileVisitorUtils.accept( url, visitor );
+        try
+        {
+            ClassFileVisitorUtils.accept( url, visitor );
+        }
+        catch( ZipException e )
+        {
+            // since the current ZipException gives no indication what jar file is corrupted
+            // we prefer to wrap another ZipException for better error visibility
+            ZipException ze = new ZipException( "Cannot process Jar entry on URL: " + url + " due to " + e.getMessage() );
+            ze.initCause( e );
+            throw ze;
+        }
 
         return visitor.getClasses();
     }
