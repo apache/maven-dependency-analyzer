@@ -229,7 +229,12 @@ public class DependencyVisitor
     public void visitFieldInsn( final int opcode, final String owner, final String name, final String desc )
     {
         addName( owner );
-        addDesc( desc );
+        /*
+         * NOTE: Merely accessing a field does not impose a direct dependency on its type. For example, the code line
+         * <code>java.lang.Object var = bean.field;</code> does not directly depend on the type of the field. A direct
+         * dependency is only introduced when the code explicitly references the field's type by means of a variable
+         * declaration or a type check/cast. Those cases are handled by other visitor callbacks.
+         */
     }
 
     /*
@@ -238,7 +243,12 @@ public class DependencyVisitor
     public void visitMethodInsn( final int opcode, final String owner, final String name, final String desc )
     {
         addName( owner );
-        addMethodDesc( desc );
+        /*
+         * NOTE: Merely invoking a method does not impose a direct dependency on its return type nor its parameter
+         * types. For example, the code line <code>bean.method(null);</code> only depends on the owner type of the
+         * method. A direct dependency is only introduced when the code explicitly references the method's types by
+         * means of a variable declaration or a type check/cast. Those cases are handled by other visitor callbacks.
+         */
     }
 
     /*

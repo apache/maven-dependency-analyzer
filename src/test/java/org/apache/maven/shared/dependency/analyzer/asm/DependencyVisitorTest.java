@@ -446,7 +446,7 @@ public class DependencyVisitorTest extends TestCase
     {
         visitor.visitFieldInsn( Opcodes.GETFIELD, "a/b/c", "x", "Lx/y/z;" );
 
-        assertClasses( "a.b.c", "x.y.z" );
+        assertClasses( "a.b.c" );
     }
 
     // visitMethodInsn tests --------------------------------------------------
@@ -476,21 +476,21 @@ public class DependencyVisitorTest extends TestCase
     {
         visitor.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(Lx/y/z;)V" );
 
-        assertClasses( "a.b.c", "x.y.z" );
+        assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithObjectArguments()
     {
         visitor.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(Lp/q/r;Lx/y/z;)V" );
 
-        assertClasses( "a.b.c", "p.q.r", "x.y.z" );
+        assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithObjectArrayArgument()
     {
         visitor.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "([Lx/y/z;)V" );
 
-        assertClasses( "a.b.c", "x.y.z" );
+        assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithPrimitiveReturnType()
@@ -511,14 +511,14 @@ public class DependencyVisitorTest extends TestCase
     {
         visitor.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()Lx/y/z;" );
 
-        assertClasses( "a.b.c", "x.y.z" );
+        assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithObjectArrayReturnType()
     {
         visitor.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()[Lx/y/z;" );
 
-        assertClasses( "a.b.c", "x.y.z" );
+        assertClasses( "a.b.c" );
     }
 
     // visitJumpInsn tests ----------------------------------------------------
