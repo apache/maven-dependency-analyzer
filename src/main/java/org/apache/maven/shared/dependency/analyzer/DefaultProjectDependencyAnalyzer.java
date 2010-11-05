@@ -38,7 +38,7 @@ import org.apache.maven.project.MavenProject;
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
- * @plexus.component role="org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzer"
+ * @plexus.component role="org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzer" role-hint="default"
  */
 public class DefaultProjectDependencyAnalyzer
     implements ProjectDependencyAnalyzer
@@ -71,7 +71,7 @@ public class DefaultProjectDependencyAnalyzer
         {
             Map artifactClassMap = buildArtifactClassMap( project );
 
-            Set dependencyClasses = buildDependencyClasses( project );
+            Set dependencyClasses = buildDependencyClasses( project , artifactClassMap );
 
             Set declaredArtifacts = buildDeclaredArtifacts( project );
             
@@ -159,7 +159,7 @@ public class DefaultProjectDependencyAnalyzer
         return artifactClassMap;
     }
 
-    private Set buildDependencyClasses( MavenProject project )
+    protected Set buildDependencyClasses( MavenProject project , Map artifactClassMap )
         throws IOException
     {
         Set dependencyClasses = new HashSet();
@@ -212,7 +212,7 @@ public class DefaultProjectDependencyAnalyzer
         return usedArtifacts;
     }
 
-    private Artifact findArtifactForClassName( Map artifactClassMap, String className )
+    protected Artifact findArtifactForClassName( Map artifactClassMap, String className )
     {
         for ( Iterator artifactIterator = artifactClassMap.keySet().iterator(); artifactIterator.hasNext(); )
         {
