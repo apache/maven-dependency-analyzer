@@ -34,13 +34,13 @@ public class CollectorClassFileVisitor
 {
     // fields -----------------------------------------------------------------
 
-    private final Set classes;
+    private final Set<String> classes;
 
     // constructors -----------------------------------------------------------
 
     public CollectorClassFileVisitor()
     {
-        classes = new HashSet();
+        classes = new HashSet<String>();
     }
 
     // ClassFileVisitor methods -----------------------------------------------
@@ -56,7 +56,7 @@ public class CollectorClassFileVisitor
 
     // public methods ---------------------------------------------------------
 
-    public Set getClasses()
+    public Set<String> getClasses()
     {
         return classes;
     }

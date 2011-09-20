@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -69,21 +68,21 @@ public class DefaultProjectDependencyAnalyzer
     {
         try
         {
-            Map artifactClassMap = buildArtifactClassMap( project );
+            Map<Artifact, Set<String>> artifactClassMap = buildArtifactClassMap( project );
 
-            Set dependencyClasses = buildDependencyClasses( project , artifactClassMap );
+            Set<String> dependencyClasses = buildDependencyClasses( project, artifactClassMap );
 
-            Set declaredArtifacts = buildDeclaredArtifacts( project );
+            Set<Artifact> declaredArtifacts = buildDeclaredArtifacts( project );
             
-            Set usedArtifacts = buildUsedArtifacts( artifactClassMap, dependencyClasses );
+            Set<Artifact> usedArtifacts = buildUsedArtifacts( artifactClassMap, dependencyClasses );
             
-            Set usedDeclaredArtifacts = new LinkedHashSet( declaredArtifacts );
+            Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<Artifact>( declaredArtifacts );
             usedDeclaredArtifacts.retainAll( usedArtifacts );
 
-            Set usedUndeclaredArtifacts = new LinkedHashSet( usedArtifacts );
+            Set<Artifact> usedUndeclaredArtifacts = new LinkedHashSet<Artifact>( usedArtifacts );
             usedUndeclaredArtifacts = removeAll( usedUndeclaredArtifacts, declaredArtifacts );
 
-            Set unusedDeclaredArtifacts = new LinkedHashSet( declaredArtifacts );
+            Set<Artifact> unusedDeclaredArtifacts = new LinkedHashSet<Artifact>( declaredArtifacts );
             unusedDeclaredArtifacts = removeAll( unusedDeclaredArtifacts, usedArtifacts );
 
             return new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts,
@@ -106,51 +105,50 @@ public class DefaultProjectDependencyAnalyzer
      *            set to exclude
      * @return set with remove excluded
      */
-    private Set removeAll( Set start, Set remove )
+    private Set<Artifact> removeAll( Set<Artifact> start, Set<Artifact> remove )
     {
-        Set results = new LinkedHashSet( start.size() );
-        Iterator iter = start.iterator();
-        while ( iter.hasNext() )
+        Set<Artifact> results = new LinkedHashSet<Artifact>( start.size() );
+
+        for ( Artifact artifact : start )
         {
-            Artifact artifact = (Artifact) iter.next();
-            Iterator iter2 = remove.iterator();
             boolean found = false;
-            while ( iter2.hasNext() )
+
+            for ( Artifact artifact2 : remove )
             {
-                Artifact artifact2 = (Artifact) iter2.next();
                 if ( artifact.getDependencyConflictId().equals( artifact2.getDependencyConflictId() ) )
                 {
                     found = true;
+                    break;
                 }
             }
+
             if ( !found )
             {
                 results.add( artifact );
             }
         }
+
         return results;
     }
 
     // private methods --------------------------------------------------------
 
-    private Map buildArtifactClassMap( MavenProject project )
+    private Map<Artifact, Set<String>> buildArtifactClassMap( MavenProject project )
         throws IOException
     {
-        Map artifactClassMap = new LinkedHashMap();
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<Artifact, Set<String>>();
 
-        Set dependencyArtifacts = project.getArtifacts();
+        Set<Artifact> dependencyArtifacts = project.getArtifacts();
 
-        for ( Iterator iterator = dependencyArtifacts.iterator(); iterator.hasNext(); )
+        for ( Artifact artifact : dependencyArtifacts )
         {
-            Artifact artifact = (Artifact) iterator.next();
-
             File file = artifact.getFile();
 
             if ( file != null && file.getName().endsWith( ".jar" ) )
             {
                 URL url = file.toURL();
 
-                Set classes = classAnalyzer.analyze( url );
+                Set<String> classes = classAnalyzer.analyze( url );
 
                 artifactClassMap.put( artifact, classes );
             }
@@ -159,10 +157,10 @@ public class DefaultProjectDependencyAnalyzer
         return artifactClassMap;
     }
 
-    protected Set buildDependencyClasses( MavenProject project , Map artifactClassMap )
+    protected Set<String> buildDependencyClasses( MavenProject project, Map<Artifact, Set<String>> artifactClassMap )
         throws IOException
     {
-        Set dependencyClasses = new HashSet();
+        Set<String> dependencyClasses = new HashSet<String>();
         
         String outputDirectory = project.getBuild().getOutputDirectory();
         dependencyClasses.addAll( buildDependencyClasses( outputDirectory ) );
@@ -173,7 +171,7 @@ public class DefaultProjectDependencyAnalyzer
         return dependencyClasses;
     }
     
-    private Set buildDependencyClasses( String path )
+    private Set<String> buildDependencyClasses( String path )
         throws IOException
     {
         URL url = new File( path ).toURI().toURL();
@@ -181,26 +179,24 @@ public class DefaultProjectDependencyAnalyzer
         return dependencyAnalyzer.analyze( url );
     }
     
-    private Set buildDeclaredArtifacts( MavenProject project )
+    private Set<Artifact> buildDeclaredArtifacts( MavenProject project )
     {
-        Set declaredArtifacts = project.getDependencyArtifacts();
+        Set<Artifact> declaredArtifacts = project.getDependencyArtifacts();
         
         if ( declaredArtifacts == null )
         {
-            declaredArtifacts = Collections.EMPTY_SET;
+            declaredArtifacts = Collections.<Artifact>emptySet();
         }
         
         return declaredArtifacts;
     }
     
-    private Set buildUsedArtifacts( Map artifactClassMap, Set dependencyClasses )
+    private Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap, Set<String> dependencyClasses )
     {
-        Set usedArtifacts = new HashSet();
+        Set<Artifact> usedArtifacts = new HashSet<Artifact>();
 
-        for ( Iterator dependencyIterator = dependencyClasses.iterator(); dependencyIterator.hasNext(); )
+        for ( String className : dependencyClasses )
         {
-            String className = (String) dependencyIterator.next();
-
             Artifact artifact = findArtifactForClassName( artifactClassMap, className );
 
             if ( artifact != null )
@@ -212,17 +208,13 @@ public class DefaultProjectDependencyAnalyzer
         return usedArtifacts;
     }
 
-    protected Artifact findArtifactForClassName( Map artifactClassMap, String className )
+    protected Artifact findArtifactForClassName( Map<Artifact, Set<String>> artifactClassMap, String className )
     {
-        for ( Iterator artifactIterator = artifactClassMap.keySet().iterator(); artifactIterator.hasNext(); )
+        for ( Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet() )
         {
-            Artifact artifact = (Artifact) artifactIterator.next();
-
-            Set artifactClassNames = (Set) artifactClassMap.get( artifact );
-
-            if ( artifactClassNames.contains( className ) )
+            if ( entry.getValue().contains( className ) )
             {
-                return artifact;
+                return entry.getKey();
             }
         }
 

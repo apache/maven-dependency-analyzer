@@ -43,13 +43,13 @@ public class DependencyVisitor
 {
     // fields -----------------------------------------------------------------
 
-    private final Set classes;
+    private final Set<String> classes;
 
     // constructors -----------------------------------------------------------
 
     public DependencyVisitor()
     {
-        classes = new HashSet();
+        classes = new HashSet<String>();
     }
 
     // ClassVisitor methods ---------------------------------------------------
@@ -124,12 +124,18 @@ public class DependencyVisitor
                                     final Object value )
     {
         if ( signature == null )
+        {
             addDesc( desc );
+        }
         else
+        {
             addTypeSignature( signature );
+        }
 
         if ( value instanceof Type )
+        {
             addType( (Type) value );
+        }
 
         return this;
     }
@@ -142,9 +148,13 @@ public class DependencyVisitor
                                       final String[] exceptions )
     {
         if ( signature == null )
+        {
             addMethodDesc( desc );
+        }
         else
+        {
             addSignature( signature );
+        }
 
         addNames( exceptions );
 
@@ -218,9 +228,13 @@ public class DependencyVisitor
     public void visitTypeInsn( final int opcode, final String desc )
     {
         if ( desc.charAt( 0 ) == '[' )
+        {
             addDesc( desc );
+        }
         else
+        {
             addName( desc );
+        }
     }
 
     /*
@@ -273,7 +287,9 @@ public class DependencyVisitor
     public void visitLdcInsn( final Object cst )
     {
         if ( cst instanceof Type )
+        {
             addType( (Type) cst );
+        }
     }
 
     /*
@@ -521,7 +537,7 @@ public class DependencyVisitor
 
     // public methods ---------------------------------------------------------
 
-    public Set getClasses()
+    public Set<String> getClasses()
     {
         return classes;
     }
@@ -531,11 +547,15 @@ public class DependencyVisitor
     private void addName( String name )
     {
         if ( name == null )
+        {
             return;
+        }
 
         // decode arrays
         if ( name.startsWith( "[L" ) && name.endsWith( ";" ) )
+        {
             name = name.substring( 2, name.length() - 1 );
+        }
 
         // decode internal representation
         name = name.replace( '/', '.' );
@@ -546,10 +566,14 @@ public class DependencyVisitor
     private void addNames( final String[] names )
     {
         if ( names == null )
+        {
             return;
+        }
         
-        for ( int i = 0; i < names.length; i++ )
-            addName( names[i] );
+        for ( String name : names )
+        {
+            addName( name );
+        }
     }
 
     private void addDesc( final String desc )
@@ -563,8 +587,10 @@ public class DependencyVisitor
         
         Type[] types = Type.getArgumentTypes( desc );
 
-        for ( int i = 0; i < types.length; i++ )
-            addType( types[i] );
+        for ( Type type : types )
+        {
+            addType( type );
+        }
     }
 
     private void addType( final Type t )
@@ -584,12 +610,16 @@ public class DependencyVisitor
     private void addSignature( final String signature )
     {
         if ( signature != null )
+        {
             new SignatureReader( signature ).accept( this );
+        }
     }
 
     private void addTypeSignature( final String signature )
     {
         if ( signature != null )
+        {
             new SignatureReader( signature ).acceptType( this );
+        }
     }
 }

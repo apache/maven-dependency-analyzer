@@ -58,7 +58,7 @@ public class CollectorClassFileVisitorTest
         visitor.visitClass( "a.b.c", null );
         visitor.visitClass( "x.y.z", null );
 
-        Set expected = new HashSet();
+        Set<String> expected = new HashSet<String>();
         expected.add( "a.b.c" );
         expected.add( "x.y.z" );
 

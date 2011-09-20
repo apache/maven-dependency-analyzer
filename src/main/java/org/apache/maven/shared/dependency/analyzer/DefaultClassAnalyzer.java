@@ -39,7 +39,7 @@ public class DefaultClassAnalyzer
     /*
      * @see org.apache.maven.shared.dependency.analyzer.ClassAnalyzer#analyze(java.net.URL)
      */
-    public Set analyze( URL url )
+    public Set<String> analyze( URL url )
         throws IOException
     {
         CollectorClassFileVisitor visitor = new CollectorClassFileVisitor();

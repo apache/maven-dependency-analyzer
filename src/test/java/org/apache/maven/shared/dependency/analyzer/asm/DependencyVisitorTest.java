@@ -37,7 +37,8 @@ import org.objectweb.asm.Type;
  * @version $Id$
  * @see DependencyVisitor
  */
-public class DependencyVisitorTest extends TestCase
+public class DependencyVisitorTest
+    extends TestCase
 {
     // TODO: finish tests
 
@@ -50,7 +51,8 @@ public class DependencyVisitorTest extends TestCase
     /*
      * @see junit.framework.TestCase#setUp()
      */
-    protected void setUp() throws Exception
+    protected void setUp()
+        throws Exception
     {
         visitor = new DependencyVisitor();
     }
@@ -692,7 +694,7 @@ public class DependencyVisitorTest extends TestCase
 
     private void assertNoClasses()
     {
-        assertClasses( Collections.EMPTY_SET );
+        assertClasses( Collections.<String>emptySet() );
     }
 
     private void assertClasses( String element )
@@ -712,10 +714,10 @@ public class DependencyVisitorTest extends TestCase
 
     private void assertClasses( String[] expectedClasses )
     {
-        assertClasses( new HashSet( Arrays.asList( expectedClasses ) ) );
+        assertClasses( new HashSet<String>( Arrays.asList( expectedClasses ) ) );
     }
 
-    private void assertClasses( Set expectedClasses )
+    private void assertClasses( Set<String> expectedClasses )
     {
         assertEquals( expectedClasses, visitor.getClasses() );
     }

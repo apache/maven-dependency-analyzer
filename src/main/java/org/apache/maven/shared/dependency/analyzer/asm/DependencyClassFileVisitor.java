@@ -38,13 +38,13 @@ public class DependencyClassFileVisitor
 {
     // fields -----------------------------------------------------------------
 
-    private final Set dependencies;
+    private final Set<String> dependencies;
 
     // constructors -----------------------------------------------------------
 
     public DependencyClassFileVisitor()
     {
-        dependencies = new HashSet();
+        dependencies = new HashSet<String>();
     }
 
     // ClassFileVisitor methods -----------------------------------------------
@@ -68,17 +68,17 @@ public class DependencyClassFileVisitor
         {
             exception.printStackTrace();
         }
-        catch (IndexOutOfBoundsException e)
+        catch ( IndexOutOfBoundsException e )
         {
-            //some bug inside ASM causes an IOB exception. Log it and move on?
-            //this happens when the class isn't valid.
-            System.out.println("Unable to process: "+ className);
+            // some bug inside ASM causes an IOB exception. Log it and move on?
+            // this happens when the class isn't valid.
+            System.out.println( "Unable to process: " + className );
         }
     }
 
     // public methods ---------------------------------------------------------
 
-    public Set getDependencies()
+    public Set<String> getDependencies()
     {
         return dependencies;
     }

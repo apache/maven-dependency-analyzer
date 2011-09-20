@@ -126,7 +126,7 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact project1 =
             createArtifact( "org.apache.maven.shared.dependency-analyzer.tests", "jarWithCompileDependency1", "jar",
                             "1.0", "compile" );
-        Set usedDeclaredArtifacts = Collections.singleton( project1 );
+        Set<Artifact> usedDeclaredArtifacts = Collections.singleton( project1 );
         ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null );
 
         assertEquals( expectedAnalysis, actualAnalysis );
@@ -144,11 +144,11 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact project1 =
             createArtifact( "org.apache.maven.shared.dependency-analyzer.tests", "jarWithTestDependency1", "jar",
                             "1.0", "test" );
-        Set usedDeclaredArtifacts = Collections.singleton( project1 );
+        Set<Artifact> usedDeclaredArtifacts = Collections.singleton( project1 );
 
         // TODO: remove workaround for SUREFIRE-300 when 2.3.1 released
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
-        Set unusedDeclaredArtifacts = Collections.singleton( junit );
+        Set<Artifact> unusedDeclaredArtifacts = Collections.singleton( junit );
 
         ProjectDependencyAnalysis expectedAnalysis =
             new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, unusedDeclaredArtifacts );
@@ -163,7 +163,7 @@ public class DefaultProjectDependencyAnalyzerTest
     {
         File pom = getTestFile( "target/test-classes/", pomPath );
         Properties properties = new Properties();
-        List goals = Arrays.asList( new String[] { "clean", "install" } );
+        List<String> goals = Arrays.asList( "clean", "install" );
         File log = new File( pom.getParentFile(), "build.log" );
 
         // TODO: don't install test artifacts to local repository

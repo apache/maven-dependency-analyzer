@@ -22,6 +22,8 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.maven.artifact.Artifact;
+
 import junit.framework.TestCase;
 
 /**
@@ -31,15 +33,16 @@ import junit.framework.TestCase;
  * @version $Id$
  * @see ProjectDependencyAnalysis
  */
-public class ProjectDependencyAnalysisTest extends TestCase
+public class ProjectDependencyAnalysisTest
+    extends TestCase
 {
     // tests ------------------------------------------------------------------
 
     public void testConstructor()
     {
-        Set usedDeclaredArtifacts = new HashSet();
-        Set usedUndeclaredArtifacts = new HashSet();
-        Set unusedDeclaredArtifacts = new HashSet();
+        Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>();
+        Set<Artifact> usedUndeclaredArtifacts = new HashSet<Artifact>();
+        Set<Artifact> unusedDeclaredArtifacts = new HashSet<Artifact>();
 
         ProjectDependencyAnalysis analysis =
             new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts );

@@ -41,7 +41,7 @@ public class ASMDependencyAnalyzer
     /*
      * @see org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer#analyze(java.net.URL)
      */
-    public Set analyze( URL url )
+    public Set<String> analyze( URL url )
         throws IOException
     {
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();

@@ -38,11 +38,13 @@ import org.codehaus.plexus.util.IOUtil;
  * @version $Id$
  * @see DefaultClassAnalyzer
  */
-public class DefaultClassAnalyzerTest extends AbstractFileTest
+public class DefaultClassAnalyzerTest
+    extends AbstractFileTest
 {
     // tests ------------------------------------------------------------------
 
-    public void testAnalyzeWithJar() throws IOException
+    public void testAnalyzeWithJar()
+        throws IOException
     {
         File file = createJar();
         JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) );
@@ -50,17 +52,18 @@ public class DefaultClassAnalyzerTest extends AbstractFileTest
         writeEntry( out, "x/y/z.class", "class x.y.z" );
         out.close();
 
-        Set expectedClasses = new HashSet();
+        Set<String> expectedClasses = new HashSet<String>();
         expectedClasses.add( "a.b.c" );
         expectedClasses.add( "x.y.z" );
 
         DefaultClassAnalyzer analyzer = new DefaultClassAnalyzer();
-        Set actualClasses = analyzer.analyze( file.toURI().toURL() );
+        Set<String> actualClasses = analyzer.analyze( file.toURI().toURL() );
 
         assertEquals( expectedClasses, actualClasses );
     }
 
-    public void testAnalyzeBadJar() throws IOException
+    public void testAnalyzeBadJar()
+        throws IOException
     {
         //to reproduce MDEP-143
         File file = createJar();

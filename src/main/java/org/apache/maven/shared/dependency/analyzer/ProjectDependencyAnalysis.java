@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.maven.artifact.Artifact;
+
 /**
  * 
  * 
@@ -33,11 +35,11 @@ public class ProjectDependencyAnalysis
 {
     // fields -----------------------------------------------------------------
 
-    private final Set usedDeclaredArtifacts;
+    private final Set<Artifact> usedDeclaredArtifacts;
 
-    private final Set usedUndeclaredArtifacts;
+    private final Set<Artifact> usedUndeclaredArtifacts;
 
-    private final Set unusedDeclaredArtifacts;
+    private final Set<Artifact> unusedDeclaredArtifacts;
 
     // constructors -----------------------------------------------------------
     
@@ -46,27 +48,27 @@ public class ProjectDependencyAnalysis
         this( null, null, null );
     }
 
-    public ProjectDependencyAnalysis( Set usedDeclaredArtifacts, Set usedUndeclaredArtifacts,
-                                      Set unusedDeclaredArtifacts )
+    public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
+                                      Set<Artifact> unusedDeclaredArtifacts )
     {
-        this.usedDeclaredArtifacts = safeCopy(usedDeclaredArtifacts);
-        this.usedUndeclaredArtifacts = safeCopy(usedUndeclaredArtifacts);
-        this.unusedDeclaredArtifacts = safeCopy(unusedDeclaredArtifacts);
+        this.usedDeclaredArtifacts = safeCopy( usedDeclaredArtifacts );
+        this.usedUndeclaredArtifacts = safeCopy( usedUndeclaredArtifacts );
+        this.unusedDeclaredArtifacts = safeCopy( unusedDeclaredArtifacts );
     }
 
     // public methods ---------------------------------------------------------
 
-    public Set getUsedDeclaredArtifacts()
+    public Set<Artifact> getUsedDeclaredArtifacts()
     {
         return usedDeclaredArtifacts;
     }
 
-    public Set getUsedUndeclaredArtifacts()
+    public Set<Artifact> getUsedUndeclaredArtifacts()
     {
         return usedUndeclaredArtifacts;
     }
 
-    public Set getUnusedDeclaredArtifacts()
+    public Set<Artifact> getUnusedDeclaredArtifacts()
     {
         return unusedDeclaredArtifacts;
     }
@@ -90,22 +92,16 @@ public class ProjectDependencyAnalysis
      */
     public boolean equals( Object object )
     {
-        boolean equals;
-        
         if ( object instanceof ProjectDependencyAnalysis )
         {
             ProjectDependencyAnalysis analysis = (ProjectDependencyAnalysis) object;
             
-            equals = getUsedDeclaredArtifacts().equals( analysis.getUsedDeclaredArtifacts() )
+            return getUsedDeclaredArtifacts().equals( analysis.getUsedDeclaredArtifacts() )
                 && getUsedUndeclaredArtifacts().equals( analysis.getUsedUndeclaredArtifacts() )
                 && getUnusedDeclaredArtifacts().equals( analysis.getUnusedDeclaredArtifacts() );
         }
-        else
-        {
-            equals = false;
-        }
         
-        return equals;
+        return false;
     }
     
     /*
@@ -150,8 +146,8 @@ public class ProjectDependencyAnalysis
     
     // private methods --------------------------------------------------------
     
-    private Set safeCopy( Set set )
+    private Set<Artifact> safeCopy( Set<Artifact> set )
     {
-        return ( set == null ) ? Collections.EMPTY_SET : Collections.unmodifiableSet( new LinkedHashSet( set ) );
+        return ( set == null ) ? Collections.<Artifact>emptySet() : Collections.unmodifiableSet( new LinkedHashSet<Artifact>( set ) );
     }
 }
