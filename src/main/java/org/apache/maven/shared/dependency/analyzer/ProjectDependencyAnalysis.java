@@ -42,7 +42,7 @@ public class ProjectDependencyAnalysis
     private final Set<Artifact> unusedDeclaredArtifacts;
 
     // constructors -----------------------------------------------------------
-    
+
     public ProjectDependencyAnalysis()
     {
         this( null, null, null );
@@ -81,9 +81,9 @@ public class ProjectDependencyAnalysis
     public int hashCode()
     {
         int hashCode = getUsedDeclaredArtifacts().hashCode();
-        hashCode = (hashCode * 37) + getUsedUndeclaredArtifacts().hashCode();
-        hashCode = (hashCode * 37) + getUnusedDeclaredArtifacts().hashCode();
-        
+        hashCode = ( hashCode * 37 ) + getUsedUndeclaredArtifacts().hashCode();
+        hashCode = ( hashCode * 37 ) + getUnusedDeclaredArtifacts().hashCode();
+
         return hashCode;
     }
     
@@ -100,7 +100,7 @@ public class ProjectDependencyAnalysis
                 && getUsedUndeclaredArtifacts().equals( analysis.getUsedUndeclaredArtifacts() )
                 && getUnusedDeclaredArtifacts().equals( analysis.getUnusedDeclaredArtifacts() );
         }
-        
+
         return false;
     }
     
@@ -148,6 +148,7 @@ public class ProjectDependencyAnalysis
     
     private Set<Artifact> safeCopy( Set<Artifact> set )
     {
-        return ( set == null ) ? Collections.<Artifact>emptySet() : Collections.unmodifiableSet( new LinkedHashSet<Artifact>( set ) );
+        return ( set == null ) ? Collections.<Artifact> emptySet()
+                        : Collections.unmodifiableSet( new LinkedHashSet<Artifact>( set ) );
     }
 }

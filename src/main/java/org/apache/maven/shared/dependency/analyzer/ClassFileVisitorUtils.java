@@ -101,7 +101,9 @@ public final class ClassFileVisitorUtils
             String name = entry.getName();
 
             if ( name.endsWith( ".class" ) )
+            {
                 visitClass( name, in, visitor );
+            }
         }
 
         in.close();
@@ -111,7 +113,9 @@ public final class ClassFileVisitorUtils
         throws IOException
     {
         if ( !directory.isDirectory() )
+        {
             throw new IllegalArgumentException( "File is not a directory" );
+        }
 
         DirectoryScanner scanner = new DirectoryScanner();
 
@@ -122,9 +126,9 @@ public final class ClassFileVisitorUtils
 
         String[] paths = scanner.getIncludedFiles();
 
-        for ( int i = 0; i < paths.length; i++ )
+        for ( String path : paths )
         {
-            String path = paths[i].replace( File.separatorChar, '/' );
+            path = path.replace( File.separatorChar, '/' );
 
             File file = new File( directory, path );
             FileInputStream in = new FileInputStream( file );
@@ -138,7 +142,9 @@ public final class ClassFileVisitorUtils
     private static void visitClass( String path, InputStream in, ClassFileVisitor visitor )
     {
         if ( !path.endsWith( ".class" ) )
+        {
             throw new IllegalArgumentException( "Path is not a class" );
+        }
 
         String className = path.substring( 0, path.length() - 6 );
 

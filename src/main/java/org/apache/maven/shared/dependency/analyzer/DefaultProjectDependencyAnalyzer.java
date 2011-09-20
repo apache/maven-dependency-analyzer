@@ -73,9 +73,9 @@ public class DefaultProjectDependencyAnalyzer
             Set<String> dependencyClasses = buildDependencyClasses( project, artifactClassMap );
 
             Set<Artifact> declaredArtifacts = buildDeclaredArtifacts( project );
-            
+
             Set<Artifact> usedArtifacts = buildUsedArtifacts( artifactClassMap, dependencyClasses );
-            
+
             Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<Artifact>( declaredArtifacts );
             usedDeclaredArtifacts.retainAll( usedArtifacts );
 
@@ -161,10 +161,10 @@ public class DefaultProjectDependencyAnalyzer
         throws IOException
     {
         Set<String> dependencyClasses = new HashSet<String>();
-        
+
         String outputDirectory = project.getBuild().getOutputDirectory();
         dependencyClasses.addAll( buildDependencyClasses( outputDirectory ) );
-        
+
         String testOutputDirectory = project.getBuild().getTestOutputDirectory();
         dependencyClasses.addAll( buildDependencyClasses( testOutputDirectory ) );
 
@@ -182,12 +182,12 @@ public class DefaultProjectDependencyAnalyzer
     private Set<Artifact> buildDeclaredArtifacts( MavenProject project )
     {
         Set<Artifact> declaredArtifacts = project.getDependencyArtifacts();
-        
+
         if ( declaredArtifacts == null )
         {
             declaredArtifacts = Collections.<Artifact>emptySet();
         }
-        
+
         return declaredArtifacts;
     }
     
@@ -204,7 +204,7 @@ public class DefaultProjectDependencyAnalyzer
                 usedArtifacts.add( artifact );
             }
         }
-        
+
         return usedArtifacts;
     }
 

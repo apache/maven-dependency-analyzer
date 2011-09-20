@@ -376,7 +376,9 @@ public class DependencyVisitor
     public void visit( final String name, final Object value )
     {
         if ( value instanceof Type )
+        {
             addType( (Type) value );
+        }
     }
 
     /*
@@ -569,7 +571,7 @@ public class DependencyVisitor
         {
             return;
         }
-        
+
         for ( String name : names )
         {
             addName( name );
@@ -584,7 +586,7 @@ public class DependencyVisitor
     private void addMethodDesc( final String desc )
     {
         addType( Type.getReturnType( desc ) );
-        
+
         Type[] types = Type.getArgumentTypes( desc );
 
         for ( Type type : types )
