@@ -48,7 +48,7 @@
   </issueManagement>
 
   <properties>
-    <mavenVersion>2.2.0</mavenVersion>
+    <mavenVersion>2.0.5</mavenVersion>
   </properties>
 
   <dependencies>
@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
-      <version>1.5.15</version>
+      <version>1.5.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
