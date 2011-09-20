@@ -47,6 +47,10 @@
     <url>http://jira.codehaus.org/browse/MSHARED/component/13265</url>
   </issueManagement>
 
+  <properties>
+    <mavenVersion>2.2.0</mavenVersion>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>asm</groupId>
@@ -56,22 +60,22 @@
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
-      <version>1.5.1</version>
+      <version>1.5.15</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-project</artifactId>
-      <version>2.0.5</version>
+      <version>${mavenVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-model</artifactId>
-      <version>2.0.5</version>
+      <version>${mavenVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact</artifactId>
-      <version>2.0.5</version>
+      <version>${mavenVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
