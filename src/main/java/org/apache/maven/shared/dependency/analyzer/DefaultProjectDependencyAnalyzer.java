@@ -70,7 +70,7 @@ public class DefaultProjectDependencyAnalyzer
         {
             Map<Artifact, Set<String>> artifactClassMap = buildArtifactClassMap( project );
 
-            Set<String> dependencyClasses = buildDependencyClasses( project, artifactClassMap );
+            Set<String> dependencyClasses = buildDependencyClasses( project );
 
             Set<Artifact> declaredArtifacts = buildDeclaredArtifacts( project );
 
@@ -157,7 +157,7 @@ public class DefaultProjectDependencyAnalyzer
         return artifactClassMap;
     }
 
-    protected Set<String> buildDependencyClasses( MavenProject project, Map<Artifact, Set<String>> artifactClassMap )
+    protected Set<String> buildDependencyClasses( MavenProject project )
         throws IOException
     {
         Set<String> dependencyClasses = new HashSet<String>();
