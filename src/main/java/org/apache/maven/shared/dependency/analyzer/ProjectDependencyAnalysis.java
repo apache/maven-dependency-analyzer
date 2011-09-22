@@ -26,7 +26,7 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 
 /**
- * 
+ * Project dependencies analysis result.
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
@@ -58,16 +58,25 @@ public class ProjectDependencyAnalysis
 
     // public methods ---------------------------------------------------------
 
+    /**
+     * Used and declared artifacts.
+     */
     public Set<Artifact> getUsedDeclaredArtifacts()
     {
         return usedDeclaredArtifacts;
     }
 
+    /**
+     * Used but not declared artifacts.
+     */
     public Set<Artifact> getUsedUndeclaredArtifacts()
     {
         return usedUndeclaredArtifacts;
     }
 
+    /**
+     * Unused but declared artifacts.
+     */
     public Set<Artifact> getUnusedDeclaredArtifacts()
     {
         return unusedDeclaredArtifacts;

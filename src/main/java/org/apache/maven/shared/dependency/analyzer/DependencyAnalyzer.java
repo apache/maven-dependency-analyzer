@@ -24,7 +24,7 @@ import java.net.URL;
 import java.util.Set;
 
 /**
- * DependencyAnalyzer
+ * Gets the set of classes referenced by a library given either as a jar file or an exploded directory.
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$

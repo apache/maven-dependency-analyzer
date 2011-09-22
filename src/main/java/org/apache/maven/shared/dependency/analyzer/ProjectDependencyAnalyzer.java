@@ -22,7 +22,12 @@ package org.apache.maven.shared.dependency.analyzer;
 import org.apache.maven.project.MavenProject;
 
 /**
- * 
+ * Analyze a project's declared dependencies and effective classes used to find which artifacts are:
+ * <ul>
+ * <li>used and declared,</li>
+ * <li>used but not declared,</li>
+ * <li>not used but declared.</li>
+ * </ul>
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$

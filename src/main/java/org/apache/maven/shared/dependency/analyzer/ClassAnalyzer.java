@@ -24,7 +24,7 @@ import java.net.URL;
 import java.util.Set;
 
 /**
- * 
+ * Gets the set of classes contained in a library given either as a jar file or an exploded directory.
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$

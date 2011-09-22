@@ -36,9 +36,6 @@ public class DefaultClassAnalyzer
 {
     // ClassAnalyzer methods --------------------------------------------------
 
-    /*
-     * @see org.apache.maven.shared.dependency.analyzer.ClassAnalyzer#analyze(java.net.URL)
-     */
     public Set<String> analyze( URL url )
         throws IOException
     {

@@ -28,10 +28,12 @@ import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
 import org.objectweb.asm.ClassReader;
 
 /**
- * 
+ * Computes the set of classes referenced by visited class files, using
+ * <a href="DependencyVisitor.html">DependencyVisitor</a>.
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
+ * @see #getDependencies()
  */
 public class DependencyClassFileVisitor
     implements ClassFileVisitor
@@ -78,6 +80,10 @@ public class DependencyClassFileVisitor
 
     // public methods ---------------------------------------------------------
 
+    /**
+     * 
+     * @return the set of classes referenced by visited class files
+     */
     public Set<String> getDependencies()
     {
         return dependencies;

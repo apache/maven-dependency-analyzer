@@ -32,7 +32,7 @@ import java.util.jar.JarInputStream;
 import org.codehaus.plexus.util.DirectoryScanner;
 
 /**
- * 
+ * Utility to visit classes in a library given either as a jar file or an exploded directory.
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
