@@ -1,0 +1,14 @@
+ -----
+ Introduction
+ -----
+ Hervé Boutemy
+ -----
+ 2011-09-22
+ -----
+
+Maven Dependency Analyzer
+
+  Analyzes the dependencies of a project for undeclared or unused artifacts.
+
+  Main component is <<<ProjectDependencyAnalyzer>>>
+  ({{{./apidocs/org/apache/maven/shared/dependency/analyzer/ProjectDependencyAnalyzer.html}javadoc}}).
