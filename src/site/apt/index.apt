@@ -11,4 +11,8 @@ Maven Dependency Analyzer
   Analyzes the dependencies of a project for undeclared or unused artifacts.
 
   Main component is <<<ProjectDependencyAnalyzer>>>
-  ({{{./apidocs/org/apache/maven/shared/dependency/analyzer/ProjectDependencyAnalyzer.html}javadoc}}).
+  ({{{./apidocs/org/apache/maven/shared/dependency/analyzer/ProjectDependencyAnalyzer.html}javadoc}}), which uses
+  <<<ClassAnalyzer>>>
+  ({{{./apidocs/org/apache/maven/shared/dependency/analyzer/ClassAnalyzer.html}javadoc}})
+  and <<<DependencyAnalyzer>>>
+  ({{{./apidocs/org/apache/maven/shared/dependency/analyzer/DependencyAnalyzer.html}javadoc}}).
