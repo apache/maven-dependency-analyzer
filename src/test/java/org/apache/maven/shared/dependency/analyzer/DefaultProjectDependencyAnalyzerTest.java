@@ -121,6 +121,13 @@ public class DefaultProjectDependencyAnalyzerTest
 
         MavenProject project2 = getProject( "jarWithCompileDependency/project2/pom.xml" );
 
+        if ( project2.getBuild().getOutputDirectory().contains( "${" ) )
+        {
+            // if Maven version used as dependency is upgraded to >= 2.2.0 
+            throw new TestToolsException( "output directory was not interpolated: "
+                + project2.getBuild().getOutputDirectory() );
+        }
+
         ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
 
         Artifact project1 =
