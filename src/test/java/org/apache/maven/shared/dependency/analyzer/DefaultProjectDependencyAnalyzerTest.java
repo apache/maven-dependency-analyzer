@@ -166,9 +166,9 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testJarWithXxmlTransitiveDependency()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        compileProject( "jarWithXercesDependency/pom.xml" );
+        compileProject( "jarWithXmlTransitiveDependency/pom.xml" );
 
-        MavenProject project = getProject( "jarWithXercesDependency/pom.xml" );
+        MavenProject project = getProject( "jarWithXmlTransitiveDependency/pom.xml" );
 
         ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project );
 
