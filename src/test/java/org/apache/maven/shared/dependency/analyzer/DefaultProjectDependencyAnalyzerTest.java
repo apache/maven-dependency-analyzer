@@ -163,6 +163,25 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    public void testJarWithXxmlTransitiveDependency()
+        throws TestToolsException, ProjectDependencyAnalyzerException
+    {
+        compileProject( "jarWithXercesDependency/pom.xml" );
+
+        MavenProject project = getProject( "jarWithXercesDependency/pom.xml" );
+
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project );
+
+        Artifact jdom = createArtifact( "dom4j", "dom4j", "jar", "1.6.1", "compile" );
+        Set<Artifact> usedDeclaredArtifacts = Collections.singleton( jdom );
+
+        ProjectDependencyAnalysis expectedAnalysis =
+            new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null );
+
+        // MSHARED-47: usedUndeclaredArtifacts=[xml-apis:xml-apis:jar:1.0.b2:compile]
+        //assertEquals( expectedAnalysis, actualAnalysis );
+    }
+
     // private methods --------------------------------------------------------
 
     private void compileProject( String pomPath )
