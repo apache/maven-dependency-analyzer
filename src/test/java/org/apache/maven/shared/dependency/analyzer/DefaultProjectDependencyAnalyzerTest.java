@@ -163,7 +163,7 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
-    public void testJarWithXxmlTransitiveDependency()
+    public void testJarWithXmlTransitiveDependency()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
         compileProject( "jarWithXmlTransitiveDependency/pom.xml" );
