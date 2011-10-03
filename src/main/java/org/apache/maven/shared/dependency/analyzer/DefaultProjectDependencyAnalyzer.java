@@ -31,14 +31,16 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 
 /**
  * 
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
- * @plexus.component role="org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzer" role-hint="default"
  */
+@Component( role = ProjectDependencyAnalyzer.class )
 public class DefaultProjectDependencyAnalyzer
     implements ProjectDependencyAnalyzer
 {
@@ -46,16 +48,14 @@ public class DefaultProjectDependencyAnalyzer
 
     /**
      * ClassAnalyzer
-     * 
-     * @plexus.requirement
      */
+    @Requirement
     private ClassAnalyzer classAnalyzer;
 
     /**
      * DependencyAnalyzer
-     * 
-     * @plexus.requirement
      */
+    @Requirement
     private DependencyAnalyzer dependencyAnalyzer;
 
     // ProjectDependencyAnalyzer methods --------------------------------------

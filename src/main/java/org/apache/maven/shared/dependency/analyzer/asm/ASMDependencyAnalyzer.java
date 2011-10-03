@@ -25,14 +25,15 @@ import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitorUtils;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
+import org.codehaus.plexus.component.annotations.Component;
 
 /**
  * ASMDependencyAnalyzer 
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
- * @plexus.component role="org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer"
  */
+@Component( role = DependencyAnalyzer.class )
 public class ASMDependencyAnalyzer
     implements DependencyAnalyzer
 {

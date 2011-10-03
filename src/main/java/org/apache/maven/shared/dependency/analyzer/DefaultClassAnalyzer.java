@@ -24,13 +24,15 @@ import java.net.URL;
 import java.util.Set;
 import java.util.zip.ZipException;
 
+import org.codehaus.plexus.component.annotations.Component;
+
 /**
  *
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
- * @plexus.component role="org.apache.maven.shared.dependency.analyzer.ClassAnalyzer"
  */
+@Component( role = ClassAnalyzer.class )
 public class DefaultClassAnalyzer
     implements ClassAnalyzer
 {
