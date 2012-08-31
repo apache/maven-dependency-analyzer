@@ -19,6 +19,8 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import org.apache.maven.shared.utils.io.DirectoryScanner;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,7 +31,6 @@ import java.net.URL;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import org.codehaus.plexus.util.DirectoryScanner;
 
 /**
  * Utility to visit classes in a library given either as a jar file or an exploded directory.
