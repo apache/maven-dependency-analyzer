@@ -80,7 +80,7 @@ public class DefaultClassAnalyzerTest
         byte [] ba = baos.toByteArray();
         ba[50] = 1;
         FileOutputStream fos = new FileOutputStream( file );
-        IOUtil.copy( ba, fos, 100 );
+        IOUtil.copy( ba, fos );
         fos.close();
 
         DefaultClassAnalyzer analyzer = new DefaultClassAnalyzer();
