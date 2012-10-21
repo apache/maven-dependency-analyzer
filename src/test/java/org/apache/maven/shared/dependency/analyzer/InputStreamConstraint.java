@@ -22,7 +22,7 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.maven.shared.utils.io.IOUtil;
+import org.codehaus.plexus.util.IOUtil;
 import org.jmock.core.Constraint;
 
 /**

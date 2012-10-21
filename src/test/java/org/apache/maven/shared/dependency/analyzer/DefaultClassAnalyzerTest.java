@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipException;
 
-import org.apache.maven.shared.utils.io.IOUtil;
+import org.codehaus.plexus.util.IOUtil;
 
 /**
  * Tests <code>DefaultClassAnalyzer</code>.

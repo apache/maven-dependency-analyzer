@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.jar.JarOutputStream;
 
-import org.apache.maven.shared.utils.io.FileUtils;
+import org.codehaus.plexus.util.FileUtils;
 import org.jmock.Mock;
 
 /**

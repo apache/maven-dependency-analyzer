@@ -19,7 +19,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import org.apache.maven.shared.utils.io.DirectoryScanner;
+import org.codehaus.plexus.util.DirectoryScanner;
 
 import java.io.File;
 import java.io.FileInputStream;
