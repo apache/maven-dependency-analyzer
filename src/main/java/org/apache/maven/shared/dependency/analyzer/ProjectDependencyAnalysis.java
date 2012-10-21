@@ -86,6 +86,27 @@ public class ProjectDependencyAnalysis
     }
 
     /**
+     * Filter not-compile scoped artifacts from unused declared.
+     * 
+     * @return updated project dependency analysis
+     * @since 1.3
+     */
+    public ProjectDependencyAnalysis ignoreNonCompile()
+    {
+        Set<Artifact> filteredUnusedDeclared = new HashSet<Artifact>( unusedDeclaredArtifacts );
+        for ( Iterator<Artifact> iter = filteredUnusedDeclared.iterator(); iter.hasNext(); )
+        {
+            Artifact artifact = iter.next();
+            if ( !artifact.getScope().equals( Artifact.SCOPE_COMPILE ) )
+            {
+                iter.remove();
+            }
+        }
+
+        return new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, filteredUnusedDeclared );
+    }
+
+    /**
      * Force use status of some declared dependencies, to manually fix consequences of bytecode-level analysis which
      * happens to not detect some effective use (constants, annotation with source-retention, javadoc).
      * 
