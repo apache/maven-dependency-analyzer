@@ -22,6 +22,7 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -153,7 +154,6 @@ public class DefaultProjectDependencyAnalyzerTest
                             "1.0", "test" );
         Set<Artifact> usedDeclaredArtifacts = Collections.singleton( project1 );
 
-        // TODO: remove workaround for SUREFIRE-300 when 2.3.1 released
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
         Set<Artifact> unusedDeclaredArtifacts = Collections.singleton( junit );
 
@@ -161,6 +161,37 @@ public class DefaultProjectDependencyAnalyzerTest
             new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, unusedDeclaredArtifacts );
 
         assertEquals( expectedAnalysis, actualAnalysis );
+
+        // MSHARED-253: force used dependency (which is actually used but not detected)
+        ProjectDependencyAnalysis forcedAnalysis =
+            actualAnalysis.forceDeclaredDependenciesUsage( new String[] { "junit:junit" } );
+
+        usedDeclaredArtifacts = new HashSet<Artifact>( Arrays.asList( project1, junit ) );
+        expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null );
+
+        assertEquals( expectedAnalysis, forcedAnalysis );
+
+        try
+        {
+            forcedAnalysis.forceDeclaredDependenciesUsage( new String[]{ "junit:junit" } );
+            fail( "failure expected since junit dependency is declared-used" );
+        }
+        catch( ProjectDependencyAnalyzerException pdae )
+        {
+            assertTrue( pdae.getMessage().contains( "Trying to force use of dependencies which are "
+                                                        + "declared but already detected as used: [junit:junit]" ) );
+        }
+
+        try
+        {
+            forcedAnalysis.forceDeclaredDependenciesUsage( new String[]{ "undefined:undefined" } );
+            fail( "failure expected since undefined dependency is not declared" );
+        }
+        catch( ProjectDependencyAnalyzerException pdae )
+        {
+            assertTrue( pdae.getMessage().contains( "Trying to force use of dependencies which are "
+                                                        + "not declared: [undefined:undefined]" ) );
+        }
     }
 
     public void testJarWithXmlTransitiveDependency()

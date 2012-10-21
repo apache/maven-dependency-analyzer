@@ -19,7 +19,10 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -80,6 +83,69 @@ public class ProjectDependencyAnalysis
     public Set<Artifact> getUnusedDeclaredArtifacts()
     {
         return unusedDeclaredArtifacts;
+    }
+
+    /**
+     * Force use status of some declared dependencies, to manually fix consequences of bytecode-level analysis which
+     * happens to not detect some effective use (constants, annotation with source-retention, javadoc).
+     * 
+     * @param forceUsedDependencies dependencies to move from "unused-declared" to "used-declared", with
+     *            <code>groupId:artifactId</code> format
+     * @return updated project dependency analysis
+     * @throws ProjectDependencyAnalyzerException if dependencies forced were either not declared or already detected as
+     *             used
+     * @since 1.3
+     */
+    public ProjectDependencyAnalysis forceDeclaredDependenciesUsage( String[] forceUsedDependencies )
+        throws ProjectDependencyAnalyzerException
+    {
+        Set<String> forced = new HashSet<String>( Arrays.asList( forceUsedDependencies ) );
+
+        Set<Artifact> forcedUnusedDeclared = new HashSet<Artifact>( unusedDeclaredArtifacts );
+        Set<Artifact> forcedUsedDeclared = new HashSet<Artifact>( usedDeclaredArtifacts );
+
+        for ( Iterator<Artifact> iter = forcedUnusedDeclared.iterator(); iter.hasNext(); )
+        {
+            Artifact artifact = iter.next();
+
+            if ( forced.remove( artifact.getGroupId() + ':' + artifact.getArtifactId() ) )
+            {
+                // ok, change artifact status from unused-declared to used-declared
+                iter.remove();
+                forcedUsedDeclared.add( artifact );
+            }
+        }
+
+        if ( !forced.isEmpty() )
+        {
+            // trying to force dependencies as used-declared which were not declared or already detected as used
+            Set<String> used = new HashSet<String>();
+            for ( Artifact artifact : usedDeclaredArtifacts )
+            {
+                String id = artifact.getGroupId() + ':' + artifact.getArtifactId();
+                if ( forced.remove( id ) )
+                {
+                    used.add( id );
+                }
+            }
+
+            StringBuilder builder = new StringBuilder();
+            if ( !forced.isEmpty() )
+            {
+                builder.append( "not declared: " + forced );
+            }
+            if ( !used.isEmpty() )
+            {
+                if ( builder.length() > 0 )
+                {
+                    builder.append( " and " );
+                }
+                builder.append( "declared but already detected as used: " + used );
+            }
+            throw new ProjectDependencyAnalyzerException( "Trying to force use of dependencies which are " + builder );
+        }
+
+        return new ProjectDependencyAnalysis( forcedUsedDeclared, usedUndeclaredArtifacts, forcedUnusedDeclared );
     }
 
     // Object methods ---------------------------------------------------------

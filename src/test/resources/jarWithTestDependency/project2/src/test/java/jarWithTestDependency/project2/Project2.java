@@ -29,6 +29,10 @@ import jarWithTestDependency.project1.Project1;
  */
 public class Project2
 {
+    // using a constant from JUnit requires junit dependency but is not detected since the constant
+    // value is copied, then nothing can be detected in bytecode
+    public final static int STATUS_ERROR = junit.runner.TestRunListener.STATUS_ERROR;
+
     // constructors -----------------------------------------------------------
 
     public Project2()
