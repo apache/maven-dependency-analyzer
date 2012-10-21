@@ -81,9 +81,9 @@ public class ProjectDependencyAnalysis
     {
         return unusedDeclaredArtifacts;
     }
-    
+
     // Object methods ---------------------------------------------------------
-    
+
     /*
      * @see java.lang.Object#hashCode()
      */
@@ -95,7 +95,7 @@ public class ProjectDependencyAnalysis
 
         return hashCode;
     }
-    
+
     /*
      * @see java.lang.Object#equals(java.lang.Object)
      */
@@ -104,7 +104,7 @@ public class ProjectDependencyAnalysis
         if ( object instanceof ProjectDependencyAnalysis )
         {
             ProjectDependencyAnalysis analysis = (ProjectDependencyAnalysis) object;
-            
+
             return getUsedDeclaredArtifacts().equals( analysis.getUsedDeclaredArtifacts() )
                 && getUsedUndeclaredArtifacts().equals( analysis.getUsedUndeclaredArtifacts() )
                 && getUnusedDeclaredArtifacts().equals( analysis.getUnusedDeclaredArtifacts() );
@@ -112,49 +112,49 @@ public class ProjectDependencyAnalysis
 
         return false;
     }
-    
+
     /*
      * @see java.lang.Object#toString()
      */
     public String toString()
     {
         StringBuffer buffer = new StringBuffer();
-        
+
         if ( !getUsedDeclaredArtifacts().isEmpty() )
         {
             buffer.append( "usedDeclaredArtifacts=" ).append( getUsedDeclaredArtifacts() );
         }
-        
+
         if ( !getUsedUndeclaredArtifacts().isEmpty() )
         {
             if ( buffer.length() > 0)
             {
                 buffer.append( "," );
             }
-            
+
             buffer.append( "usedUndeclaredArtifacts=" ).append( getUsedUndeclaredArtifacts() );
         }
-        
+
         if ( !getUnusedDeclaredArtifacts().isEmpty() )
         {
             if ( buffer.length() > 0)
             {
                 buffer.append( "," );
             }
-            
+
             buffer.append( "unusedDeclaredArtifacts=" ).append( getUnusedDeclaredArtifacts() );
         }
 
         buffer.insert( 0, "[" );
         buffer.insert( 0, getClass().getName() );
-        
+
         buffer.append( "]" );
-        
+
         return buffer.toString();
     }
-    
+
     // private methods --------------------------------------------------------
-    
+
     private Set<Artifact> safeCopy( Set<Artifact> set )
     {
         return ( set == null ) ? Collections.<Artifact> emptySet()
