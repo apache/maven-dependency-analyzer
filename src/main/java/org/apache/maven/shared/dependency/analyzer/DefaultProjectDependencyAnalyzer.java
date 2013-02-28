@@ -145,7 +145,7 @@ public class DefaultProjectDependencyAnalyzer
         {
             File file = artifact.getFile();
 
-            if ( file != null && file.getName().endsWith( ".jar" ) )
+            if ( file != null && (file.getName().endsWith( ".jar" ) || file.isDirectory()))
             {
                 URL url = file.toURL();
 
