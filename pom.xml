@@ -33,6 +33,7 @@
   <version>1.4-SNAPSHOT</version>
 
   <name>Maven Dependency Analyzer</name>
+  
   <description>
     Analyzes the dependencies of a project for undeclared or unused artifacts.
   </description>
