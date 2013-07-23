@@ -3,10 +3,10 @@
  -----
  Hervé Boutemy
  -----
- 2012-10-21
+ 2013-07-23
  -----
 
-Maven Dependency Analyzer
+${project.name}
 
   Analyzes the dependencies of a project for undeclared or unused artifacts.
 
