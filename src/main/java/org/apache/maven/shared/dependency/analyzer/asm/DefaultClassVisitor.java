@@ -23,13 +23,11 @@ import org.objectweb.asm.*;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Computes the set of classes referenced by visited code.
  * Inspired by <code>org.objectweb.asm.depend.DependencyVisitor</code> in the ASM dependencies example.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  */
@@ -37,7 +35,7 @@ public class DefaultClassVisitor extends ClassVisitor
 {
     // fields -----------------------------------------------------------------
 
-    private final ResultCollector classes;
+    private final ResultCollector resultCollector;
 
     private final SignatureVisitor signatureVisitor;
 
@@ -56,7 +54,7 @@ public class DefaultClassVisitor extends ClassVisitor
         this.annotationVisitor = annotationVisitor;
         this.fieldVisitor = fieldVisitor;
         this.methodVisitor = methodVisitor;
-        this.classes = resultCollector;
+        this.resultCollector = resultCollector;
     }
 
     public void visit( final int version, final int access, final String name, final String signature,
@@ -64,8 +62,8 @@ public class DefaultClassVisitor extends ClassVisitor
     {
         if ( signature == null )
         {
-            addName( superName );
-            addNames( interfaces );
+            resultCollector.addName(superName);
+            resultCollector.addNames(interfaces);
         }
         else
         {
@@ -73,126 +71,52 @@ public class DefaultClassVisitor extends ClassVisitor
         }
     }
 
-    /*
-     * @see org.objectweb.asm.ClassVisitor#visitAnnotation(java.lang.String, boolean)
-     */
     public AnnotationVisitor visitAnnotation( final String desc, final boolean visible )
     {
-        addDesc( desc );
+        resultCollector.addDesc(desc);
         
         return annotationVisitor;
     }
 
-    /*
-     * @see org.objectweb.asm.ClassVisitor#visitField(int, java.lang.String, java.lang.String, java.lang.String,
-     *      java.lang.Object)
-     */
     public FieldVisitor visitField( final int access, final String name, final String desc, final String signature,
                                     final Object value )
     {
         if ( signature == null )
         {
-            addDesc( desc );
+            resultCollector.addDesc(desc);
         }
         else
         {
-            addTypeSignature( signature );
+            addTypeSignature(signature);
         }
 
         if ( value instanceof Type )
         {
-            addType( (Type) value );
+            resultCollector.addType((Type) value);
         }
 
         return fieldVisitor;
     }
 
-    /*
-     * @see org.objectweb.asm.ClassVisitor#visitMethod(int, java.lang.String, java.lang.String, java.lang.String,
-     *      java.lang.String[])
-     */
     public MethodVisitor visitMethod( final int access, final String name, final String desc, final String signature,
                                       final String[] exceptions )
     {
         if ( signature == null )
         {
-            addMethodDesc( desc );
+            resultCollector.addMethodDesc(desc);
         }
         else
         {
-            addSignature( signature );
+            addSignature(signature);
         }
 
-        addNames( exceptions );
+        resultCollector.addNames( exceptions );
 
         return methodVisitor;
     }
 
 
     // private methods --------------------------------------------------------
-
-    private void addName( String name )
-    {
-        if ( name == null )
-        {
-            return;
-        }
-
-        // decode arrays
-        if ( name.startsWith( "[L" ) && name.endsWith( ";" ) )
-        {
-            name = name.substring( 2, name.length() - 1 );
-        }
-
-        // decode internal representation
-        name = name.replace( '/', '.' );
-
-        classes.add( name );
-    }
-
-    private void addNames( final String[] names )
-    {
-        if ( names == null )
-        {
-            return;
-        }
-
-        for ( String name : names )
-        {
-            addName( name );
-        }
-    }
-
-    private void addDesc( final String desc )
-    {
-        addType( Type.getType( desc ) );
-    }
-
-    private void addMethodDesc( final String desc )
-    {
-        addType( Type.getReturnType( desc ) );
-
-        Type[] types = Type.getArgumentTypes( desc );
-
-        for ( Type type : types )
-        {
-            addType( type );
-        }
-    }
-
-    private void addType( final Type t )
-    {
-        switch ( t.getSort() )
-        {
-            case Type.ARRAY:
-                addType( t.getElementType() );
-                break;
-
-            case Type.OBJECT:
-                addName( t.getClassName().replace( '.', '/' ) );
-                break;
-        }
-    }
 
     private void addSignature( final String signature )
     {
