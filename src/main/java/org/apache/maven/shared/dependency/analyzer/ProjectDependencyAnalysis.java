@@ -153,7 +153,7 @@ public class ProjectDependencyAnalysis
             StringBuilder builder = new StringBuilder();
             if ( !forced.isEmpty() )
             {
-                builder.append( "not declared: " + forced );
+                builder.append("not declared: ").append(forced);
             }
             if ( !used.isEmpty() )
             {
@@ -161,7 +161,7 @@ public class ProjectDependencyAnalysis
                 {
                     builder.append( " and " );
                 }
-                builder.append( "declared but already detected as used: " + used );
+                builder.append("declared but already detected as used: ").append(used);
             }
             throw new ProjectDependencyAnalyzerException( "Trying to force use of dependencies which are " + builder );
         }
@@ -205,7 +205,7 @@ public class ProjectDependencyAnalysis
      */
     public String toString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         if ( !getUsedDeclaredArtifacts().isEmpty() )
         {

@@ -21,11 +21,11 @@ package org.apache.maven.shared.dependency.analyzer.asm;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
-import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.*;
+import org.objectweb.asm.signature.SignatureVisitor;
 
 /**
  * Computes the set of classes referenced by visited class files, using
@@ -40,13 +40,12 @@ public class DependencyClassFileVisitor
 {
     // fields -----------------------------------------------------------------
 
-    private final Set<String> dependencies;
+    private final ResultCollector resultCollector = new ResultCollector();
 
     // constructors -----------------------------------------------------------
 
     public DependencyClassFileVisitor()
     {
-        dependencies = new HashSet<String>();
     }
 
     // ClassFileVisitor methods -----------------------------------------------
@@ -60,11 +59,15 @@ public class DependencyClassFileVisitor
         try
         {
             ClassReader reader = new ClassReader( in );
-            DependencyVisitor visitor = new DependencyVisitor();
 
-            reader.accept( visitor, 0 );
+            AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor(resultCollector);
+            SignatureVisitor signatureVisitor = new DefaultSignatureVisitor(resultCollector);
+            FieldVisitor fieldVisitor = new DefaultFieldVisitor(annotationVisitor, resultCollector);
+            MethodVisitor mv = new DefaultMethodVisitor(annotationVisitor, signatureVisitor, resultCollector);
+            ClassVisitor classVisitor = new DefaultClassVisitor(signatureVisitor, annotationVisitor,
+                    fieldVisitor, mv, resultCollector);
 
-            dependencies.addAll( visitor.getClasses() );
+            reader.accept( classVisitor, 0 );
         }
         catch ( IOException exception )
         {
@@ -86,6 +89,6 @@ public class DependencyClassFileVisitor
      */
     public Set<String> getDependencies()
     {
-        return dependencies;
+        return resultCollector.getDependencies();
     }
 }
