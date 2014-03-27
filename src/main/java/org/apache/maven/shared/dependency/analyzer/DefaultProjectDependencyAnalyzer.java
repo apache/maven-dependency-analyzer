@@ -147,7 +147,7 @@ public class DefaultProjectDependencyAnalyzer
 
             if ( file != null && (file.getName().endsWith( ".jar" ) || file.isDirectory()))
             {
-                URL url = file.toURL();
+                URL url = file.toURI().toURL();
 
                 Set<String> classes = classAnalyzer.analyze( url );
 
