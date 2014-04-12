@@ -36,7 +36,7 @@ public class DefaultAnnotationVisitor extends AnnotationVisitor
 
     public DefaultAnnotationVisitor(ResultCollector resultCollector)
     {
-        super(Opcodes.ASM4);
+        super(Opcodes.ASM5);
         this.resultCollector = resultCollector;
     }
 

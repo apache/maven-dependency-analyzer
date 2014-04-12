@@ -39,7 +39,7 @@ public class DefaultMethodVisitor extends MethodVisitor
 
     public DefaultMethodVisitor(AnnotationVisitor annotationVisitor, SignatureVisitor signatureVisitor, ResultCollector resultCollector)
     {
-        super(Opcodes.ASM4);
+        super(Opcodes.ASM5);
         this.annotationVisitor = annotationVisitor;
         this.signatureVisitor = signatureVisitor;
         this.resultCollector = resultCollector;
