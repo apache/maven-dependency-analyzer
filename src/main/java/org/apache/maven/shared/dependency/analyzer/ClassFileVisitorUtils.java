@@ -94,20 +94,24 @@ public final class ClassFileVisitorUtils
         throws IOException
     {
         JarInputStream in = new JarInputStream( url.openStream() );
-
-        JarEntry entry = null;
-
-        while ( ( entry = in.getNextJarEntry() ) != null )
+        try
         {
-            String name = entry.getName();
+            JarEntry entry = null;
 
-            if ( name.endsWith( ".class" ) )
+            while ( ( entry = in.getNextJarEntry() ) != null )
             {
-                visitClass( name, in, visitor );
+                String name = entry.getName();
+
+                if ( name.endsWith( ".class" ) )
+                {
+                    visitClass( name, in, visitor );
+                }
             }
         }
-
-        in.close();
+        finally
+        {
+            in.close();
+        }
     }
 
     private static void acceptDirectory( File directory, ClassFileVisitor visitor )
@@ -134,9 +138,14 @@ public final class ClassFileVisitorUtils
             File file = new File( directory, path );
             FileInputStream in = new FileInputStream( file );
 
-            visitClass( path, in, visitor );
-
-            in.close();
+            try
+            {
+                visitClass( path, in, visitor );
+            }
+            finally
+            {
+                in.close();
+            }
         }
     }
 
