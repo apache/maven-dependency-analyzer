@@ -19,7 +19,11 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  * under the License.
  */
 
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 
@@ -27,19 +31,23 @@ import org.objectweb.asm.signature.SignatureVisitor;
 /**
  * Computes the set of classes referenced by visited code.
  * Inspired by <code>org.objectweb.asm.depend.DependencyVisitor</code> in the ASM dependencies example.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  */
-public class DefaultMethodVisitor extends MethodVisitor
+public class DefaultMethodVisitor
+    extends MethodVisitor
 {
     private final AnnotationVisitor annotationVisitor;
+
     private final SignatureVisitor signatureVisitor;
+
     private final ResultCollector resultCollector;
 
-    public DefaultMethodVisitor(AnnotationVisitor annotationVisitor, SignatureVisitor signatureVisitor, ResultCollector resultCollector)
+    public DefaultMethodVisitor( AnnotationVisitor annotationVisitor, SignatureVisitor signatureVisitor,
+                                 ResultCollector resultCollector )
     {
-        super(Opcodes.ASM5);
+        super( Opcodes.ASM5 );
         this.annotationVisitor = annotationVisitor;
         this.signatureVisitor = signatureVisitor;
         this.resultCollector = resultCollector;
@@ -47,15 +55,15 @@ public class DefaultMethodVisitor extends MethodVisitor
 
     public AnnotationVisitor visitAnnotation( final String desc, final boolean visible )
     {
-        resultCollector.addDesc(desc);
-        
+        resultCollector.addDesc( desc );
+
         return annotationVisitor;
     }
 
 
     public AnnotationVisitor visitParameterAnnotation( final int parameter, final String desc, final boolean visible )
     {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc( desc );
 
         return annotationVisitor;
     }
@@ -74,7 +82,7 @@ public class DefaultMethodVisitor extends MethodVisitor
 
     public void visitFieldInsn( final int opcode, final String owner, final String name, final String desc )
     {
-        resultCollector.addName(owner);
+        resultCollector.addName( owner );
         /*
          * NOTE: Merely accessing a field does not impose a direct dependency on its type. For example, the code line
          * <code>java.lang.Object var = bean.field;</code> does not directly depend on the type of the field. A direct
@@ -104,7 +112,7 @@ public class DefaultMethodVisitor extends MethodVisitor
 
     public void visitMultiANewArrayInsn( final String desc, final int dims )
     {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc( desc );
     }
 
     public void visitTryCatchBlock( final Label start, final Label end, final Label handler, final String type )

@@ -22,33 +22,31 @@ package org.apache.maven.shared.dependency.analyzer.asm;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.signature.SignatureVisitor;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Computes the set of classes referenced by visited code.
  * Inspired by <code>org.objectweb.asm.depend.DependencyVisitor</code> in the ASM dependencies example.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  */
-public class DefaultSignatureVisitor extends SignatureVisitor
+public class DefaultSignatureVisitor
+    extends SignatureVisitor
 {
     private final ResultCollector resultCollector;
 
-    public DefaultSignatureVisitor(ResultCollector resultCollector)
+    public DefaultSignatureVisitor( ResultCollector resultCollector )
     {
-        super(Opcodes.ASM5);
+        super( Opcodes.ASM5 );
         this.resultCollector = resultCollector;
     }
 
     public void visitClassType( final String name )
     {
-        resultCollector.addName(name);
+        resultCollector.addName( name );
     }
 
     public void visitInnerClassType( final String name )
     {
-        resultCollector.addName(name);
+        resultCollector.addName( name );
     }
 }

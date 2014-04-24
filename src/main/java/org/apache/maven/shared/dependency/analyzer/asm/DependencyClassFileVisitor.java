@@ -19,18 +19,22 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  * under the License.
  */
 
+import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.signature.SignatureVisitor;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
-import org.objectweb.asm.*;
-import org.objectweb.asm.signature.SignatureVisitor;
-
 /**
  * Computes the set of classes referenced by visited class files, using
  * <a href="DependencyVisitor.html">DependencyVisitor</a>.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  * @see #getDependencies()
@@ -60,12 +64,12 @@ public class DependencyClassFileVisitor
         {
             ClassReader reader = new ClassReader( in );
 
-            AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor(resultCollector);
-            SignatureVisitor signatureVisitor = new DefaultSignatureVisitor(resultCollector);
-            FieldVisitor fieldVisitor = new DefaultFieldVisitor(annotationVisitor, resultCollector);
-            MethodVisitor mv = new DefaultMethodVisitor(annotationVisitor, signatureVisitor, resultCollector);
-            ClassVisitor classVisitor = new DefaultClassVisitor(signatureVisitor, annotationVisitor,
-                    fieldVisitor, mv, resultCollector);
+            AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor( resultCollector );
+            SignatureVisitor signatureVisitor = new DefaultSignatureVisitor( resultCollector );
+            FieldVisitor fieldVisitor = new DefaultFieldVisitor( annotationVisitor, resultCollector );
+            MethodVisitor mv = new DefaultMethodVisitor( annotationVisitor, signatureVisitor, resultCollector );
+            ClassVisitor classVisitor =
+                new DefaultClassVisitor( signatureVisitor, annotationVisitor, fieldVisitor, mv, resultCollector );
 
             reader.accept( classVisitor, 0 );
         }
@@ -84,7 +88,6 @@ public class DependencyClassFileVisitor
     // public methods ---------------------------------------------------------
 
     /**
-     * 
      * @return the set of classes referenced by visited class files
      */
     public Set<String> getDependencies()

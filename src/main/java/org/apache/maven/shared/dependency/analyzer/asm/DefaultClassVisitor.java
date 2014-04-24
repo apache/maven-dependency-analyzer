@@ -19,7 +19,12 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  * under the License.
  */
 
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 
@@ -31,7 +36,8 @@ import org.objectweb.asm.signature.SignatureVisitor;
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  */
-public class DefaultClassVisitor extends ClassVisitor
+public class DefaultClassVisitor
+    extends ClassVisitor
 {
     // fields -----------------------------------------------------------------
 
@@ -47,9 +53,11 @@ public class DefaultClassVisitor extends ClassVisitor
 
     // constructors -----------------------------------------------------------
 
-    public DefaultClassVisitor(SignatureVisitor signatureVisitor, AnnotationVisitor annotationVisitor, FieldVisitor fieldVisitor, MethodVisitor methodVisitor, ResultCollector resultCollector)
+    public DefaultClassVisitor( SignatureVisitor signatureVisitor, AnnotationVisitor annotationVisitor,
+                                FieldVisitor fieldVisitor, MethodVisitor methodVisitor,
+                                ResultCollector resultCollector )
     {
-        super(Opcodes.ASM5);
+        super( Opcodes.ASM5 );
         this.signatureVisitor = signatureVisitor;
         this.annotationVisitor = annotationVisitor;
         this.fieldVisitor = fieldVisitor;
@@ -62,8 +70,8 @@ public class DefaultClassVisitor extends ClassVisitor
     {
         if ( signature == null )
         {
-            resultCollector.addName(superName);
-            resultCollector.addNames(interfaces);
+            resultCollector.addName( superName );
+            resultCollector.addNames( interfaces );
         }
         else
         {
@@ -73,8 +81,8 @@ public class DefaultClassVisitor extends ClassVisitor
 
     public AnnotationVisitor visitAnnotation( final String desc, final boolean visible )
     {
-        resultCollector.addDesc(desc);
-        
+        resultCollector.addDesc( desc );
+
         return annotationVisitor;
     }
 
@@ -83,16 +91,16 @@ public class DefaultClassVisitor extends ClassVisitor
     {
         if ( signature == null )
         {
-            resultCollector.addDesc(desc);
+            resultCollector.addDesc( desc );
         }
         else
         {
-            addTypeSignature(signature);
+            addTypeSignature( signature );
         }
 
         if ( value instanceof Type )
         {
-            resultCollector.addType((Type) value);
+            resultCollector.addType( (Type) value );
         }
 
         return fieldVisitor;
@@ -103,18 +111,17 @@ public class DefaultClassVisitor extends ClassVisitor
     {
         if ( signature == null )
         {
-            resultCollector.addMethodDesc(desc);
+            resultCollector.addMethodDesc( desc );
         }
         else
         {
-            addSignature(signature);
+            addSignature( signature );
         }
 
         resultCollector.addNames( exceptions );
 
         return methodVisitor;
     }
-
 
     // private methods --------------------------------------------------------
 

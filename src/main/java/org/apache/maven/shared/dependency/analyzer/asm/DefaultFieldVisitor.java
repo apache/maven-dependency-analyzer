@@ -26,25 +26,28 @@ import org.objectweb.asm.Opcodes;
 /**
  * Computes the set of classes referenced by visited code.
  * Inspired by <code>org.objectweb.asm.depend.DependencyVisitor</code> in the ASM dependencies example.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  */
-public class DefaultFieldVisitor extends FieldVisitor
+public class DefaultFieldVisitor
+    extends FieldVisitor
 {
     private final AnnotationVisitor annotationVisitor;
+
     private final ResultCollector resultCollector;
 
-    public DefaultFieldVisitor(AnnotationVisitor annotationVisitor, ResultCollector resultCollector)
+    public DefaultFieldVisitor( AnnotationVisitor annotationVisitor, ResultCollector resultCollector )
     {
-        super(Opcodes.ASM5);
+        super( Opcodes.ASM5 );
         this.annotationVisitor = annotationVisitor;
         this.resultCollector = resultCollector;
     }
+
     public AnnotationVisitor visitAnnotation( final String desc, final boolean visible )
     {
-        resultCollector.addDesc(desc);
-        
+        resultCollector.addDesc( desc );
+
         return annotationVisitor;
     }
 

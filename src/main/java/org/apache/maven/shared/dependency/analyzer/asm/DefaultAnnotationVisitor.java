@@ -26,17 +26,18 @@ import org.objectweb.asm.Type;
 /**
  * Computes the set of classes referenced by visited code.
  * Inspired by <code>org.objectweb.asm.depend.DependencyVisitor</code> in the ASM dependencies example.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  */
-public class DefaultAnnotationVisitor extends AnnotationVisitor
+public class DefaultAnnotationVisitor
+    extends AnnotationVisitor
 {
     private final ResultCollector resultCollector;
 
-    public DefaultAnnotationVisitor(ResultCollector resultCollector)
+    public DefaultAnnotationVisitor( ResultCollector resultCollector )
     {
-        super(Opcodes.ASM5);
+        super( Opcodes.ASM5 );
         this.resultCollector = resultCollector;
     }
 
@@ -44,18 +45,18 @@ public class DefaultAnnotationVisitor extends AnnotationVisitor
     {
         if ( value instanceof Type )
         {
-            resultCollector.addType((Type) value);
+            resultCollector.addType( (Type) value );
         }
     }
 
     public void visitEnum( final String name, final String desc, final String value )
     {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc( desc );
     }
 
     public AnnotationVisitor visitAnnotation( final String name, final String desc )
     {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc( desc );
 
         return this;
     }

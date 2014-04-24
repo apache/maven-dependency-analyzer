@@ -27,9 +27,11 @@ import java.util.Set;
 /**
  * @author Kristian Rosenvold
  */
-public class ResultCollector {
+public class ResultCollector
+{
 
     private final Set<String> classes = new HashSet<String>();
+
     ;
 
     public Set<String> getDependencies()
@@ -56,12 +58,12 @@ public class ResultCollector {
         classes.add( name );
     }
 
-    void addDesc(final String desc)
+    void addDesc( final String desc )
     {
-        addType( Type.getType(desc) );
+        addType( Type.getType( desc ) );
     }
 
-    void addType(final Type t)
+    void addType( final Type t )
     {
         switch ( t.getSort() )
         {
@@ -75,11 +77,12 @@ public class ResultCollector {
         }
     }
 
-    public void add(String name) {
-        classes.add( name);
+    public void add( String name )
+    {
+        classes.add( name );
     }
 
-    void addNames(final String[] names)
+    void addNames( final String[] names )
     {
         if ( names == null )
         {
@@ -88,19 +91,19 @@ public class ResultCollector {
 
         for ( String name : names )
         {
-            addName(name);
+            addName( name );
         }
     }
 
-    void addMethodDesc(final String desc)
+    void addMethodDesc( final String desc )
     {
-        addType(Type.getReturnType(desc));
+        addType( Type.getReturnType( desc ) );
 
         Type[] types = Type.getArgumentTypes( desc );
 
         for ( Type type : types )
         {
-            addType(type);
+            addType( type );
         }
     }
 }
