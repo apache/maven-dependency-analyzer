@@ -32,8 +32,6 @@ public class ResultCollector
 
     private final Set<String> classes = new HashSet<String>();
 
-    ;
-
     public Set<String> getDependencies()
     {
         return classes;
