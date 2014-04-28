@@ -19,28 +19,29 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
 /**
- * 
- * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  */
-@Component( role = ProjectDependencyAnalyzer.class )
+@Component(role = ProjectDependencyAnalyzer.class)
 public class DefaultProjectDependencyAnalyzer
     implements ProjectDependencyAnalyzer
 {
@@ -98,11 +99,9 @@ public class DefaultProjectDependencyAnalyzer
      * This method defines a new way to remove the artifacts by using the
      * conflict id. We don't care about the version here because there can be
      * only 1 for a given artifact anyway.
-     * 
-     * @param start
-     *            initial set
-     * @param remove
-     *            set to exclude
+     *
+     * @param start  initial set
+     * @param remove set to exclude
      * @return set with remove excluded
      */
     private Set<Artifact> removeAll( Set<Artifact> start, Set<Artifact> remove )
@@ -138,18 +137,35 @@ public class DefaultProjectDependencyAnalyzer
     {
         Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<Artifact, Set<String>>();
 
-        @SuppressWarnings( "unchecked" )
-        Set<Artifact> dependencyArtifacts = project.getArtifacts();
+        @SuppressWarnings( "unchecked" ) Set<Artifact> dependencyArtifacts = project.getArtifacts();
 
         for ( Artifact artifact : dependencyArtifacts )
         {
             File file = artifact.getFile();
 
-            if ( file != null && (file.getName().endsWith( ".jar" ) || file.isDirectory()))
+            if ( file != null && ( file.getName().endsWith( ".jar" ) || file.isDirectory() ) )
             {
-                URL url = file.toURI().toURL();
+                //URL url = file.toURI().toURL();
 
-                Set<String> classes = classAnalyzer.analyze( url );
+                JarFile jarFile = new JarFile( file );
+
+                Enumeration<JarEntry> jarEntries = jarFile.entries();
+
+                Set<String> classes = new HashSet<String>();
+
+                while ( jarEntries.hasMoreElements() )
+                {
+                    String entry = jarEntries.nextElement().getName();
+                    if ( entry.endsWith( ".class" ) )
+                    {
+                        String className =  entry.replace( '/', '.' );
+                        className = className.substring( 0, className.length() - ".class".length() );
+                        classes.add( className );
+
+                    }
+                }
+                // to slow
+                //Set<String> classes = classAnalyzer.analyze( url );
 
                 artifactClassMap.put( artifact, classes );
             }
@@ -171,7 +187,7 @@ public class DefaultProjectDependencyAnalyzer
 
         return dependencyClasses;
     }
-    
+
     private Set<String> buildDependencyClasses( String path )
         throws IOException
     {
@@ -179,11 +195,10 @@ public class DefaultProjectDependencyAnalyzer
 
         return dependencyAnalyzer.analyze( url );
     }
-    
+
     private Set<Artifact> buildDeclaredArtifacts( MavenProject project )
     {
-        @SuppressWarnings( "unchecked" )
-        Set<Artifact> declaredArtifacts = project.getDependencyArtifacts();
+        @SuppressWarnings( "unchecked" ) Set<Artifact> declaredArtifacts = project.getDependencyArtifacts();
 
         if ( declaredArtifacts == null )
         {
@@ -192,8 +207,9 @@ public class DefaultProjectDependencyAnalyzer
 
         return declaredArtifacts;
     }
-    
-    private Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap, Set<String> dependencyClasses )
+
+    private Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap,
+                                              Set<String> dependencyClasses )
     {
         Set<Artifact> usedArtifacts = new HashSet<Artifact>();
 
