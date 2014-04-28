@@ -91,6 +91,7 @@ public class DefaultMethodVisitor
          */
     }
 
+    // TODO remove
     public void visitMethodInsn( final int opcode, final String owner, final String name, final String desc )
     {
         resultCollector.addName( owner );
@@ -100,6 +101,13 @@ public class DefaultMethodVisitor
          * method. A direct dependency is only introduced when the code explicitly references the method's types by
          * means of a variable declaration or a type check/cast. Those cases are handled by other visitor callbacks.
          */
+    }
+
+    // for java 8 and default method in interfaces
+    @Override
+    public void visitMethodInsn( int opcode, String owner, String name, String desc, boolean itf )
+    {
+        resultCollector.addName( owner );
     }
 
     public void visitLdcInsn( final Object cst )
@@ -132,6 +140,8 @@ public class DefaultMethodVisitor
             addTypeSignature( signature );
         }
     }
+
+
 
     private void addTypeSignature( final String signature )
     {

@@ -140,4 +140,6 @@ public class DefaultClassVisitor
             new SignatureReader( signature ).acceptType( signatureVisitor );
         }
     }
+
+
 }

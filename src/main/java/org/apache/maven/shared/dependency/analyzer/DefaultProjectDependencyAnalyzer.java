@@ -187,7 +187,7 @@ public class DefaultProjectDependencyAnalyzer
 
         if ( declaredArtifacts == null )
         {
-            declaredArtifacts = Collections.<Artifact>emptySet();
+            declaredArtifacts = Collections.emptySet();
         }
 
         return declaredArtifacts;
