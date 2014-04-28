@@ -460,70 +460,70 @@ public class DependencyVisitorTest
 
     public void testVisitMethodInsn()
     {
-        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()V" );
+        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()V", false );
 
         assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithPrimitiveArgument()
     {
-        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(I)V" );
+        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(I)V", false );
 
         assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithPrimitiveArrayArgument()
     {
-        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "([I)V" );
+        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "([I)V", false );
 
         assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithObjectArgument()
     {
-        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(Lx/y/z;)V" );
+        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(Lx/y/z;)V", false );
 
         assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithObjectArguments()
     {
-        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(Lp/q/r;Lx/y/z;)V" );
+        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(Lp/q/r;Lx/y/z;)V", false );
 
         assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithObjectArrayArgument()
     {
-        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "([Lx/y/z;)V" );
+        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "([Lx/y/z;)V", false );
 
         assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithPrimitiveReturnType()
     {
-        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()I" );
+        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()I", false );
 
         assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithPrimitiveArrayReturnType()
     {
-        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()[I" );
+        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()[I", false );
 
         assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithObjectReturnType()
     {
-        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()Lx/y/z;" );
+        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()Lx/y/z;", false );
 
         assertClasses( "a.b.c" );
     }
 
     public void testVisitMethodInsnWithObjectArrayReturnType()
     {
-        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()[Lx/y/z;" );
+        mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()[Lx/y/z;", false );
 
         assertClasses( "a.b.c" );
     }

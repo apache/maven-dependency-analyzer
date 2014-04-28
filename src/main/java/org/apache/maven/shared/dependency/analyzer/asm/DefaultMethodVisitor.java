@@ -91,19 +91,6 @@ public class DefaultMethodVisitor
          */
     }
 
-    // TODO remove
-    public void visitMethodInsn( final int opcode, final String owner, final String name, final String desc )
-    {
-        resultCollector.addName( owner );
-        /*
-         * NOTE: Merely invoking a method does not impose a direct dependency on its return type nor its parameter
-         * types. For example, the code line <code>bean.method(null);</code> only depends on the owner type of the
-         * method. A direct dependency is only introduced when the code explicitly references the method's types by
-         * means of a variable declaration or a type check/cast. Those cases are handled by other visitor callbacks.
-         */
-    }
-
-    // for java 8 and default method in interfaces
     @Override
     public void visitMethodInsn( int opcode, String owner, String name, String desc, boolean itf )
     {
