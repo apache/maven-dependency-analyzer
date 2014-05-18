@@ -107,9 +107,9 @@ under the License.
         <tbody>
           <tr>
             <td>${project.name} ${project.version} (Source zip)</td>
-            <td><a href="[preferred]maven/plugins/${project.artifactId}-${project.version}-source-release.zip">maven/plugins/${project.artifactId}-${project.version}-source-release.zip</a></td>
-            <td><a href="http://www.apache.org/dist/maven/plugins/${project.artifactId}-${project.version}-source-release.zip.md5">maven/plugins/${project.artifactId}-${project.version}-source-release.zip.md5</a></td>
-            <td><a href="http://www.apache.org/dist/maven/plugins/${project.artifactId}-${project.version}-source-release.zip.asc">maven/plugins/${project.artifactId}-${project.version}-source-release.zip.asc</a></td>
+            <td><a href="[preferred]maven/shared/${project.artifactId}-${project.version}-source-release.zip">maven/shared/${project.artifactId}-${project.version}-source-release.zip</a></td>
+            <td><a href="http://www.apache.org/dist/maven/shared/${project.artifactId}-${project.version}-source-release.zip.md5">maven/shared/${project.artifactId}-${project.version}-source-release.zip.md5</a></td>
+            <td><a href="http://www.apache.org/dist/maven/shared/${project.artifactId}-${project.version}-source-release.zip.asc">maven/shared/${project.artifactId}-${project.version}-source-release.zip.asc</a></td>
           </tr>
         </tbody>
       </table>
@@ -117,7 +117,7 @@ under the License.
 
       <subsection name="Previous Versions">
         
-      <p>Older non-recommended releases can be found on our <a href="http://archive.apache.org/dist/maven/plugins/">archive site</a>.</p>
+      <p>Older non-recommended releases can be found on our <a href="http://archive.apache.org/dist/maven/shared/">archive site</a>.</p>
 
       </subsection>
     </section>
