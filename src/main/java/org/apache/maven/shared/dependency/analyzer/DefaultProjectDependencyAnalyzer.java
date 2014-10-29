@@ -41,7 +41,7 @@ import org.codehaus.plexus.component.annotations.Requirement;
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  */
-@Component(role = ProjectDependencyAnalyzer.class)
+@Component( role = ProjectDependencyAnalyzer.class )
 public class DefaultProjectDependencyAnalyzer
     implements ProjectDependencyAnalyzer
 {
@@ -96,11 +96,10 @@ public class DefaultProjectDependencyAnalyzer
     }
 
     /**
-     * This method defines a new way to remove the artifacts by using the
-     * conflict id. We don't care about the version here because there can be
-     * only 1 for a given artifact anyway.
-     *
-     * @param start  initial set
+     * This method defines a new way to remove the artifacts by using the conflict id. We don't care about the version
+     * here because there can be only 1 for a given artifact anyway.
+     * 
+     * @param start initial set
      * @param remove set to exclude
      * @return set with remove excluded
      */
@@ -137,7 +136,8 @@ public class DefaultProjectDependencyAnalyzer
     {
         Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<Artifact, Set<String>>();
 
-        @SuppressWarnings( "unchecked" ) Set<Artifact> dependencyArtifacts = project.getArtifacts();
+        @SuppressWarnings( "unchecked" )
+        Set<Artifact> dependencyArtifacts = project.getArtifacts();
 
         for ( Artifact artifact : dependencyArtifacts )
         {
@@ -157,10 +157,9 @@ public class DefaultProjectDependencyAnalyzer
                     String entry = jarEntries.nextElement().getName();
                     if ( entry.endsWith( ".class" ) )
                     {
-                        String className =  entry.replace( '/', '.' );
+                        String className = entry.replace( '/', '.' );
                         className = className.substring( 0, className.length() - ".class".length() );
                         classes.add( className );
-
                     }
                 }
 
@@ -202,7 +201,8 @@ public class DefaultProjectDependencyAnalyzer
 
     private Set<Artifact> buildDeclaredArtifacts( MavenProject project )
     {
-        @SuppressWarnings( "unchecked" ) Set<Artifact> declaredArtifacts = project.getDependencyArtifacts();
+        @SuppressWarnings( "unchecked" )
+        Set<Artifact> declaredArtifacts = project.getDependencyArtifacts();
 
         if ( declaredArtifacts == null )
         {
@@ -212,8 +212,7 @@ public class DefaultProjectDependencyAnalyzer
         return declaredArtifacts;
     }
 
-    private Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap,
-                                              Set<String> dependencyClasses )
+    private Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap, Set<String> dependencyClasses )
     {
         Set<Artifact> usedArtifacts = new HashSet<Artifact>();
 
