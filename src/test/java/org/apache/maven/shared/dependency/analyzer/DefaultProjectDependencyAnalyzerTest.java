@@ -213,6 +213,36 @@ public class DefaultProjectDependencyAnalyzerTest
         //assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    public void testMultimoduleProject()
+        throws TestToolsException, ProjectDependencyAnalyzerException
+    {
+        compileProject( "multimoduleProject/pom.xml" );
+
+        // difficult to create multi-module project with Maven 2.x, so here's hacky solution
+        // to get a inter-module dependency
+        MavenProject project = getProject( "multimoduleProject/module2/pom.xml" );
+        @SuppressWarnings( "unchecked" )
+        Set<Artifact> dependencyArtifacts = project.getArtifacts();
+        for ( Artifact artifact : dependencyArtifacts )
+        {
+            if ( artifact.getArtifactId().equals( "test-module1" ) )
+            {
+                File dir = getTestFile( "target/test-classes/", "multimoduleProject/module1/target/classes/" );
+                artifact.setFile( dir );
+            }
+        }
+
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project );
+
+        Artifact junit = createArtifact( "org.apache.maven.its.dependency", "test-module1", "jar", "1.0", "compile" );
+        Set<Artifact> usedDeclaredArtifacts = Collections.singleton( junit );
+
+        ProjectDependencyAnalysis expectedAnalysis =
+            new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null );
+
+        assertEquals( expectedAnalysis, actualAnalysis );
+    }
+
     // private methods --------------------------------------------------------
 
     private void compileProject( String pomPath )

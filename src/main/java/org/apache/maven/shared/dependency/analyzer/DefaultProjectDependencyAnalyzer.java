@@ -19,11 +19,6 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -36,6 +31,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 
 /**
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
@@ -143,10 +143,9 @@ public class DefaultProjectDependencyAnalyzer
         {
             File file = artifact.getFile();
 
-            if ( file != null && ( file.getName().endsWith( ".jar" ) || file.isDirectory() ) )
+            if ( file != null && file.getName().endsWith( ".jar" ) )
             {
-                //URL url = file.toURI().toURL();
-
+                // optimized solution for the jar case
                 JarFile jarFile = new JarFile( file );
 
                 Enumeration<JarEntry> jarEntries = jarFile.entries();
@@ -164,8 +163,13 @@ public class DefaultProjectDependencyAnalyzer
 
                     }
                 }
-                // to slow
-                //Set<String> classes = classAnalyzer.analyze( url );
+
+                artifactClassMap.put( artifact, classes );
+            }
+            else if ( file != null && file.isDirectory() )
+            {
+                URL url = file.toURI().toURL();
+                Set<String> classes = classAnalyzer.analyze( url );
 
                 artifactClassMap.put( artifact, classes );
             }
