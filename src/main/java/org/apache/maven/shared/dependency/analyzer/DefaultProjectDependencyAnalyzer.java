@@ -148,22 +148,35 @@ public class DefaultProjectDependencyAnalyzer
                 // optimized solution for the jar case
                 JarFile jarFile = new JarFile( file );
 
-                Enumeration<JarEntry> jarEntries = jarFile.entries();
-
-                Set<String> classes = new HashSet<String>();
-
-                while ( jarEntries.hasMoreElements() )
+                try
                 {
-                    String entry = jarEntries.nextElement().getName();
-                    if ( entry.endsWith( ".class" ) )
+                    Enumeration<JarEntry> jarEntries = jarFile.entries();
+
+                    Set<String> classes = new HashSet<String>();
+
+                    while ( jarEntries.hasMoreElements() )
                     {
-                        String className = entry.replace( '/', '.' );
-                        className = className.substring( 0, className.length() - ".class".length() );
-                        classes.add( className );
+                        String entry = jarEntries.nextElement().getName();
+                        if ( entry.endsWith( ".class" ) )
+                        {
+                            String className = entry.replace( '/', '.' );
+                            className = className.substring( 0, className.length() - ".class".length() );
+                            classes.add( className );
+                        }
+                    }
+
+                    artifactClassMap.put( artifact, classes );
+                }
+                finally
+                {
+                    try
+                    {
+                        jarFile.close();
+                    }
+                    catch ( IOException ignore )
+                    {
                     }
                 }
-
-                artifactClassMap.put( artifact, classes );
             }
             else if ( file != null && file.isDirectory() )
             {
