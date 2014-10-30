@@ -153,7 +153,7 @@ public class ProjectDependencyAnalysis
             StringBuilder builder = new StringBuilder();
             if ( !forced.isEmpty() )
             {
-                builder.append("not declared: ").append(forced);
+                builder.append( "not declared: " ).append( forced );
             }
             if ( !used.isEmpty() )
             {
@@ -161,7 +161,7 @@ public class ProjectDependencyAnalysis
                 {
                     builder.append( " and " );
                 }
-                builder.append("declared but already detected as used: ").append(used);
+                builder.append( "declared but already detected as used: " ).append( used );
             }
             throw new ProjectDependencyAnalyzerException( "Trying to force use of dependencies which are " + builder );
         }
@@ -214,7 +214,7 @@ public class ProjectDependencyAnalysis
 
         if ( !getUsedUndeclaredArtifacts().isEmpty() )
         {
-            if ( buffer.length() > 0)
+            if ( buffer.length() > 0 )
             {
                 buffer.append( "," );
             }
@@ -224,7 +224,7 @@ public class ProjectDependencyAnalysis
 
         if ( !getUnusedDeclaredArtifacts().isEmpty() )
         {
-            if ( buffer.length() > 0)
+            if ( buffer.length() > 0 )
             {
                 buffer.append( "," );
             }
@@ -244,7 +244,7 @@ public class ProjectDependencyAnalysis
 
     private Set<Artifact> safeCopy( Set<Artifact> set )
     {
-        return ( set == null ) ? Collections.<Artifact> emptySet()
+        return ( set == null ) ? Collections.<Artifact>emptySet()
                         : Collections.unmodifiableSet( new LinkedHashSet<Artifact>( set ) );
     }
 }

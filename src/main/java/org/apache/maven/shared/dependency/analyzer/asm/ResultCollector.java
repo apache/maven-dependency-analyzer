@@ -72,6 +72,8 @@ public class ResultCollector
             case Type.OBJECT:
                 addName( t.getClassName().replace( '.', '/' ) );
                 break;
+
+            default:
         }
     }
 

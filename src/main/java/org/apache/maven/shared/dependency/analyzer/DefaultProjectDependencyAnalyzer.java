@@ -175,6 +175,7 @@ public class DefaultProjectDependencyAnalyzer
                     }
                     catch ( IOException ignore )
                     {
+                        // ingore
                     }
                 }
             }
@@ -225,7 +226,8 @@ public class DefaultProjectDependencyAnalyzer
         return declaredArtifacts;
     }
 
-    private Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap, Set<String> dependencyClasses )
+    private Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap,
+                                              Set<String> dependencyClasses )
     {
         Set<Artifact> usedArtifacts = new HashSet<Artifact>();
 

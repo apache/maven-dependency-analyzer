@@ -47,11 +47,12 @@ public class DefaultClassAnalyzer
         {
             ClassFileVisitorUtils.accept( url, visitor );
         }
-        catch( ZipException e )
+        catch ( ZipException e )
         {
             // since the current ZipException gives no indication what jar file is corrupted
             // we prefer to wrap another ZipException for better error visibility
-            ZipException ze = new ZipException( "Cannot process Jar entry on URL: " + url + " due to " + e.getMessage() );
+            ZipException ze =
+                new ZipException( "Cannot process Jar entry on URL: " + url + " due to " + e.getMessage() );
             ze.initCause( e );
             throw ze;
         }
