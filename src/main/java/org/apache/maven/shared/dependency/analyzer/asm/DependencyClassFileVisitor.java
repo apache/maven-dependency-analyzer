@@ -64,6 +64,12 @@ public class DependencyClassFileVisitor
         {
             ClassReader reader = new ClassReader( in );
 
+            final Set<String> constantPoolClassRefs = ConstantPoolParser.getConstantPoolClassReferences( reader.b );
+            for ( String string : constantPoolClassRefs )
+            {
+                resultCollector.addName( string );
+            }
+
             AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor( resultCollector );
             SignatureVisitor signatureVisitor = new DefaultSignatureVisitor( resultCollector );
             FieldVisitor fieldVisitor = new DefaultFieldVisitor( annotationVisitor, resultCollector );

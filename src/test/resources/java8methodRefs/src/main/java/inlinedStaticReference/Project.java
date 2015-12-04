@@ -1,4 +1,4 @@
-package jarWithTestDependency.project2;
+package inlinedStaticReference;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,25 +19,17 @@ package jarWithTestDependency.project2;
  * under the License.
  */
 
-import jarWithTestDependency.project1.Project1;
+import java.io.File;
+import java.util.function.Function;
 
-/**
- * 
- * 
- * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
- */
-public class Project2
+import org.apache.commons.io.FileUtils;
+
+public class Project
 {
-    // using a constant from JUnit requires junit dependency but is not detected since the constant
-    // value is copied, then nothing can be detected in bytecode
-    // Not the case any more, since we sniff it from the constant pool
-    public final static int STATUS_ERROR = junit.runner.TestRunListener.STATUS_ERROR;
+    public static final Function<String, File> souv = FileUtils::getFile;
 
-    // constructors -----------------------------------------------------------
-
-    public Project2()
-    {
-        Project1 project = new Project1();
+    public Project() {
+        Function<Character, String> fn = org.apache.commons.lang.CharUtils::unicodeEscaped;
     }
+
 }
