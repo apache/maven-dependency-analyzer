@@ -33,8 +33,6 @@ import org.apache.maven.shared.test.plugin.ProjectTool;
 import org.apache.maven.shared.test.plugin.RepositoryTool;
 import org.apache.maven.shared.test.plugin.TestToolsException;
 import org.codehaus.plexus.PlexusTestCase;
-import org.junit.Assume;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
@@ -125,7 +123,8 @@ public class DefaultProjectDependencyAnalyzerTest
         {
             return;
         }
-        // Only visible through constant pool analysis
+
+        // Only visible through constant pool analysis (supported for JDK8+)
         compileProject( "java8methodRefs/pom.xml" );
 
         MavenProject project = getProject( "java8methodRefs/pom.xml" );
@@ -143,7 +142,7 @@ public class DefaultProjectDependencyAnalyzerTest
     }
 
 
-    public void testInlinedStaticReferece()
+    public void testInlinedStaticReference()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
         if ( !SystemUtils.isJavaVersionAtLeast( 180 ) )
@@ -151,7 +150,7 @@ public class DefaultProjectDependencyAnalyzerTest
             return;
         }
 
-        // Only visible through constant pool analysis
+        // Only visible through constant pool analysis (supported for JDK8+)
         compileProject( "inlinedStaticReference/pom.xml" );
 
         MavenProject project = getProject( "inlinedStaticReference/pom.xml" );
@@ -174,9 +173,7 @@ public class DefaultProjectDependencyAnalyzerTest
 
         MavenProject project2 = getProject( "jarWithCompileDependency/project2/pom.xml" );
 
-        if ( project2.getBuild()
-                     .getOutputDirectory()
-                     .contains( "${" ) )
+        if ( project2.getBuild().getOutputDirectory().contains( "${" ) )
         {
             // if Maven version used as dependency is upgraded to >= 2.2.0 
             throw new TestToolsException( "output directory was not interpolated: " + project2.getBuild()
@@ -194,77 +191,43 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
-    public void testJarWithTestDependency()
+    public void testForceDeclaredDependenciesUsage()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        if ( SystemUtils.isJavaVersionAtLeast( 180 ) )
-        {
-            return;
-        }
-
-        Assume.assumeTrue( !SystemUtils.isJavaVersionAtLeast( 180 ) );
-
         compileProject( "jarWithTestDependency/pom.xml" );
 
         MavenProject project2 = getProject( "jarWithTestDependency/project2/pom.xml" );
 
-        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
-
-        Artifact project1 =
-            createArtifact( "org.apache.maven.shared.dependency-analyzer.tests", "jarWithTestDependency1", "jar", "1.0",
-                            "test" );
-        Set<Artifact> usedDeclaredArtifacts = Collections.singleton( project1 );
-
-        Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
-        Set<Artifact> unusedDeclaredArtifacts = Collections.singleton( junit );
-
-        ProjectDependencyAnalysis expectedAnalysis =
-            new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, unusedDeclaredArtifacts );
-
-        assertEquals( expectedAnalysis, actualAnalysis );
-
-        // MSHARED-253: force used dependency (which is actually used but not detected)
-        ProjectDependencyAnalysis forcedAnalysis =
-            actualAnalysis.forceDeclaredDependenciesUsage( new String[]{ "junit:junit" } );
-
-        usedDeclaredArtifacts = new HashSet<Artifact>( Arrays.asList( project1, junit ) );
-        expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null );
-
-        assertEquals( expectedAnalysis, forcedAnalysis );
+        ProjectDependencyAnalysis analysis = analyzer.analyze( project2 );
 
         try
         {
-            forcedAnalysis.forceDeclaredDependenciesUsage( new String[]{ "junit:junit" } );
+            analysis.forceDeclaredDependenciesUsage( new String[] {
+                "org.apache.maven.shared.dependency-analyzer.tests:jarWithTestDependency1" } );
             fail( "failure expected since junit dependency is declared-used" );
         }
         catch ( ProjectDependencyAnalyzerException pdae )
         {
-            assertTrue( pdae.getMessage()
-                            .contains( "Trying to force use of dependencies which are "
-                                           + "declared but already detected as used: [junit:junit]" ) );
+            assertTrue( pdae.getMessage().contains( "Trying to force use of dependencies which are "
+                + "declared but already detected as used: "
+                + "[org.apache.maven.shared.dependency-analyzer.tests:jarWithTestDependency1]" ) );
         }
 
         try
         {
-            forcedAnalysis.forceDeclaredDependenciesUsage( new String[]{ "undefined:undefined" } );
+            analysis.forceDeclaredDependenciesUsage( new String[]{ "undefined:undefined" } );
             fail( "failure expected since undefined dependency is not declared" );
         }
         catch ( ProjectDependencyAnalyzerException pdae )
         {
-            assertTrue( pdae.getMessage()
-                            .contains( "Trying to force use of dependencies which are "
-                                           + "not declared: [undefined:undefined]" ) );
+            assertTrue( pdae.getMessage().contains( "Trying to force use of dependencies which are "
+                + "not declared: [undefined:undefined]" ) );
         }
     }
 
-    public void testJarWithTestDependencyJDK8()
+    public void testJarWithTestDependency()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        if ( !SystemUtils.isJavaVersionAtLeast( 180 ) )
-        {
-            return;
-        }
-
         compileProject( "jarWithTestDependency/pom.xml" );
 
         MavenProject project2 = getProject( "jarWithTestDependency/project2/pom.xml" );
@@ -275,10 +238,20 @@ public class DefaultProjectDependencyAnalyzerTest
             createArtifact( "org.apache.maven.shared.dependency-analyzer.tests", "jarWithTestDependency1", "jar", "1.0",
                             "test" );
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
-        Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>( Arrays.asList( project1, junit ) );
 
-        ProjectDependencyAnalysis expectedAnalysis =
-            new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, new HashSet<Artifact>() );
+        ProjectDependencyAnalysis expectedAnalysis;
+        if ( SystemUtils.isJavaVersionAtLeast( 180 ) )
+        {
+            Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>( Arrays.asList( project1, junit ) );
+            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null );
+        }
+        else
+        {
+            // With JDK 7 and earlier, not all deps are identified correctly
+            Set<Artifact> usedDeclaredArtifacts = Collections.singleton( project1 );
+            Set<Artifact> unusedDeclaredArtifacts = Collections.singleton( junit );
+            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, unusedDeclaredArtifacts );
+        }
 
         assertEquals( expectedAnalysis, actualAnalysis );
     }
