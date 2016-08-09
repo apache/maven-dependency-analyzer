@@ -74,10 +74,10 @@ public class ConstantPoolParser
 
     static Set<String> getConstantPoolClassReferences( byte[] b )
     {
-        return parseConstantPoolClassRefereces( ByteBuffer.wrap( b ) );
+        return parseConstantPoolClassReferences( ByteBuffer.wrap( b ) );
     }
 
-    static Set<String> parseConstantPoolClassRefereces( ByteBuffer buf )
+    static Set<String> parseConstantPoolClassReferences( ByteBuffer buf )
     {
         if ( buf.order( ByteOrder.BIG_ENDIAN )
                 .getInt() != HEAD )
