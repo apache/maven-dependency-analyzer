@@ -117,9 +117,11 @@ public class ConstantPoolParser
                     break;
                 case CONSTANT_DOUBLE:
                     buf.getDouble();
+                    ix++;
                     break;
                 case CONSTANT_LONG:
                     buf.getLong();
+                    ix++;
                     break;
                 case CONSTANT_METHODHANDLE:
                     buf.get();

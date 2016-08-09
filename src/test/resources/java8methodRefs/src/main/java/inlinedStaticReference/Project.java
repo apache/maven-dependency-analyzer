@@ -26,6 +26,8 @@ import org.apache.commons.io.FileUtils;
 
 public class Project
 {
+    public static final long LONG_CONSTANT = 123L;
+    public static final double DOUBLE_CONSTANT = 123.0;
     public static final Function<String, File> souv = FileUtils::getFile;
 
     public Project() {
