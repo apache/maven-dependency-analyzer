@@ -129,9 +129,7 @@ public class DefaultProjectDependencyAnalyzer
         return results;
     }
 
-    // private methods --------------------------------------------------------
-
-    private Map<Artifact, Set<String>> buildArtifactClassMap( MavenProject project )
+    protected Map<Artifact, Set<String>> buildArtifactClassMap( MavenProject project )
         throws IOException
     {
         Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<Artifact, Set<String>>();
@@ -213,7 +211,7 @@ public class DefaultProjectDependencyAnalyzer
         return dependencyAnalyzer.analyze( url );
     }
 
-    private Set<Artifact> buildDeclaredArtifacts( MavenProject project )
+    protected Set<Artifact> buildDeclaredArtifacts( MavenProject project )
     {
         @SuppressWarnings( "unchecked" )
         Set<Artifact> declaredArtifacts = project.getDependencyArtifacts();
@@ -226,7 +224,7 @@ public class DefaultProjectDependencyAnalyzer
         return declaredArtifacts;
     }
 
-    private Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap,
+    protected Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap,
                                               Set<String> dependencyClasses )
     {
         Set<Artifact> usedArtifacts = new HashSet<Artifact>();
