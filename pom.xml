@@ -30,7 +30,7 @@
 
   <artifactId>maven-dependency-analyzer</artifactId>
   <packaging>jar</packaging>
-  <version>1.7-SNAPSHOT</version>
+  <version>1.7</version>
 
   <name>Apache Maven Dependency Analyzer</name>
   <description>
@@ -38,9 +38,9 @@
   </description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-analyzer</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-analyzer</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/shared/trunk/maven-dependency-analyzer</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/shared/tags/maven-dependency-analyzer-1.7</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/shared/tags/maven-dependency-analyzer-1.7</developerConnection>
+    <url>http://svn.apache.org/viewvc/maven/shared/tags/maven-dependency-analyzer-1.7</url>
   </scm>
   <issueManagement>
     <system>jira</system>
