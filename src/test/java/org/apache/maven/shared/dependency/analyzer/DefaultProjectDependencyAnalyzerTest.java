@@ -1,5 +1,16 @@
 package org.apache.maven.shared.dependency.analyzer;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
+import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.SystemUtils;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,7 +30,6 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import org.apache.commons.lang.SystemUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.ArtifactHandler;
@@ -33,13 +43,6 @@ import org.apache.maven.shared.test.plugin.ProjectTool;
 import org.apache.maven.shared.test.plugin.RepositoryTool;
 import org.apache.maven.shared.test.plugin.TestToolsException;
 import org.codehaus.plexus.PlexusTestCase;
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * Tests <code>DefaultProjectDependencyAnalyzer</code>.
@@ -78,8 +81,7 @@ public class DefaultProjectDependencyAnalyzerTest
         if ( localRepo == null )
         {
             RepositoryTool repositoryTool = (RepositoryTool) lookup( RepositoryTool.ROLE );
-            localRepo = repositoryTool.findLocalRepositoryDirectory()
-                                      .getAbsoluteFile();
+            localRepo = repositoryTool.findLocalRepositoryDirectory();
             System.out.println( "Local repository: " + localRepo );
         }
 
@@ -119,7 +121,7 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testJava8methodRefs()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        if ( !SystemUtils.isJavaVersionAtLeast( 180 ) )
+        if ( !SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
         {
             return;
         }
@@ -141,11 +143,10 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
-
     public void testInlinedStaticReference()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        if ( !SystemUtils.isJavaVersionAtLeast( 180 ) )
+        if ( !SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
         {
             return;
         }
@@ -175,16 +176,15 @@ public class DefaultProjectDependencyAnalyzerTest
 
         if ( project2.getBuild().getOutputDirectory().contains( "${" ) )
         {
-            // if Maven version used as dependency is upgraded to >= 2.2.0 
-            throw new TestToolsException( "output directory was not interpolated: " + project2.getBuild()
-                                                                                              .getOutputDirectory() );
+            // if Maven version used as dependency is upgraded to >= 2.2.0
+            throw new TestToolsException( "output directory was not interpolated: "
+                + project2.getBuild().getOutputDirectory() );
         }
 
         ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
 
-        Artifact project1 =
-            createArtifact( "org.apache.maven.shared.dependency-analyzer.tests", "jarWithCompileDependency1", "jar",
-                            "1.0", "compile" );
+        Artifact project1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
+                                            "jarWithCompileDependency1", "jar", "1.0", "compile" );
         Set<Artifact> usedDeclaredArtifacts = Collections.singleton( project1 );
         ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null );
 
@@ -215,7 +215,7 @@ public class DefaultProjectDependencyAnalyzerTest
 
         try
         {
-            analysis.forceDeclaredDependenciesUsage( new String[]{ "undefined:undefined" } );
+            analysis.forceDeclaredDependenciesUsage( new String[] { "undefined:undefined" } );
             fail( "failure expected since undefined dependency is not declared" );
         }
         catch ( ProjectDependencyAnalyzerException pdae )
@@ -234,13 +234,12 @@ public class DefaultProjectDependencyAnalyzerTest
 
         ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
 
-        Artifact project1 =
-            createArtifact( "org.apache.maven.shared.dependency-analyzer.tests", "jarWithTestDependency1", "jar", "1.0",
-                            "test" );
+        Artifact project1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
+                                            "jarWithTestDependency1", "jar", "1.0", "test" );
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
 
         ProjectDependencyAnalysis expectedAnalysis;
-        if ( SystemUtils.isJavaVersionAtLeast( 180 ) )
+        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
         {
             Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>( Arrays.asList( project1, junit ) );
             expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null );
@@ -271,7 +270,7 @@ public class DefaultProjectDependencyAnalyzerTest
         ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null );
 
         // MSHARED-47: usedUndeclaredArtifacts=[xml-apis:xml-apis:jar:1.0.b2:compile]
-        //assertEquals( expectedAnalysis, actualAnalysis );
+        // assertEquals( expectedAnalysis, actualAnalysis );
     }
 
     public void testMultimoduleProject()
@@ -282,11 +281,11 @@ public class DefaultProjectDependencyAnalyzerTest
         // difficult to create multi-module project with Maven 2.x, so here's hacky solution
         // to get a inter-module dependency
         MavenProject project = getProject( "multimoduleProject/module2/pom.xml" );
-        @SuppressWarnings( "unchecked" ) Set<Artifact> dependencyArtifacts = project.getArtifacts();
+        @SuppressWarnings( "unchecked" )
+        Set<Artifact> dependencyArtifacts = project.getArtifacts();
         for ( Artifact artifact : dependencyArtifacts )
         {
-            if ( artifact.getArtifactId()
-                         .equals( "test-module1" ) )
+            if ( artifact.getArtifactId().equals( "test-module1" ) )
             {
                 File dir = getTestFile( "target/test-classes/", "multimoduleProject/module1/target/classes/" );
                 artifact.setFile( dir );
@@ -310,6 +309,12 @@ public class DefaultProjectDependencyAnalyzerTest
     {
         File pom = getTestFile( "target/test-classes/", pomPath );
         Properties properties = new Properties();
+        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_9 ) )
+        {
+          properties.put( "maven.compiler.source", "1.6" );   
+          properties.put( "maven.compiler.target", "1.6" );   
+        }
+
         List<String> goals = Arrays.asList( "clean", "install" );
         File log = new File( pom.getParentFile(), "build.log" );
 
