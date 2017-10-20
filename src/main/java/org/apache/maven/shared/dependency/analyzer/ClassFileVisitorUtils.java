@@ -102,7 +102,8 @@ public final class ClassFileVisitorUtils
             {
                 String name = entry.getName();
 
-                if ( name.endsWith( ".class" ) )
+                // ignore files like package-info.class and module-info.class
+                if ( name.endsWith( ".class" ) && name.indexOf( '-' ) == -1 )
                 {
                     visitClass( name, in, visitor );
                 }
