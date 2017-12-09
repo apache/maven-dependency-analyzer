@@ -38,14 +38,19 @@
   </description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-analyzer</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-analyzer</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/shared/trunk/maven-dependency-analyzer</url>
+    <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-analyzer.git</connection>
+    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-analyzer.git</developerConnection>
+    <url>https://github.com/apache/maven-dependency-analyzer/tree/${project.scm.tag}</url>
+    <tag>HEAD</tag>
   </scm>
   <issueManagement>
     <system>jira</system>
     <url>https://issues.apache.org/jira/browse/MSHARED/component/12326428</url>
   </issueManagement>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>https://builds.apache.org/job/maven-box/job/maven-dependency-analyzer/</url>
+  </ciManagement>
   <distributionManagement>
     <site>
       <id>apache.website</id>
