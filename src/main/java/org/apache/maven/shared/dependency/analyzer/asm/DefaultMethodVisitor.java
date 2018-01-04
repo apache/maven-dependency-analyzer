@@ -24,6 +24,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.TypePath;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 
@@ -60,6 +61,13 @@ public class DefaultMethodVisitor
         return annotationVisitor;
     }
 
+    @Override
+    public AnnotationVisitor visitTypeAnnotation( int typeRef, TypePath typePath, String desc, boolean visible )
+    {
+        resultCollector.addDesc( desc );
+
+        return annotationVisitor;
+    }
 
     public AnnotationVisitor visitParameterAnnotation( final int parameter, final String desc, final boolean visible )
     {

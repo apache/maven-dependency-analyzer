@@ -302,17 +302,47 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    public void testTypeUseAnnotationDependency()
+            throws TestToolsException, ProjectDependencyAnalyzerException
+    {
+        // java.lang.annotation.ElementType.TYPE_USE introduced with Java 1.8
+        if ( !SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        {
+            return;
+        }
+
+        Properties properties = new Properties();
+        properties.put( "maven.compiler.source", "1.8" );
+        properties.put( "maven.compiler.target", "1.8" );
+        compileProject( "typeUseAnnotationDependency/pom.xml", properties);
+
+        MavenProject usage = getProject( "typeUseAnnotationDependency/usage/pom.xml" );
+
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( usage );
+
+        Artifact annotation = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
+                                            "typeUseAnnotationDependencyAnnotation", "jar", "1.0", "compile" );
+        Set<Artifact> usedDeclaredArtifacts = Collections.singleton( annotation );
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis(usedDeclaredArtifacts, null, null);
+
+        assertEquals( expectedAnalysis, actualAnalysis );
+    }
+
     // private methods --------------------------------------------------------
 
     private void compileProject( String pomPath )
         throws TestToolsException
     {
+        compileProject( pomPath, new Properties() );
+    }
+
+    private void compileProject(String pomPath, Properties properties) throws TestToolsException {
         File pom = getTestFile( "target/test-classes/", pomPath );
-        Properties properties = new Properties();
-        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_9 ) )
+        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_9 )
+             && !properties.containsKey( "maven.compiler.source" ) )
         {
-          properties.put( "maven.compiler.source", "1.6" );   
-          properties.put( "maven.compiler.target", "1.6" );   
+          properties.put( "maven.compiler.source", "1.6" );
+          properties.put( "maven.compiler.target", "1.6" );
         }
 
         List<String> goals = Arrays.asList( "clean", "install" );
