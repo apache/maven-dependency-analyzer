@@ -43,7 +43,6 @@ import org.apache.maven.shared.test.plugin.ProjectTool;
 import org.apache.maven.shared.test.plugin.RepositoryTool;
 import org.apache.maven.shared.test.plugin.TestToolsException;
 import org.codehaus.plexus.PlexusTestCase;
-import org.junit.Assume;
 
 /**
  * Tests <code>DefaultProjectDependencyAnalyzer</code>.
@@ -307,7 +306,10 @@ public class DefaultProjectDependencyAnalyzerTest
             throws TestToolsException, ProjectDependencyAnalyzerException
     {
         // java.lang.annotation.ElementType.TYPE_USE introduced with Java 1.8
-        Assume.assumeTrue(SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_1_8));
+        if ( !SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        {
+            return;
+        }
 
         Properties properties = new Properties();
         properties.put( "maven.compiler.source", "1.8" );
