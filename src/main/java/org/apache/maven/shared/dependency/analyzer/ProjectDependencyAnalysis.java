@@ -63,6 +63,7 @@ public class ProjectDependencyAnalysis
 
     /**
      * Used and declared artifacts.
+     * @return {@link Artifact}
      */
     public Set<Artifact> getUsedDeclaredArtifacts()
     {
@@ -71,6 +72,7 @@ public class ProjectDependencyAnalysis
 
     /**
      * Used but not declared artifacts.
+     * @return {@link Artifact}
      */
     public Set<Artifact> getUsedUndeclaredArtifacts()
     {
@@ -79,6 +81,7 @@ public class ProjectDependencyAnalysis
 
     /**
      * Unused but declared artifacts.
+     * @return {@link Artifact}
      */
     public Set<Artifact> getUnusedDeclaredArtifacts()
     {

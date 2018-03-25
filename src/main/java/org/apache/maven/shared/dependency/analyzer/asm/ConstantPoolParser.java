@@ -35,8 +35,8 @@ import java.util.Set;
  * 
  * Constant pool types:
  * 
- * @see https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.4
- * @see https://docs.oracle.com/javase/specs/jvms/se10/html/jvms-4.html#jvms-4.4
+ * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.4">JVM 9 Sepc</a>
+ * @see <a href="https://docs.oracle.com/javase/specs/jvms/se10/html/jvms-4.html#jvms-4.4">JVM 10 Sepc</a>
  * 
  */
 public class ConstantPoolParser
