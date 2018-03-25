@@ -32,6 +32,12 @@ import java.util.Set;
  * ASM does not support.
  *
  * Adapted from http://stackoverflow.com/a/32278587/23691
+ * 
+ * Constant pool types:
+ * 
+ * @see https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.4
+ * @see https://docs.oracle.com/javase/specs/jvms/se10/html/jvms-4.html#jvms-4.4
+ * 
  */
 public class ConstantPoolParser
 {
@@ -65,6 +71,10 @@ public class ConstantPoolParser
     public static final byte CONSTANT_METHOD_TYPE = 16;
 
     public static final byte CONSTANT_INVOKE_DYNAMIC = 18;
+    
+    public static final byte CONSTANT_MODULE = 19;
+
+    public static final byte CONSTANT_PACKAGE = 20;
 
     private static final int OXF0 = 0xf0;
 
@@ -93,7 +103,7 @@ public class ConstantPoolParser
             switch ( tag )
             {
                 default:
-                    throw new RuntimeException( "Unknown constant pool type" );
+                    throw new RuntimeException( "Unknown constant pool type '" + tag + "'" );
                 case CONSTANT_UTF8:
                     stringConstants.put( ix, decodeString( buf ) );
                     continue;
@@ -131,6 +141,12 @@ public class ConstantPoolParser
                     buf.getChar();
                     buf.getChar();
                     break;
+                case CONSTANT_MODULE:
+                    buf.getChar();
+                    break;
+                case CONSTANT_PACKAGE:
+                    buf.getChar();
+                    break;  
             }
         }
         Set<String> result = new HashSet<String>();
