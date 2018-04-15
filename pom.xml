@@ -60,6 +60,7 @@
 
   <properties>
     <mavenVersion>2.0.5</mavenVersion>
+    <javaVersion>7</javaVersion>
   </properties>
 
   <dependencyManagement>
@@ -75,12 +76,12 @@
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>6.1</version>
+      <version>6.1.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.5</version>
+      <version>3.7</version>
       <scope>test</scope>
     </dependency>
     <dependency>
