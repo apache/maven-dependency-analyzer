@@ -39,7 +39,7 @@ public class DefaultFieldVisitor
 
     public DefaultFieldVisitor( AnnotationVisitor annotationVisitor, ResultCollector resultCollector )
     {
-        super( Opcodes.ASM6 );
+        super( Opcodes.ASM7 );
         this.annotationVisitor = annotationVisitor;
         this.resultCollector = resultCollector;
     }
