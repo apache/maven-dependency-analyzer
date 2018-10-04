@@ -123,6 +123,16 @@ public class DefaultClassVisitor
         return methodVisitor;
     }
 
+    public void visitNestHost( final String nestHost )
+    {
+        resultCollector.addName( nestHost );
+    }
+
+    public void visitNestMember( final String nestMember )
+    {
+        resultCollector.addName( nestMember );
+    }
+
     // private methods --------------------------------------------------------
 
     private void addSignature( final String signature )
