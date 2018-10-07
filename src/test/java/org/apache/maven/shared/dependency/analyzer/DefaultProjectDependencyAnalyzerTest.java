@@ -344,6 +344,12 @@ public class DefaultProjectDependencyAnalyzerTest
           properties.put( "maven.compiler.source", "1.6" );
           properties.put( "maven.compiler.target", "1.6" );
         }
+        
+        String httpsProtocols = System.getProperty( "https.protocols" );
+        if ( httpsProtocols != null )
+        {
+            properties.put( "https.protocols", httpsProtocols );
+        }
 
         List<String> goals = Arrays.asList( "clean", "install" );
         File log = new File( pom.getParentFile(), "build.log" );
