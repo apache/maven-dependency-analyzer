@@ -36,7 +36,7 @@ public class DefaultSignatureVisitor
 
     public DefaultSignatureVisitor( ResultCollector resultCollector )
     {
-        super( Opcodes.ASM6 );
+        super( Opcodes.ASM7 );
         this.resultCollector = resultCollector;
     }
 

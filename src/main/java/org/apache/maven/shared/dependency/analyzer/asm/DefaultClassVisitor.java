@@ -57,7 +57,7 @@ public class DefaultClassVisitor
                                 FieldVisitor fieldVisitor, MethodVisitor methodVisitor,
                                 ResultCollector resultCollector )
     {
-        super( Opcodes.ASM6 );
+        super( Opcodes.ASM7 );
         this.signatureVisitor = signatureVisitor;
         this.annotationVisitor = annotationVisitor;
         this.fieldVisitor = fieldVisitor;
@@ -121,6 +121,16 @@ public class DefaultClassVisitor
         resultCollector.addNames( exceptions );
 
         return methodVisitor;
+    }
+
+    public void visitNestHost( final String nestHost )
+    {
+        resultCollector.addName( nestHost );
+    }
+
+    public void visitNestMember( final String nestMember )
+    {
+        resultCollector.addName( nestMember );
     }
 
     // private methods --------------------------------------------------------
