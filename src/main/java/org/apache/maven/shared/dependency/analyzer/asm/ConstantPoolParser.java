@@ -19,6 +19,7 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  * under the License.
  */
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collections;
@@ -159,8 +160,10 @@ public class ConstantPoolParser
 
     private static String decodeString( ByteBuffer buf )
     {
-        int size = buf.getChar(), oldLimit = buf.limit();
-        buf.limit( buf.position() + size );
+        int size = buf.getChar();
+        // Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
+        int oldLimit = ( (Buffer) buf ).limit();
+        ( (Buffer) buf ).limit( buf.position() + size );
         StringBuilder sb = new StringBuilder( size + ( size >> 1 ) + 16 );
         while ( buf.hasRemaining() )
         {
@@ -183,7 +186,7 @@ public class ConstantPoolParser
                 }
             }
         }
-        buf.limit( oldLimit );
+        ( (Buffer) buf ).limit( oldLimit );
         return sb.toString();
     }
 }
