@@ -26,14 +26,15 @@
 >
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
-	<artifactId>typeUseAnnotationDependency</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>typeUseAnnotationDependencyUsageLocalVar</artifactId>
+	<packaging>jar</packaging>
 	<version>1.0</version>
-	
-	<modules>
-		<module>annotation</module>
-		<module>usage</module>
-		<module>usageLocalVar</module>
-	</modules>
-	
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
+			<artifactId>typeUseAnnotationDependencyAnnotation</artifactId>
+			<version>1.0</version>
+		</dependency>
+	</dependencies>
 </project>
