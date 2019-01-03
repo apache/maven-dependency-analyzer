@@ -76,6 +76,15 @@ public class DefaultMethodVisitor
         return annotationVisitor;
     }
 
+    @Override
+    public AnnotationVisitor visitLocalVariableAnnotation( int typeRef, TypePath typePath, Label[] start, Label[] end,
+                                                           int[] index, String desc, boolean visible )
+    {
+        resultCollector.addDesc( desc );
+
+        return annotationVisitor;
+    }
+
     public void visitTypeInsn( final int opcode, final String desc )
     {
         if ( desc.charAt( 0 ) == '[' )
