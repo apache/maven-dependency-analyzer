@@ -341,8 +341,8 @@ public class DefaultProjectDependencyAnalyzerTest
         if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_9 )
              && !properties.containsKey( "maven.compiler.source" ) )
         {
-          properties.put( "maven.compiler.source", "1.6" );
-          properties.put( "maven.compiler.target", "1.6" );
+          properties.put( "maven.compiler.source", "1.7" );
+          properties.put( "maven.compiler.target", "1.7" );
         }
         
         String httpsProtocols = System.getProperty( "https.protocols" );
