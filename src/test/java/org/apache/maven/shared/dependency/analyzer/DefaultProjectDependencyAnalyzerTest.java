@@ -354,6 +354,23 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    public void testJarWithClassInUnnamedPackage()
+            throws TestToolsException, ProjectDependencyAnalyzerException
+    {
+        compileProject( "jarWithClassInUnnamedPackage/pom.xml" );
+
+        MavenProject project2 = getProject( "jarWithClassInUnnamedPackage/project2/pom.xml" );
+
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
+
+        Artifact project1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
+                                            "jarWithClassInUnnamedPackage1", "jar", "1.0", "compile" );
+        Set<Artifact> unusedDeclaredArtifacts = Collections.singleton( project1 );
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( null, null, unusedDeclaredArtifacts );
+
+        assertEquals( expectedAnalysis, actualAnalysis );
+    }
+
     // private methods --------------------------------------------------------
 
     private void compileProject( String pomPath )
