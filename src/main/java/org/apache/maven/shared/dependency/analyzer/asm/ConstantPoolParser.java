@@ -117,37 +117,34 @@ public class ConstantPoolParser
                 case CONSTANT_METHODREF:
                 case CONSTANT_INTERFACEMETHODREF:
                 case CONSTANT_NAME_AND_TYPE:
-                    buf.getChar();
-                    buf.getChar();
+                    consumeReference( buf );
                     break;
                 case CONSTANT_INTEGER:
-                    buf.getInt();
+                    consumeInt( buf );
                     break;
                 case CONSTANT_FLOAT:
-                    buf.getFloat();
+                    consumeFloat( buf );
                     break;
                 case CONSTANT_DOUBLE:
-                    buf.getDouble();
+                    consumeDouble( buf );
                     ix++;
                     break;
                 case CONSTANT_LONG:
-                    buf.getLong();
+                    consumeLong( buf );
                     ix++;
                     break;
                 case CONSTANT_METHODHANDLE:
-                    buf.get();
-                    buf.getChar();
+                    consumeMethodHandle( buf );
                     break;
                 case CONSTANT_INVOKE_DYNAMIC:
-                    buf.getChar();
-                    buf.getChar();
+                    consumeInvokeDynamic( buf );
                     break;
                 case CONSTANT_MODULE:
-                    buf.getChar();
+                    consumeModule( buf );
                     break;
                 case CONSTANT_PACKAGE:
-                    buf.getChar();
-                    break;  
+                    consumePackage( buf );
+                    break;
             }
         }
         Set<String> result = new HashSet<String>();
@@ -188,5 +185,53 @@ public class ConstantPoolParser
         }
         ( (Buffer) buf ).limit( oldLimit );
         return sb.toString();
+    }
+
+    private static void consumeReference( ByteBuffer buf )
+    {
+        buf.getChar();
+        buf.getChar();
+    }
+
+    private static void consumeInt( ByteBuffer buf )
+    {
+        buf.getInt();
+    }
+
+    private static void consumeFloat( ByteBuffer buf )
+    {
+        buf.getFloat();
+    }
+
+    private static void consumeDouble( ByteBuffer buf )
+    {
+        buf.getDouble();
+    }
+
+    private static void consumeLong( ByteBuffer buf )
+    {
+        buf.getLong();
+    }
+
+    private static void consumeMethodHandle( ByteBuffer buf )
+    {
+        buf.get();
+        buf.getChar();
+    }
+
+    private static void consumeInvokeDynamic( ByteBuffer buf )
+    {
+        buf.getChar();
+        buf.getChar();
+    }
+
+    private static void consumeModule( ByteBuffer buf )
+    {
+        buf.getChar();
+    }
+
+    private static void consumePackage( ByteBuffer buf )
+    {
+        buf.getChar();
     }
 }
