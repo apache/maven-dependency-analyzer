@@ -126,7 +126,6 @@ public class ConstantPoolParser
                     stringConstants.put( ix, decodeString( buf ) );
                     continue;
                 case CONSTANT_CLASS:
-                case CONSTANT_STRING:
                 case CONSTANT_METHOD_TYPE:
                     classes.add( (int) buf.getChar() );
                     break;
@@ -149,6 +148,9 @@ public class ConstantPoolParser
                 case CONSTANT_LONG:
                     consumeLong( buf );
                     ix++;
+                    break;
+                case CONSTANT_STRING:
+                    consumeString( buf );
                     break;
                 case CONSTANT_METHODHANDLE:
                     consumeMethodHandle( buf );
@@ -241,6 +243,11 @@ public class ConstantPoolParser
     private static void consumeLong( ByteBuffer buf )
     {
         buf.getLong();
+    }
+
+    private static void consumeString( ByteBuffer buf )
+    {
+        buf.getChar();
     }
 
     private static void consumeMethodHandle( ByteBuffer buf )
