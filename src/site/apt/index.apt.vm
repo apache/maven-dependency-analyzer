@@ -30,11 +30,12 @@ ${project.name}
 
   Analyzes the dependencies of a project for undeclared or unused artifacts.
 
-  <<Warning>>: Analysis is not done at source but bytecode level, then some cases are not detected
-  (constants, annotations with source-only retention, links in javadoc) which can lead to wrong result
-  if they are the only use of a dependency.
+  <<Warning>>: Because analysis is done on the bytecode rather than the source,
+  some cases are not detected including constants, annotations with source-only retention, 
+  and links in javadoc. This can lead to incorrect results when these are the only uses
+  of a dependency.
 
-  Main component is <<<ProjectDependencyAnalyzer>>>
+  The main component is <<<ProjectDependencyAnalyzer>>>
   ({{{./apidocs/org/apache/maven/shared/dependency/analyzer/ProjectDependencyAnalyzer.html}javadoc}}), which uses
   <<<ClassAnalyzer>>>
   ({{{./apidocs/org/apache/maven/shared/dependency/analyzer/ClassAnalyzer.html}javadoc}})
