@@ -32,7 +32,7 @@ ${project.name}
 
   <<Warning>>: Because analysis is done on the bytecode rather than the source,
   some cases are not detected including constants, annotations with source-only retention, 
-  and links in javadoc. This can lead to incorrect results when these are the only uses
+  and links in Javadoc. This can lead to incorrect results when these are the only uses
   of a dependency.
 
   The main component is <<<ProjectDependencyAnalyzer>>>
