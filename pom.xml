@@ -61,6 +61,7 @@
   <properties>
     <mavenVersion>2.0.5</mavenVersion>
     <javaVersion>7</javaVersion>
+    <project.build.outputTimestamp>2020-04-04T09:03:59Z</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
@@ -164,7 +165,6 @@
       <plugin>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-component-metadata</artifactId>
-        <version>2.1.0</version>
         <executions>
           <execution>
             <goals>
