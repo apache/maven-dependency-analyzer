@@ -19,7 +19,7 @@ Contributing to [Apache Maven Dependency Analyzer](https://maven.apache.org/shar
 
 [![ASF Jira](https://img.shields.io/endpoint?url=https%3A%2F%2Fmaven.apache.org%2Fbadges%2Fasf_jira-MSHARED.json)][jira]
 [![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)][license]
-[![Maven Central](https://img.shields.io/maven-central/v/org.apache.maven.shared/maven-dependency-analyzer.svg?label=Maven%20Central)](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.apache.maven.shared%22%20AND%20a%3A%22maven-dependency-analyzer%22)
+[![Maven Central](https://img.shields.io/maven-central/v/org.apache.maven.shared/maven-dependency-analyzer.svg?label=Maven%20Central)](https://search.maven.org/artifact/org.apache.maven.shared/maven-dependency-analyzer)
 [![Jenkins Status](https://img.shields.io/jenkins/s/https/builds.apache.org/job/maven-box/job/maven-dependency-analyzer/job/master.svg)][build]
 [![Jenkins tests](https://img.shields.io/jenkins/t/https/builds.apache.org/job/maven-box/job/maven-dependency-analyzer/job/master.svg)][test-results]
 
