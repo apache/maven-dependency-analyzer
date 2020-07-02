@@ -57,7 +57,7 @@ public class DefaultClassVisitor
                                 FieldVisitor fieldVisitor, MethodVisitor methodVisitor,
                                 ResultCollector resultCollector )
     {
-        super( Opcodes.ASM7 );
+        super( Opcodes.ASM8 );
         this.signatureVisitor = signatureVisitor;
         this.annotationVisitor = annotationVisitor;
         this.fieldVisitor = fieldVisitor;
