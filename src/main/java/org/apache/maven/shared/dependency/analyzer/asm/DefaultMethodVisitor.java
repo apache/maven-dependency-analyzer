@@ -48,7 +48,7 @@ public class DefaultMethodVisitor
     public DefaultMethodVisitor( AnnotationVisitor annotationVisitor, SignatureVisitor signatureVisitor,
                                  ResultCollector resultCollector )
     {
-        super( Opcodes.ASM7 );
+        super( Opcodes.ASM8 );
         this.annotationVisitor = annotationVisitor;
         this.signatureVisitor = signatureVisitor;
         this.resultCollector = resultCollector;
