@@ -281,14 +281,14 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testJarWithNonTestScopedTestDependency()
             throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        compileProject( "jarWithTestDependency2/pom.xml" );
+        compileProject( "jarWithNonTestScopedTestDependency/pom.xml" );
 
-        MavenProject project2 = getProject( "jarWithTestDependency2/project2/pom.xml" );
+        MavenProject project2 = getProject( "jarWithNonTestScopedTestDependency/project2/pom.xml" );
 
         ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
 
         Artifact project1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
-                "jarWithTestDependency1", "jar", "1.0", "test" );
+                "jarWithNonTestScopedTestDependency1", "jar", "1.0", "test" );
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
 
         ProjectDependencyAnalysis expectedAnalysis;
