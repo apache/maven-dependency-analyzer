@@ -44,19 +44,23 @@ public class ProjectDependencyAnalysis
 
     private final Set<Artifact> unusedDeclaredArtifacts;
 
+    private final Set<Artifact> testArtifactsWithNonTestScope;
+
     // constructors -----------------------------------------------------------
 
     public ProjectDependencyAnalysis()
     {
-        this( null, null, null );
+        this( null, null, null, null );
     }
 
     public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
-                                      Set<Artifact> unusedDeclaredArtifacts )
+                                      Set<Artifact> unusedDeclaredArtifacts,
+                                      Set<Artifact> testArtifactsWithNonTestScope )
     {
         this.usedDeclaredArtifacts = safeCopy( usedDeclaredArtifacts );
         this.usedUndeclaredArtifacts = safeCopy( usedUndeclaredArtifacts );
         this.unusedDeclaredArtifacts = safeCopy( unusedDeclaredArtifacts );
+        this.testArtifactsWithNonTestScope = safeCopy( testArtifactsWithNonTestScope );
     }
 
     // public methods ---------------------------------------------------------
@@ -89,6 +93,15 @@ public class ProjectDependencyAnalysis
     }
 
     /**
+     * Test Artifacts that have a non-test scope
+     * @return {@link Artifact}
+     */
+    public Set<Artifact> getTestArtifactsWithNonTestScope()
+    {
+        return testArtifactsWithNonTestScope;
+    }
+
+    /**
      * Filter not-compile scoped artifacts from unused declared.
      * 
      * @return updated project dependency analysis
@@ -106,7 +119,8 @@ public class ProjectDependencyAnalysis
             }
         }
 
-        return new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, filteredUnusedDeclared );
+        return new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, filteredUnusedDeclared,
+                testArtifactsWithNonTestScope );
     }
 
     /**
@@ -169,7 +183,8 @@ public class ProjectDependencyAnalysis
             throw new ProjectDependencyAnalyzerException( "Trying to force use of dependencies which are " + builder );
         }
 
-        return new ProjectDependencyAnalysis( forcedUsedDeclared, usedUndeclaredArtifacts, forcedUnusedDeclared );
+        return new ProjectDependencyAnalysis( forcedUsedDeclared, usedUndeclaredArtifacts, forcedUnusedDeclared,
+                testArtifactsWithNonTestScope );
     }
 
     // Object methods ---------------------------------------------------------
@@ -182,6 +197,7 @@ public class ProjectDependencyAnalysis
         int hashCode = getUsedDeclaredArtifacts().hashCode();
         hashCode = ( hashCode * 37 ) + getUsedUndeclaredArtifacts().hashCode();
         hashCode = ( hashCode * 37 ) + getUnusedDeclaredArtifacts().hashCode();
+        hashCode = ( hashCode * 37 ) + getTestArtifactsWithNonTestScope().hashCode();
 
         return hashCode;
     }
@@ -197,7 +213,8 @@ public class ProjectDependencyAnalysis
 
             return getUsedDeclaredArtifacts().equals( analysis.getUsedDeclaredArtifacts() )
                 && getUsedUndeclaredArtifacts().equals( analysis.getUsedUndeclaredArtifacts() )
-                && getUnusedDeclaredArtifacts().equals( analysis.getUnusedDeclaredArtifacts() );
+                && getUnusedDeclaredArtifacts().equals( analysis.getUnusedDeclaredArtifacts() )
+                && getTestArtifactsWithNonTestScope().equals( analysis.getTestArtifactsWithNonTestScope() );
         }
 
         return false;
@@ -233,6 +250,16 @@ public class ProjectDependencyAnalysis
             }
 
             buffer.append( "unusedDeclaredArtifacts=" ).append( getUnusedDeclaredArtifacts() );
+        }
+
+        if ( !getTestArtifactsWithNonTestScope().isEmpty() )
+        {
+            if ( buffer.length() > 0 )
+            {
+                buffer.append( "," );
+            }
+
+            buffer.append( "testArtifactsWithNonTestScope=" ).append( getTestArtifactsWithNonTestScope() );
         }
 
         buffer.insert( 0, "[" );

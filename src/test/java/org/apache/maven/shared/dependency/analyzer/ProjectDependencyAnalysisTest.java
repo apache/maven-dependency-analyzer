@@ -43,9 +43,11 @@ public class ProjectDependencyAnalysisTest
         Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>();
         Set<Artifact> usedUndeclaredArtifacts = new HashSet<Artifact>();
         Set<Artifact> unusedDeclaredArtifacts = new HashSet<Artifact>();
+        Set<Artifact> testArtifactsWithNonTestScope = new HashSet<Artifact>();
 
         ProjectDependencyAnalysis analysis =
-            new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts );
+            new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts,
+                    testArtifactsWithNonTestScope);
 
         assertEquals( usedDeclaredArtifacts, analysis.getUsedDeclaredArtifacts() );
         assertEquals( usedUndeclaredArtifacts, analysis.getUsedUndeclaredArtifacts() );
