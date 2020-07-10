@@ -281,21 +281,22 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testJarWithNonTestScopedTestDependency()
             throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        compileProject( "jarWithNonTestScopedTestDependency/pom.xml" );
+        compileProject( "jarWithTestDependency2/pom.xml" );
 
-        MavenProject project = getProject( "jarWithNonTestScopedTestDependency/project2/pom.xml" );
+        MavenProject project2 = getProject( "jarWithTestDependency2/project2/pom.xml" );
 
-        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project );
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
 
-        Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "compile" );
-        Artifact projectJar = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
-                "jarWithNonTestScopedTestDependency1", "jar", "1.0", "test" );
+        Artifact project1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
+                "jarWithTestDependency1", "jar", "1.0", "test" );
+        Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
 
-        Set<Artifact> unUsedDeclaredArtifacts = Collections.singleton( projectJar );
+        ProjectDependencyAnalysis expectedAnalysis;
+
+        Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>( Arrays.asList( project1, junit ) );
         Set<Artifact> nonTestScopedTestArtifacts = Collections.singleton( junit );
-
-        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( null, null, unUsedDeclaredArtifacts,
-                nonTestScopedTestArtifacts );
+        expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
+                    nonTestScopedTestArtifacts );
 
         assertEquals( expectedAnalysis, actualAnalysis );
     }
