@@ -29,10 +29,10 @@
 	<artifactId>jarWithTestDependency</artifactId>
 	<packaging>pom</packaging>
 	<version>1.0</version>
-	
+
 	<modules>
 		<module>project1</module>
 		<module>project2</module>
 	</modules>
-	
+
 </project>

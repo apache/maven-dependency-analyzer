@@ -135,7 +135,7 @@ public class DefaultProjectDependencyAnalyzer
         return results;
     }
 
-    protected Set<Artifact> getTestArtifactsWithNonTestScope( Set<Artifact> testOnlyArtifacts )
+    private Set<Artifact> getTestArtifactsWithNonTestScope( Set<Artifact> testOnlyArtifacts )
     {
         Set<Artifact> nonTestScopeArtifacts = new LinkedHashSet<Artifact>();
 
@@ -212,9 +212,9 @@ public class DefaultProjectDependencyAnalyzer
 
     protected Set<String> buildTestDependencyClasses( MavenProject project ) throws IOException
     {
-        Set<String> nonTestDependencyClasses = new HashSet<String>();
-        Set<String> testDependencyClasses = new HashSet<String>();
-        Set<String> testOnlyDependencyClasses = new HashSet<String>();
+        Set<String> nonTestDependencyClasses = new HashSet<>();
+        Set<String> testDependencyClasses = new HashSet<>();
+        Set<String> testOnlyDependencyClasses = new HashSet<>();
 
         String outputDirectory = project.getBuild().getOutputDirectory();
         nonTestDependencyClasses.addAll( buildDependencyClasses( outputDirectory ) );

@@ -287,13 +287,13 @@ public class DefaultProjectDependencyAnalyzerTest
 
         ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
 
-        Artifact project1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
+        Artifact artifact1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
                 "jarWithNonTestScopedTestDependency1", "jar", "1.0", "test" );
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
 
         ProjectDependencyAnalysis expectedAnalysis;
 
-        Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>( Arrays.asList( project1, junit ) );
+        Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>( Arrays.asList( artifact1, junit ) );
         Set<Artifact> nonTestScopedTestArtifacts = Collections.singleton( junit );
         expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
                     nonTestScopedTestArtifacts );

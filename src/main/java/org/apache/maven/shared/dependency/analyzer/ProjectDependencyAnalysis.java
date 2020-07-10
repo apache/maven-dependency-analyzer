@@ -53,6 +53,16 @@ public class ProjectDependencyAnalysis
         this( null, null, null, null );
     }
 
+    // constructor to maintain compatibility with old API
+    public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
+                                      Set<Artifact> unusedDeclaredArtifacts )
+    {
+        this.usedDeclaredArtifacts = safeCopy( usedDeclaredArtifacts );
+        this.usedUndeclaredArtifacts = safeCopy( usedUndeclaredArtifacts );
+        this.unusedDeclaredArtifacts = safeCopy( unusedDeclaredArtifacts );
+        this.testArtifactsWithNonTestScope = new HashSet<>();
+    }
+
     public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
                                       Set<Artifact> unusedDeclaredArtifacts,
                                       Set<Artifact> testArtifactsWithNonTestScope )
@@ -71,7 +81,7 @@ public class ProjectDependencyAnalysis
      */
     public Set<Artifact> getUsedDeclaredArtifacts()
     {
-        return usedDeclaredArtifacts;
+        return safeCopy( usedDeclaredArtifacts );
     }
 
     /**
@@ -80,7 +90,7 @@ public class ProjectDependencyAnalysis
      */
     public Set<Artifact> getUsedUndeclaredArtifacts()
     {
-        return usedUndeclaredArtifacts;
+        return safeCopy( usedUndeclaredArtifacts );
     }
 
     /**
@@ -89,7 +99,7 @@ public class ProjectDependencyAnalysis
      */
     public Set<Artifact> getUnusedDeclaredArtifacts()
     {
-        return unusedDeclaredArtifacts;
+        return safeCopy( unusedDeclaredArtifacts );
     }
 
     /**
@@ -98,7 +108,7 @@ public class ProjectDependencyAnalysis
      */
     public Set<Artifact> getTestArtifactsWithNonTestScope()
     {
-        return testArtifactsWithNonTestScope;
+        return safeCopy( testArtifactsWithNonTestScope );
     }
 
     /**
