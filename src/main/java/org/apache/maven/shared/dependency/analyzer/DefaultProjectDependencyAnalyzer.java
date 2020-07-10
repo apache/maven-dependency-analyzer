@@ -150,7 +150,7 @@ public class DefaultProjectDependencyAnalyzer
         return nonTestScopeArtifacts;
     }
 
-    protected Map<Artifact, Set<String>> buildArtifactClassMap( MavenProject project )
+    private Map<Artifact, Set<String>> buildArtifactClassMap( MavenProject project )
         throws IOException
     {
         Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<Artifact, Set<String>>();
@@ -210,7 +210,7 @@ public class DefaultProjectDependencyAnalyzer
         return artifactClassMap;
     }
 
-    protected Set<String> buildTestDependencyClasses( MavenProject project ) throws IOException
+    private Set<String> buildTestDependencyClasses( MavenProject project ) throws IOException
     {
         Set<String> nonTestDependencyClasses = new HashSet<>();
         Set<String> testDependencyClasses = new HashSet<>();
@@ -233,7 +233,7 @@ public class DefaultProjectDependencyAnalyzer
         return testOnlyDependencyClasses;
     }
 
-    protected Set<String> buildDependencyClasses( MavenProject project )
+    private Set<String> buildDependencyClasses( MavenProject project )
         throws IOException
     {
         Set<String> dependencyClasses = new HashSet<String>();
@@ -255,7 +255,7 @@ public class DefaultProjectDependencyAnalyzer
         return dependencyAnalyzer.analyze( url );
     }
 
-    protected Set<Artifact> buildDeclaredArtifacts( MavenProject project )
+    private Set<Artifact> buildDeclaredArtifacts( MavenProject project )
     {
         @SuppressWarnings( "unchecked" )
         Set<Artifact> declaredArtifacts = project.getDependencyArtifacts();
@@ -268,7 +268,7 @@ public class DefaultProjectDependencyAnalyzer
         return declaredArtifacts;
     }
 
-    protected Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap,
+    private Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap,
                                               Set<String> dependencyClasses )
     {
         Set<Artifact> usedArtifacts = new HashSet<Artifact>();
@@ -286,7 +286,7 @@ public class DefaultProjectDependencyAnalyzer
         return usedArtifacts;
     }
 
-    protected Artifact findArtifactForClassName( Map<Artifact, Set<String>> artifactClassMap, String className )
+    private Artifact findArtifactForClassName( Map<Artifact, Set<String>> artifactClassMap, String className )
     {
         for ( Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet() )
         {
