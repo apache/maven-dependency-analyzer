@@ -292,11 +292,21 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
 
         ProjectDependencyAnalysis expectedAnalysis;
-
-        Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>( Arrays.asList( artifact1, junit ) );
-        Set<Artifact> nonTestScopedTestArtifacts = Collections.singleton( junit );
-        expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
+        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        {
+            Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( artifact1, junit ) );
+            Set<Artifact> nonTestScopedTestArtifacts = Collections.singleton( junit );
+            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
                     nonTestScopedTestArtifacts );
+        }
+        else
+        {
+            // With JDK 7 and earlier, not all deps are identified correctly
+            Set<Artifact> usedDeclaredArtifacts = Collections.singleton( artifact1 );
+            Set<Artifact> unUsedDeclaredArtifacts = Collections.singleton( junit );
+            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, unUsedDeclaredArtifacts,
+                    null );
+        }
 
         assertEquals( expectedAnalysis, actualAnalysis );
     }
