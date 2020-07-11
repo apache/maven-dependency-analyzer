@@ -63,7 +63,7 @@ public class DependencyClassFileVisitor
     {
         try
         {
-            byte[] byteCode = IOUtils.toByteArray(in);
+            byte[] byteCode = IOUtils.toByteArray( in );
             ClassReader reader = new ClassReader( byteCode );
 
             final Set<String> constantPoolClassRefs = ConstantPoolParser.getConstantPoolClassReferences( byteCode );
