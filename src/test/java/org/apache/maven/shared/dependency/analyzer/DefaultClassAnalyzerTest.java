@@ -41,17 +41,21 @@ import org.codehaus.plexus.util.IOUtil;
 public class DefaultClassAnalyzerTest
     extends AbstractFileTest
 {
-    // tests ------------------------------------------------------------------
+    private File file;
 
+    public void setUp() throws IOException {
+        file = createJar();
+        try ( JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) ) )
+        {
+            writeEntry( out, "a/b/c.class", "class a.b.c" );
+            writeEntry( out, "x/y/z.class", "class x.y.z" );
+        }
+    }
+    
+    
     public void testAnalyzeWithJar()
         throws IOException
     {
-        File file = createJar();
-        JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) );
-        writeEntry( out, "a/b/c.class", "class a.b.c" );
-        writeEntry( out, "x/y/z.class", "class x.y.z" );
-        out.close();
-
         Set<String> expectedClasses = new HashSet<String>();
         expectedClasses.add( "a.b.c" );
         expectedClasses.add( "x.y.z" );
@@ -66,13 +70,7 @@ public class DefaultClassAnalyzerTest
         throws IOException
     {
         //to reproduce MDEP-143
-        File file = createJar();
-        JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) );
-        writeEntry( out, "a/b/c.class", "class a.b.c" );
-        writeEntry( out, "x/y/z.class", "class x.y.z" );
-        out.close();
-
-        //corrupt the jar file by alter its contents
+        // corrupt the jar file by altering its contents
         FileInputStream fis = new FileInputStream( file );
         ByteArrayOutputStream baos = new ByteArrayOutputStream( 100 );
         IOUtil.copy( fis, baos, 100 );
