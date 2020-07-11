@@ -44,10 +44,11 @@ public class ClassFileVisitorUtilsTest
         throws IOException
     {
         File file = createJar();
-        JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) );
-        writeEntry( out, "a/b/c.class", "class a.b.c" );
-        writeEntry( out, "x/y/z.class", "class x.y.z" );
-        out.close();
+        try ( JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) ) )
+        {
+            writeEntry( out, "a/b/c.class", "class a.b.c" );
+            writeEntry( out, "x/y/z.class", "class x.y.z" );
+        }
 
         Mock mock = mock( ClassFileVisitor.class );
         expectVisitClass( mock, "a.b.c", "class a.b.c" );
@@ -62,9 +63,10 @@ public class ClassFileVisitorUtilsTest
         throws IOException
     {
         File file = createJar();
-        JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) );
-        writeEntry( out, "a/b/c.jpg", "jpeg a.b.c" );
-        out.close();
+        try ( JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) ) )
+        {
+            writeEntry( out, "a/b/c.jpg", "jpeg a.b.c" );
+        }
 
         Mock mock = mock( ClassFileVisitor.class );
 
@@ -125,6 +127,7 @@ public class ClassFileVisitorUtilsTest
         try
         {
             ClassFileVisitorUtils.accept( url, (ClassFileVisitor) mock.proxy() );
+            fail("expected IllegalArgumntException");
         }
         catch ( IllegalArgumentException exception )
         {
@@ -142,6 +145,7 @@ public class ClassFileVisitorUtilsTest
         try
         {
             ClassFileVisitorUtils.accept( url, (ClassFileVisitor) mock.proxy() );
+            fail("expected IllegalArgumntException");
         }
         catch ( IllegalArgumentException exception )
         {
