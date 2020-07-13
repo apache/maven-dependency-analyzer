@@ -19,6 +19,7 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  * under the License.
  */
 
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -62,9 +63,10 @@ public class DependencyClassFileVisitor
     {
         try
         {
-            ClassReader reader = new ClassReader( in );
+            byte[] byteCode = IOUtils.toByteArray( in );
+            ClassReader reader = new ClassReader( byteCode );
 
-            final Set<String> constantPoolClassRefs = ConstantPoolParser.getConstantPoolClassReferences( reader.b );
+            final Set<String> constantPoolClassRefs = ConstantPoolParser.getConstantPoolClassReferences( byteCode );
             for ( String string : constantPoolClassRefs )
             {
                 resultCollector.addName( string );
