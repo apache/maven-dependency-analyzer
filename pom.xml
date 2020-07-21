@@ -45,7 +45,7 @@
   </scm>
   <issueManagement>
     <system>jira</system>
-    <url>https://issues.apache.org/jira/browse/MSHARED?jql=project%20%3D%20MSHARED%20AND%20component%20%3D%20maven-dependency-analyzer</url>
+    <url>https://issues.apache.org/jira/browse/MSHARED-932?jql=project%20%3D%20MSHARED%20AND%20component%20%3D%20maven-dependency-analyzer</url>
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
