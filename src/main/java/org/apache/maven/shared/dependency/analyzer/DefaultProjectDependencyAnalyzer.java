@@ -141,7 +141,7 @@ public class DefaultProjectDependencyAnalyzer
 
         for ( Artifact artifact : testOnlyArtifacts )
         {
-            if ( !artifact.getScope().equals( "test" ) )
+            if ( artifact.getScope().equals( "compile" ) )
             {
                 nonTestScopeArtifacts.add( artifact );
             }
