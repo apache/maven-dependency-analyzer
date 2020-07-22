@@ -26,13 +26,8 @@
 >
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
-  <artifactId>jarWithNonTestScopedTestDependency</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>jarWithCompileScopedTestDependency1</artifactId>
+  <packaging>jar</packaging>
   <version>1.0</version>
-
-  <modules>
-    <module>project1</module>
-    <module>project2</module>
-  </modules>
 
 </project>

@@ -278,18 +278,18 @@ public class DefaultProjectDependencyAnalyzerTest
         // assertEquals( expectedAnalysis, actualAnalysis );
     }
 
-    public void testJarWithNonTestScopedTestDependency()
+    public void testJarWithCompileScopedTestDependency()
             throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        compileProject( "jarWithNonTestScopedTestDependency/pom.xml" );
+        compileProject( "jarWithCompileScopedTestDependency/pom.xml" );
 
-        MavenProject project2 = getProject( "jarWithNonTestScopedTestDependency/project2/pom.xml" );
+        MavenProject project2 = getProject( "jarWithCompileScopedTestDependency/project2/pom.xml" );
 
         ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
 
         Artifact artifact1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
-                "jarWithNonTestScopedTestDependency1", "jar", "1.0", "test" );
-        Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
+                "jarWithCompileScopedTestDependency1", "jar", "1.0", "test" );
+        Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "compile" );
 
         ProjectDependencyAnalysis expectedAnalysis;
         if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
@@ -298,6 +298,38 @@ public class DefaultProjectDependencyAnalyzerTest
             Set<Artifact> nonTestScopedTestArtifacts = Collections.singleton( junit );
             expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
                     nonTestScopedTestArtifacts );
+        }
+        else
+        {
+            // With JDK 7 and earlier, not all deps are identified correctly
+            Set<Artifact> usedDeclaredArtifacts = Collections.singleton( artifact1 );
+            Set<Artifact> unUsedDeclaredArtifacts = Collections.singleton( junit );
+            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, unUsedDeclaredArtifacts,
+                    null );
+        }
+
+        assertEquals( expectedAnalysis, actualAnalysis );
+    }
+
+    public void testJarWithRuntimeScopedTestDependency() throws TestToolsException, ProjectDependencyAnalyzerException
+    {
+        // We can't effectively analyze runtime dependencies at this time
+        compileProject( "jarWithRuntimeScopedTestDependency/pom.xml" );
+
+        MavenProject project2 = getProject( "jarWithRuntimeScopedTestDependency/project2/pom.xml" );
+
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
+
+        Artifact artifact1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
+                "jarWithRuntimeScopedTestDependency1", "jar", "1.0", "test" );
+        Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "runtime" );
+
+        ProjectDependencyAnalysis expectedAnalysis;
+        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        {
+            Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( artifact1, junit ) );
+            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
+                    null );
         }
         else
         {
