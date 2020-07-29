@@ -22,11 +22,15 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.JarOutputStream;
 
-import org.codehaus.plexus.util.FileUtils;
-import org.jmock.Mock;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Tests <code>ClassFileVisitorUtils</code>.
@@ -38,7 +42,28 @@ import org.jmock.Mock;
 public class ClassFileVisitorUtilsTest
     extends AbstractFileTest
 {
-    // tests ------------------------------------------------------------------
+    
+    private MockVisitor visitor = new MockVisitor();
+
+    private static class MockVisitor implements ClassFileVisitor
+    {
+        
+        ArrayList<String> classNames = new ArrayList<>();
+        ArrayList<String> data = new ArrayList<>();
+
+        @Override
+        public void visitClass( String className, InputStream in )
+        {
+            classNames.add( className );
+            try {
+                List<String> lines = IOUtils.readLines( in, StandardCharsets.UTF_8 );
+                data.addAll( lines );
+            } catch (IOException ex) {
+                throw new RuntimeException( ex );
+            }
+        }
+
+    }
 
     public void testAcceptJar()
         throws IOException
@@ -50,13 +75,12 @@ public class ClassFileVisitorUtilsTest
             writeEntry( out, "x/y/z.class", "class x.y.z" );
         }
 
-        Mock mock = mock( ClassFileVisitor.class );
-        expectVisitClass( mock, "a.b.c", "class a.b.c" );
-        expectVisitClass( mock, "x.y.z", "class x.y.z" );
-
-        ClassFileVisitorUtils.accept( file.toURI().toURL(), (ClassFileVisitor) mock.proxy() );
-
-        mock.verify();
+        ClassFileVisitorUtils.accept( file.toURI().toURL(), visitor );
+        
+        assertEquals("a.b.c", visitor.classNames.get(0));
+        assertEquals("x.y.z", visitor.classNames.get(1));
+        assertEquals("class a.b.c", visitor.data.get(0));
+        assertEquals("class x.y.z", visitor.data.get(1));
     }
 
     public void testAcceptJarWithNonClassEntry()
@@ -68,11 +92,9 @@ public class ClassFileVisitorUtilsTest
             writeEntry( out, "a/b/c.jpg", "jpeg a.b.c" );
         }
 
-        Mock mock = mock( ClassFileVisitor.class );
+        ClassFileVisitorUtils.accept( file.toURI().toURL(), visitor );
 
-        ClassFileVisitorUtils.accept( file.toURI().toURL(), (ClassFileVisitor) mock.proxy() );
-
-        mock.verify();
+        assertTrue(visitor.classNames.isEmpty());
     }
 
     public void testAcceptDir()
@@ -86,15 +108,14 @@ public class ClassFileVisitorUtilsTest
         File xyDir = mkdirs( dir, "x/y" );
         createFile( xyDir, "z.class", "class x.y.z" );
 
-        Mock mock = mock( ClassFileVisitor.class );
-        expectVisitClass( mock, "a.b.c", "class a.b.c" );
-        expectVisitClass( mock, "x.y.z", "class x.y.z" );
-
-        ClassFileVisitorUtils.accept( dir.toURI().toURL(), (ClassFileVisitor) mock.proxy() );
+        ClassFileVisitorUtils.accept( dir.toURI().toURL(), visitor );
 
         FileUtils.deleteDirectory( dir );
 
-        mock.verify();
+        assertEquals("a.b.c", visitor.classNames.get(0));
+        assertEquals("x.y.z", visitor.classNames.get(1));
+        assertEquals("class a.b.c", visitor.data.get(0));
+        assertEquals("class x.y.z", visitor.data.get(1));
     }
 
     public void testAcceptDirWithNonClassFile()
@@ -105,13 +126,11 @@ public class ClassFileVisitorUtilsTest
         File abDir = mkdirs( dir, "a/b" );
         createFile( abDir, "c.jpg", "jpeg a.b.c" );
 
-        Mock mock = mock( ClassFileVisitor.class );
-
-        ClassFileVisitorUtils.accept( dir.toURI().toURL(), (ClassFileVisitor) mock.proxy() );
+        ClassFileVisitorUtils.accept( dir.toURI().toURL(), visitor );
 
         FileUtils.deleteDirectory( dir );
 
-        mock.verify();
+        assertTrue(visitor.classNames.isEmpty());
     }
 
     public void testAcceptWithFile()
@@ -120,13 +139,11 @@ public class ClassFileVisitorUtilsTest
         File file = File.createTempFile( "test", ".class" );
         file.deleteOnExit();
 
-        Mock mock = mock( ClassFileVisitor.class );
-
         URL url = file.toURI().toURL();
 
         try
         {
-            ClassFileVisitorUtils.accept( url, (ClassFileVisitor) mock.proxy() );
+            ClassFileVisitorUtils.accept( url, visitor );
             fail("expected IllegalArgumntException");
         }
         catch ( IllegalArgumentException exception )
@@ -138,30 +155,18 @@ public class ClassFileVisitorUtilsTest
     public void testAcceptWithUnsupportedScheme()
         throws IOException
     {
-        Mock mock = mock( ClassFileVisitor.class );
+        MockVisitor visitor = new MockVisitor();
 
         URL url = new URL( "http://localhost/" );
 
         try
         {
-            ClassFileVisitorUtils.accept( url, (ClassFileVisitor) mock.proxy() );
+            ClassFileVisitorUtils.accept( url, visitor );
             fail("expected IllegalArgumntException");
         }
         catch ( IllegalArgumentException exception )
         {
             assertEquals( "Cannot accept visitor on URL: " + url, exception.getMessage() );
         }
-    }
-
-    // private methods --------------------------------------------------------
-
-    private void expectVisitClass( Mock mock, String className, String data )
-    {
-        mock.expects( atLeastOnce() ).method( "visitClass" ).with( eq( className ), in( data ) );
-    }
-
-    private InputStreamConstraint in( String expected )
-    {
-        return new InputStreamConstraint( expected );
     }
 }

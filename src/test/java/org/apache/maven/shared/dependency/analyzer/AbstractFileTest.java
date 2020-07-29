@@ -20,23 +20,20 @@ package org.apache.maven.shared.dependency.analyzer;
  */
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
-import org.jmock.MockObjectTestCase;
+import org.apache.commons.io.FileUtils;
+
+import junit.framework.TestCase;
 
 /**
- * 
- * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  */
-public abstract class AbstractFileTest extends MockObjectTestCase
+public abstract class AbstractFileTest extends TestCase
 {
     // protected methods ------------------------------------------------------
 
@@ -62,11 +59,7 @@ public abstract class AbstractFileTest extends MockObjectTestCase
     protected File createFile( File parent, String child, String data ) throws IOException
     {
         File file = new File( parent, child );
-
-        OutputStream out = new FileOutputStream( file );
-        IOUtil.copy( data, out );
-        out.close();
-
+        FileUtils.write( file, data, StandardCharsets.UTF_8 );
         return file;
     }
 
