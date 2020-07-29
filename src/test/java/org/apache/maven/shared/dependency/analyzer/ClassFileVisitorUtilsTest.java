@@ -77,10 +77,10 @@ public class ClassFileVisitorUtilsTest
 
         ClassFileVisitorUtils.accept( file.toURI().toURL(), visitor );
         
-        assertEquals("a.b.c", visitor.classNames.get(0));
-        assertEquals("x.y.z", visitor.classNames.get(1));
-        assertEquals("class a.b.c", visitor.data.get(0));
-        assertEquals("class x.y.z", visitor.data.get(1));
+        assertTrue(visitor.classNames.contains( "a.b.c" ));
+        assertTrue(visitor.classNames.contains( "x.y.z" ));
+        assertTrue(visitor.data.contains( "class a.b.c" ));
+        assertTrue(visitor.data.contains( "class x.y.z" ));
     }
 
     public void testAcceptJarWithNonClassEntry()
@@ -112,10 +112,10 @@ public class ClassFileVisitorUtilsTest
 
         FileUtils.deleteDirectory( dir );
 
-        assertEquals("a.b.c", visitor.classNames.get(0));
-        assertEquals("x.y.z", visitor.classNames.get(1));
-        assertEquals("class a.b.c", visitor.data.get(0));
-        assertEquals("class x.y.z", visitor.data.get(1));
+        assertTrue(visitor.classNames.contains( "a.b.c" ));
+        assertTrue(visitor.classNames.contains( "x.y.z" ));
+        assertTrue(visitor.data.contains( "class a.b.c" ));
+        assertTrue(visitor.data.contains( "class x.y.z" ));
     }
 
     public void testAcceptDirWithNonClassFile()
@@ -144,7 +144,7 @@ public class ClassFileVisitorUtilsTest
         try
         {
             ClassFileVisitorUtils.accept( url, visitor );
-            fail("expected IllegalArgumntException");
+            fail("expected IllegalArgumentException");
         }
         catch ( IllegalArgumentException exception )
         {
@@ -155,14 +155,12 @@ public class ClassFileVisitorUtilsTest
     public void testAcceptWithUnsupportedScheme()
         throws IOException
     {
-        MockVisitor visitor = new MockVisitor();
-
         URL url = new URL( "http://localhost/" );
 
         try
         {
             ClassFileVisitorUtils.accept( url, visitor );
-            fail("expected IllegalArgumntException");
+            fail("expected IllegalArgumentException");
         }
         catch ( IllegalArgumentException exception )
         {
