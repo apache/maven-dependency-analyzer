@@ -155,7 +155,7 @@ public class ConstantPoolParser
         {
             String className = stringConstants.get( aClass );
 
-            // filter out things from the default package, probably a false-positive
+            // filter out things from unnamed package, probably a false-positive
             if ( isImportableClass( className ) )
             {
                 result.add( className );
