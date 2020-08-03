@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitorUtils;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
+import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
 import org.codehaus.plexus.component.annotations.Component;
 
 /**
@@ -50,5 +51,18 @@ public class ASMDependencyAnalyzer
         ClassFileVisitorUtils.accept( url, visitor );
 
         return visitor.getDependencies();
+    }
+
+    /*
+     * @see org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer#analyze(java.net.URL)
+     */
+    public Set<DependencyUsage> analyzeWithUsages( URL url )
+        throws IOException
+    {
+        DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
+
+        ClassFileVisitorUtils.accept( url, visitor );
+
+        return visitor.getDependencyUsages();
     }
 }

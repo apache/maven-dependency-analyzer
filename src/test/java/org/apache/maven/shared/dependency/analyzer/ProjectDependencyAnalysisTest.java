@@ -19,7 +19,9 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -41,7 +43,9 @@ public class ProjectDependencyAnalysisTest
     public void testConstructor()
     {
         Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>();
+        Map<Artifact, Set<DependencyUsage>> usedDeclaredArtifactToUsageMap = new HashMap<Artifact, Set<DependencyUsage>>();
         Set<Artifact> usedUndeclaredArtifacts = new HashSet<Artifact>();
+        Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifactToUsageMap = new HashMap<Artifact, Set<DependencyUsage>>();
         Set<Artifact> unusedDeclaredArtifacts = new HashSet<Artifact>();
         Set<Artifact> testArtifactsWithNonTestScope = new HashSet<Artifact>();
 
@@ -50,7 +54,9 @@ public class ProjectDependencyAnalysisTest
                     testArtifactsWithNonTestScope);
 
         assertEquals( usedDeclaredArtifacts, analysis.getUsedDeclaredArtifacts() );
+        assertEquals( usedDeclaredArtifactToUsageMap, analysis.getUsedDeclaredArtifactToUsageMap() );
         assertEquals( usedUndeclaredArtifacts, analysis.getUsedUndeclaredArtifacts() );
+        assertEquals( usedUndeclaredArtifactToUsageMap, analysis.getUsedUndeclaredArtifactToUsageMap() );
         assertEquals( unusedDeclaredArtifacts, analysis.getUnusedDeclaredArtifacts() );
     }
 }

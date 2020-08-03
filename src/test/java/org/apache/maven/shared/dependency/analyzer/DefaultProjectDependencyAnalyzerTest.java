@@ -3,8 +3,10 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -102,6 +104,8 @@ public class DefaultProjectDependencyAnalyzerTest
         ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis();
 
         assertEquals( expectedAnalysis, actualAnalysis );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedDeclaredArtifactToUsageMap() );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedUndeclaredArtifactToUsageMap() );
     }
 
     public void testJarWithNoDependencies()
@@ -116,6 +120,8 @@ public class DefaultProjectDependencyAnalyzerTest
         ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis();
 
         assertEquals( expectedAnalysis, actualAnalysis );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedDeclaredArtifactToUsageMap() );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedUndeclaredArtifactToUsageMap() );
     }
 
     public void testJava8methodRefs()
@@ -142,6 +148,19 @@ public class DefaultProjectDependencyAnalyzerTest
                     new HashSet<Artifact>() );
 
         assertEquals( expectedAnalysis, actualAnalysis );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedUndeclaredArtifactToUsageMap() );
+
+        Map<Artifact, Set<DependencyUsage>> actualDependencyUsageMap =
+            actualAnalysis.getUsedDeclaredArtifactToUsageMap();
+
+        Map<Artifact, Set<DependencyUsage>> expectedDependencyUsageMap =
+            new HashMap<Artifact, Set<DependencyUsage>>();
+        expectedDependencyUsageMap.put( project1, createDependencyUsage(
+            "org.apache.commons.io.FileUtils", "inlinedStaticReference.Project" ) );
+        expectedDependencyUsageMap.put( project2, createDependencyUsage(
+            "org.apache.commons.lang.CharUtils", "inlinedStaticReference.Project" ) );
+
+        assertEquals( expectedDependencyUsageMap, actualDependencyUsageMap );
     }
 
     public void testInlinedStaticReference()
@@ -167,6 +186,17 @@ public class DefaultProjectDependencyAnalyzerTest
                     new HashSet<Artifact>() );
 
         assertEquals( expectedAnalysis, actualAnalysis );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedUndeclaredArtifactToUsageMap() );
+
+        Map<Artifact, Set<DependencyUsage>> actualDependencyUsageMap =
+            actualAnalysis.getUsedDeclaredArtifactToUsageMap();
+
+        Map<Artifact, Set<DependencyUsage>> expectedDependencyUsageMap = Collections.singletonMap(
+            project1,
+            createDependencyUsage(
+                "org.dom4j.Node", "inlinedStaticReference.Project" ) );
+
+        assertEquals( expectedDependencyUsageMap, actualDependencyUsageMap );
     }
 
     public void testJarWithCompileDependency()
@@ -192,6 +222,17 @@ public class DefaultProjectDependencyAnalyzerTest
                 null );
 
         assertEquals( expectedAnalysis, actualAnalysis );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedUndeclaredArtifactToUsageMap() );
+
+        Map<Artifact, Set<DependencyUsage>> actualDependencyUsageMap =
+            actualAnalysis.getUsedDeclaredArtifactToUsageMap();
+
+        Map<Artifact, Set<DependencyUsage>> expectedDependencyUsageMap = Collections.singletonMap(
+            project1,
+            createDependencyUsage(
+                "jarWithCompileDependency.project1.Project1", "jarWithCompileDependency.project2.Project2" ) );
+
+        assertEquals( expectedDependencyUsageMap, actualDependencyUsageMap );
     }
 
     public void testForceDeclaredDependenciesUsage()
@@ -257,6 +298,22 @@ public class DefaultProjectDependencyAnalyzerTest
         }
 
         assertEquals( expectedAnalysis, actualAnalysis );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedUndeclaredArtifactToUsageMap() );
+
+        Map<Artifact, Set<DependencyUsage>> actualDependencyUsageMap =
+            actualAnalysis.getUsedDeclaredArtifactToUsageMap();
+
+        Map<Artifact, Set<DependencyUsage>> expectedDependencyUsageMap =
+            new HashMap<Artifact, Set<DependencyUsage>>();
+        expectedDependencyUsageMap.put( project1, createDependencyUsage(
+            "jarWithTestDependency.project1.Project1", "jarWithTestDependency.project2.Project2" ) );
+        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        {
+            expectedDependencyUsageMap.put( junit, createDependencyUsage(
+                "junit.runner.TestRunListener", "jarWithTestDependency.project2.Project2" ) );
+        }
+
+        assertEquals( expectedDependencyUsageMap, actualDependencyUsageMap );
     }
 
     public void testJarWithXmlTransitiveDependency()
@@ -309,6 +366,22 @@ public class DefaultProjectDependencyAnalyzerTest
         }
 
         assertEquals( expectedAnalysis, actualAnalysis );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedUndeclaredArtifactToUsageMap() );
+
+        Map<Artifact, Set<DependencyUsage>> actualDependencyUsageMap =
+            actualAnalysis.getUsedDeclaredArtifactToUsageMap();
+
+        Map<Artifact, Set<DependencyUsage>> expectedDependencyUsageMap =
+            new HashMap<Artifact, Set<DependencyUsage>>();
+        expectedDependencyUsageMap.put( artifact1, createDependencyUsage(
+            "jarWithTestDependency.project1.Project1", "jarWithTestDependency.project2.Project2" ) );
+        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        {
+            expectedDependencyUsageMap.put( junit, createDependencyUsage(
+                "junit.runner.TestRunListener", "jarWithTestDependency.project2.Project2" ) );
+        }
+
+        assertEquals( expectedDependencyUsageMap, actualDependencyUsageMap );
     }
 
     public void testJarWithRuntimeScopedTestDependency() throws TestToolsException, ProjectDependencyAnalyzerException
@@ -341,6 +414,22 @@ public class DefaultProjectDependencyAnalyzerTest
         }
 
         assertEquals( expectedAnalysis, actualAnalysis );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedUndeclaredArtifactToUsageMap() );
+
+        Map<Artifact, Set<DependencyUsage>> actualDependencyUsageMap =
+            actualAnalysis.getUsedDeclaredArtifactToUsageMap();
+
+        Map<Artifact, Set<DependencyUsage>> expectedDependencyUsageMap =
+            new HashMap<Artifact, Set<DependencyUsage>>();
+        expectedDependencyUsageMap.put( artifact1, createDependencyUsage(
+            "jarWithTestDependency.project1.Project1", "jarWithTestDependency.project2.Project2" ) );
+        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        {
+            expectedDependencyUsageMap.put( junit, createDependencyUsage(
+                "junit.runner.TestRunListener", "jarWithTestDependency.project2.Project2" ) );
+        }
+
+        assertEquals( expectedDependencyUsageMap, actualDependencyUsageMap );
     }
 
     public void testMultimoduleProject()
@@ -364,13 +453,23 @@ public class DefaultProjectDependencyAnalyzerTest
 
         ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project );
 
-        Artifact junit = createArtifact( "org.apache.maven.its.dependency", "test-module1", "jar", "1.0", "compile" );
-        Set<Artifact> usedDeclaredArtifacts = Collections.singleton( junit );
+        Artifact testArtifact = createArtifact( "org.apache.maven.its.dependency", "test-module1", "jar", "1.0", "compile" );
+        Set<Artifact> usedDeclaredArtifacts = Collections.singleton( testArtifact );
 
         ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
                 null );
 
         assertEquals( expectedAnalysis, actualAnalysis );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedUndeclaredArtifactToUsageMap() );
+
+        Map<Artifact, Set<DependencyUsage>> actualDependencyUsageMap =
+            actualAnalysis.getUsedDeclaredArtifactToUsageMap();
+
+        Map<Artifact, Set<DependencyUsage>> expectedDependencyUsageMap = Collections.singletonMap(
+            testArtifact,
+            createDependencyUsage("foo.Main", "bar.Main" ) );
+
+        assertEquals( expectedDependencyUsageMap, actualDependencyUsageMap );
     }
 
     public void testTypeUseAnnotationDependency()
@@ -398,6 +497,17 @@ public class DefaultProjectDependencyAnalyzerTest
                 null );
 
         assertEquals( expectedAnalysis, actualAnalysis );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedUndeclaredArtifactToUsageMap() );
+
+        Map<Artifact, Set<DependencyUsage>> actualDependencyUsageMap =
+            actualAnalysis.getUsedDeclaredArtifactToUsageMap();
+
+        Map<Artifact, Set<DependencyUsage>> expectedDependencyUsageMap = Collections.singletonMap(
+            annotation,
+            createDependencyUsage(
+                "typeUseAnnotationDependency.annotation.Annotation", "typeUseAnnotationDependency.usage.Usage" ) );
+
+        assertEquals( expectedDependencyUsageMap, actualDependencyUsageMap );
     }
 
     public void testTypeUseAnnotationDependencyOnLocalVariable()
@@ -425,6 +535,18 @@ public class DefaultProjectDependencyAnalyzerTest
                 null);
 
         assertEquals( expectedAnalysis, actualAnalysis );
+        assertEquals( Collections.emptyMap(), actualAnalysis.getUsedUndeclaredArtifactToUsageMap() );
+
+        Map<Artifact, Set<DependencyUsage>> actualDependencyUsageMap =
+            actualAnalysis.getUsedDeclaredArtifactToUsageMap();
+
+        Map<Artifact, Set<DependencyUsage>> expectedDependencyUsageMap = Collections.singletonMap(
+            annotation,
+            createDependencyUsage(
+                "typeUseAnnotationDependency.annotation.Annotation",
+                "typeUseAnnotationDependency.usageLocalVar.UsageLocalVar" ) );
+
+        assertEquals( expectedDependencyUsageMap, actualDependencyUsageMap );
     }
 
     // private methods --------------------------------------------------------
@@ -476,5 +598,10 @@ public class DefaultProjectDependencyAnalyzerTest
         ArtifactHandler handler = new DefaultArtifactHandler();
 
         return new DefaultArtifact( groupId, artifactId, versionRange, scope, type, null, handler );
+    }
+
+    private Set<DependencyUsage> createDependencyUsage( String dependencyClass, String usedBy )
+    {
+        return Collections.singleton( new DependencyUsage( dependencyClass, usedBy ) );
     }
 }

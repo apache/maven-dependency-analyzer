@@ -39,4 +39,7 @@ public interface DependencyAnalyzer
 
     Set<String> analyze( URL url )
         throws IOException;
+
+    Set<DependencyUsage> analyzeWithUsages( URL url )
+        throws IOException;
 }
