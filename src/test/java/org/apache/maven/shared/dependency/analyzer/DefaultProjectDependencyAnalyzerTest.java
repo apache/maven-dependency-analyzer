@@ -19,6 +19,7 @@ package org.apache.maven.shared.dependency.analyzer;
  */
 
 import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.ArtifactHandler;
@@ -32,6 +33,10 @@ import org.apache.maven.shared.test.plugin.ProjectTool;
 import org.apache.maven.shared.test.plugin.RepositoryTool;
 import org.apache.maven.shared.test.plugin.TestToolsException;
 import org.codehaus.plexus.PlexusTestCase;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.util.Arrays;
@@ -42,6 +47,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import static org.apache.commons.lang3.SystemUtils.isJavaVersionAtLeast;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Tests <code>DefaultProjectDependencyAnalyzer</code>.
@@ -49,6 +55,7 @@ import static org.apache.commons.lang3.SystemUtils.isJavaVersionAtLeast;
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @see DefaultProjectDependencyAnalyzer
  */
+@RunWith( JUnit4.class )
 public class DefaultProjectDependencyAnalyzerTest
     extends PlexusTestCase
 {
@@ -63,7 +70,8 @@ public class DefaultProjectDependencyAnalyzerTest
     /*
      * @see org.codehaus.plexus.PlexusTestCase#setUp()
      */
-    protected void setUp()
+    @Before
+    public void setUp()
         throws Exception
     {
         super.setUp();
@@ -82,8 +90,7 @@ public class DefaultProjectDependencyAnalyzerTest
         analyzer = (ProjectDependencyAnalyzer) lookup( ProjectDependencyAnalyzer.ROLE );
     }
 
-    // tests ------------------------------------------------------------------
-
+    @Test
     public void testPom()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
@@ -98,6 +105,7 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
     public void testJarWithNoDependencies()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
@@ -112,13 +120,11 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
     public void testJava8methodRefs()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        if ( !isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
-        {
-            return;
-        }
+        assumeTrue( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) );
 
         // Only visible through constant pool analysis (supported for JDK8+)
         compileProject( "java8methodRefs/pom.xml" );
@@ -138,13 +144,11 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
     public void testInlinedStaticReference()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        if ( !isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
-        {
-            return;
-        }
+        assumeTrue( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) );
 
         // Only visible through constant pool analysis (supported for JDK8+)
         compileProject( "inlinedStaticReference/pom.xml" );
@@ -163,6 +167,7 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
     public void testJarWithCompileDependency()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
@@ -188,6 +193,7 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
     public void testForceDeclaredDependenciesUsage()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
@@ -222,6 +228,7 @@ public class DefaultProjectDependencyAnalyzerTest
         }
     }
 
+    @Test
     public void testJarWithTestDependency()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
@@ -253,6 +260,7 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
     public void testJarWithXmlTransitiveDependency()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
@@ -272,6 +280,7 @@ public class DefaultProjectDependencyAnalyzerTest
         // assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
     public void testJarWithCompileScopedTestDependency()
             throws TestToolsException, ProjectDependencyAnalyzerException
     {
@@ -305,6 +314,7 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
     public void testJarWithRuntimeScopedTestDependency() throws TestToolsException, ProjectDependencyAnalyzerException
     {
         // We can't effectively analyze runtime dependencies at this time
@@ -337,6 +347,7 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
     public void testMultimoduleProject()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
@@ -367,14 +378,12 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
     public void testTypeUseAnnotationDependency()
             throws TestToolsException, ProjectDependencyAnalyzerException
     {
         // java.lang.annotation.ElementType.TYPE_USE introduced with Java 1.8
-        if ( !isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
-        {
-            return;
-        }
+        assumeTrue( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) );
 
         Properties properties = new Properties();
         properties.put( "maven.compiler.source", "1.8" );
@@ -394,14 +403,12 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
     public void testTypeUseAnnotationDependencyOnLocalVariable()
             throws TestToolsException, ProjectDependencyAnalyzerException
     {
         // java.lang.annotation.ElementType.TYPE_USE introduced with Java 1.8
-        if ( !isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
-        {
-            return;
-        }
+        assumeTrue( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) );
 
         Properties properties = new Properties();
         properties.put( "maven.compiler.source", "1.8" );
@@ -417,6 +424,30 @@ public class DefaultProjectDependencyAnalyzerTest
         Set<Artifact> usedDeclaredArtifacts = Collections.singleton( annotation );
         ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis(usedDeclaredArtifacts, null, null,
                 null);
+
+        assertEquals( expectedAnalysis, actualAnalysis );
+    }
+
+    @Test
+    public void testUnnamedPackageClassReference()
+        throws TestToolsException, ProjectDependencyAnalyzerException
+    {
+        assumeTrue( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) );
+
+        // Only visible through constant pool analysis (supported for JDK8+)
+        compileProject( "unnamedPackageClassReference/pom.xml" );
+
+        MavenProject project = getProject( "unnamedPackageClassReference/pom.xml" );
+
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project );
+
+        Artifact dnsjava = createArtifact( "dnsjava", "dnsjava", "jar", "2.1.8", "compile" );
+        // we don't use any dnsjava classes so this should show up as an unused dep
+        Set<Artifact> unusedDeclaredArtifacts = Collections.singleton( dnsjava );
+
+        ProjectDependencyAnalysis expectedAnalysis =
+            new ProjectDependencyAnalysis( new HashSet<Artifact>(), new HashSet<Artifact>(), unusedDeclaredArtifacts,
+                new HashSet<Artifact>() );
 
         assertEquals( expectedAnalysis, actualAnalysis );
     }
