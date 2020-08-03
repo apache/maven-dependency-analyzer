@@ -153,7 +153,13 @@ public class ConstantPoolParser
         Set<String> result = new HashSet<String>();
         for ( Integer aClass : classes )
         {
-            result.add( stringConstants.get( aClass ) );
+            String className = stringConstants.get( aClass );
+
+            // filter out things from the default package, probably a false-positive
+            if ( isImportableClass( className ) )
+            {
+                result.add( className );
+            }
         }
         return result;
     }
@@ -188,5 +194,11 @@ public class ConstantPoolParser
         }
         ( (Buffer) buf ).limit( oldLimit );
         return sb.toString();
+    }
+
+    private static boolean isImportableClass( String className )
+    {
+        // without a slash, class must be in unnamed package, which can't be imported
+        return className.indexOf( '/' ) != -1;
     }
 }

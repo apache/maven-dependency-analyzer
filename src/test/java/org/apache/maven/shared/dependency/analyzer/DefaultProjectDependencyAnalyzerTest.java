@@ -427,6 +427,32 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    public void testUnnamedPackageClassReference()
+        throws TestToolsException, ProjectDependencyAnalyzerException
+    {
+        if ( !SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        {
+            return;
+        }
+
+        // Only visible through constant pool analysis (supported for JDK8+)
+        compileProject( "unnamedPackageClassReference/pom.xml" );
+
+        MavenProject project = getProject( "unnamedPackageClassReference/pom.xml" );
+
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project );
+
+        Artifact dnsjava = createArtifact( "dnsjava", "dnsjava", "jar", "2.1.8", "compile" );
+        // we don't use any dnsjava classes so this should show up as an unused dep
+        Set<Artifact> unusedDeclaredArtifacts = Collections.singleton( dnsjava );
+
+        ProjectDependencyAnalysis expectedAnalysis =
+            new ProjectDependencyAnalysis( new HashSet<Artifact>(), new HashSet<Artifact>(), unusedDeclaredArtifacts,
+                new HashSet<Artifact>() );
+
+        assertEquals( expectedAnalysis, actualAnalysis );
+    }
+
     // private methods --------------------------------------------------------
 
     private void compileProject( String pomPath )
