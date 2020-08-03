@@ -19,12 +19,14 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import java.util.Objects;
+
 /**
  * Usage of a dependency class by a project class.
  *
  * @author <a href="mailto:hijon89@gmail.com">Jonathan Haber</a>
  */
-public class DependencyUsage
+public final class DependencyUsage
 {
   // fields -----------------------------------------------------------------
 
@@ -36,8 +38,8 @@ public class DependencyUsage
 
   public DependencyUsage( String dependencyClass, String usedBy )
   {
-    this.dependencyClass = dependencyClass;
-    this.usedBy = usedBy;
+    this.dependencyClass = Objects.requireNonNull( dependencyClass, "dependencyClass" );
+    this.usedBy = Objects.requireNonNull( usedBy, "usedBy" );
   }
 
   // public methods ---------------------------------------------------------
