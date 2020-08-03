@@ -43,6 +43,7 @@ import org.apache.maven.shared.test.plugin.ProjectTool;
 import org.apache.maven.shared.test.plugin.RepositoryTool;
 import org.apache.maven.shared.test.plugin.TestToolsException;
 import org.codehaus.plexus.PlexusTestCase;
+import org.junit.Assume;
 
 /**
  * Tests <code>DefaultProjectDependencyAnalyzer</code>.
@@ -430,10 +431,7 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testUnnamedPackageClassReference()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        if ( !SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
-        {
-            return;
-        }
+        Assume.assumeTrue( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) );
 
         // Only visible through constant pool analysis (supported for JDK8+)
         compileProject( "unnamedPackageClassReference/pom.xml" );
