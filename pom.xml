@@ -59,7 +59,7 @@
   </distributionManagement>
 
   <properties>
-    <mavenVersion>2.0.5</mavenVersion>
+    <mavenVersion>2.2.1</mavenVersion>
     <javaVersion>7</javaVersion>
     <project.build.outputTimestamp>2020-07-16T19:56:16Z</project.build.outputTimestamp>
   </properties>
