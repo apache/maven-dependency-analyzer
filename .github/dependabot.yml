@@ -33,3 +33,7 @@ updates:
     - dependency-name: commons-io:commons-io
       versions:
         - ">= 2.7"
+    # Ignore Maven 3.2.1+
+    - dependency-name: org.apache.maven.plugin-testing:maven-plugin-testing-tools
+      versions:
+        - ">=3.2.0"
