@@ -33,48 +33,65 @@ import java.util.Set;
  * ASM does not support.
  *
  * Adapted from http://stackoverflow.com/a/32278587/23691
- * 
+ *
  * Constant pool types:
- * 
+ *
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.4">JVM 9 Sepc</a>
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se10/html/jvms-4.html#jvms-4.4">JVM 10 Sepc</a>
- * 
  */
 public class ConstantPoolParser
 {
+    /** Constant <code>HEAD=0xcafebabe</code> */
     public static final int HEAD = 0xcafebabe;
 
     // Constant pool types
+
+    /** Constant <code>CONSTANT_UTF8=1</code> */
     public static final byte CONSTANT_UTF8 = 1;
 
+    /** Constant <code>CONSTANT_INTEGER=3</code> */
     public static final byte CONSTANT_INTEGER = 3;
 
+    /** Constant <code>CONSTANT_FLOAT=4</code> */
     public static final byte CONSTANT_FLOAT = 4;
 
+    /** Constant <code>CONSTANT_LONG=5</code> */
     public static final byte CONSTANT_LONG = 5;
 
+    /** Constant <code>CONSTANT_DOUBLE=6</code> */
     public static final byte CONSTANT_DOUBLE = 6;
 
+    /** Constant <code>CONSTANT_CLASS=7</code> */
     public static final byte CONSTANT_CLASS = 7;
 
+    /** Constant <code>CONSTANT_STRING=8</code> */
     public static final byte CONSTANT_STRING = 8;
 
+    /** Constant <code>CONSTANT_FIELDREF=9</code> */
     public static final byte CONSTANT_FIELDREF = 9;
 
+    /** Constant <code>CONSTANT_METHODREF=10</code> */
     public static final byte CONSTANT_METHODREF = 10;
 
+    /** Constant <code>CONSTANT_INTERFACEMETHODREF=11</code> */
     public static final byte CONSTANT_INTERFACEMETHODREF = 11;
 
+    /** Constant <code>CONSTANT_NAME_AND_TYPE=12</code> */
     public static final byte CONSTANT_NAME_AND_TYPE = 12;
 
+    /** Constant <code>CONSTANT_METHODHANDLE=15</code> */
     public static final byte CONSTANT_METHODHANDLE = 15;
 
+    /** Constant <code>CONSTANT_METHOD_TYPE=16</code> */
     public static final byte CONSTANT_METHOD_TYPE = 16;
 
+    /** Constant <code>CONSTANT_INVOKE_DYNAMIC=18</code> */
     public static final byte CONSTANT_INVOKE_DYNAMIC = 18;
-    
+
+    /** Constant <code>CONSTANT_MODULE=19</code> */
     public static final byte CONSTANT_MODULE = 19;
 
+    /** Constant <code>CONSTANT_PACKAGE=20</code> */
     public static final byte CONSTANT_PACKAGE = 20;
 
     private static final int OXF0 = 0xf0;
@@ -96,8 +113,8 @@ public class ConstantPoolParser
             return Collections.emptySet();
         }
         buf.getChar() ; buf.getChar(); // minor + ver
-        Set<Integer> classes = new HashSet<Integer>();
-        Map<Integer, String> stringConstants = new HashMap<Integer, String>();
+        Set<Integer> classes = new HashSet<>();
+        Map<Integer, String> stringConstants = new HashMap<>();
         for ( int ix = 1, num = buf.getChar(); ix < num; ix++ )
         {
             byte tag = buf.get();
@@ -150,7 +167,7 @@ public class ConstantPoolParser
                     break;  
             }
         }
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for ( Integer aClass : classes )
         {
             result.add( stringConstants.get( aClass ) );
@@ -162,6 +179,7 @@ public class ConstantPoolParser
     {
         int size = buf.getChar();
         // Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
+        @SuppressWarnings( "RedundantCast" )
         int oldLimit = ( (Buffer) buf ).limit();
         ( (Buffer) buf ).limit( buf.position() + size );
         StringBuilder sb = new StringBuilder( size + ( size >> 1 ) + 16 );

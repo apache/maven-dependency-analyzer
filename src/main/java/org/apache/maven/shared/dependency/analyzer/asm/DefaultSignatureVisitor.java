@@ -27,24 +27,30 @@ import org.objectweb.asm.signature.SignatureVisitor;
  * Inspired by <code>org.objectweb.asm.depend.DependencyVisitor</code> in the ASM dependencies example.
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public class DefaultSignatureVisitor
     extends SignatureVisitor
 {
     private final ResultCollector resultCollector;
 
+    /**
+     * <p>Constructor for DefaultSignatureVisitor.</p>
+     *
+     * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
+     */
     public DefaultSignatureVisitor( ResultCollector resultCollector )
     {
         super( Opcodes.ASM8 );
         this.resultCollector = resultCollector;
     }
 
+    /** {@inheritDoc} */
     public void visitClassType( final String name )
     {
         resultCollector.addName( name );
     }
 
+    /** {@inheritDoc} */
     public void visitInnerClassType( final String name )
     {
         resultCollector.addName( name );

@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * <p>ResultCollector class.</p>
+ *
  * @author Kristian Rosenvold
  */
 public class ResultCollector
@@ -32,11 +34,21 @@ public class ResultCollector
 
     private final Set<String> classes = new HashSet<String>();
 
+    /**
+     * <p>getDependencies.</p>
+     *
+     * @return a {@link java.util.Set} object.
+     */
     public Set<String> getDependencies()
     {
         return classes;
     }
 
+    /**
+     * <p>addName.</p>
+     *
+     * @param name a {@link java.lang.String} object.
+     */
     public void addName( String name )
     {
         if ( name == null )
@@ -77,6 +89,11 @@ public class ResultCollector
         }
     }
 
+    /**
+     * <p>add.</p>
+     *
+     * @param name a {@link java.lang.String} object.
+     */
     public void add( String name )
     {
         classes.add( name );

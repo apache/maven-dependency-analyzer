@@ -28,13 +28,11 @@ import org.objectweb.asm.TypePath;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 
-
 /**
  * Computes the set of classes referenced by visited code.
  * Inspired by <code>org.objectweb.asm.depend.DependencyVisitor</code> in the ASM dependencies example.
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public class DefaultMethodVisitor
     extends MethodVisitor
@@ -45,6 +43,13 @@ public class DefaultMethodVisitor
 
     private final ResultCollector resultCollector;
 
+    /**
+     * <p>Constructor for DefaultMethodVisitor.</p>
+     *
+     * @param annotationVisitor a {@link org.objectweb.asm.AnnotationVisitor} object.
+     * @param signatureVisitor a {@link org.objectweb.asm.signature.SignatureVisitor} object.
+     * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
+     */
     public DefaultMethodVisitor( AnnotationVisitor annotationVisitor, SignatureVisitor signatureVisitor,
                                  ResultCollector resultCollector )
     {
@@ -54,6 +59,7 @@ public class DefaultMethodVisitor
         this.resultCollector = resultCollector;
     }
 
+    /** {@inheritDoc} */
     public AnnotationVisitor visitAnnotation( final String desc, final boolean visible )
     {
         resultCollector.addDesc( desc );
@@ -61,6 +67,7 @@ public class DefaultMethodVisitor
         return annotationVisitor;
     }
 
+    /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitTypeAnnotation( int typeRef, TypePath typePath, String desc, boolean visible )
     {
@@ -69,6 +76,7 @@ public class DefaultMethodVisitor
         return annotationVisitor;
     }
 
+    /** {@inheritDoc} */
     public AnnotationVisitor visitParameterAnnotation( final int parameter, final String desc, final boolean visible )
     {
         resultCollector.addDesc( desc );
@@ -76,6 +84,7 @@ public class DefaultMethodVisitor
         return annotationVisitor;
     }
 
+    /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitLocalVariableAnnotation( int typeRef, TypePath typePath, Label[] start, Label[] end,
                                                            int[] index, String desc, boolean visible )
@@ -85,6 +94,7 @@ public class DefaultMethodVisitor
         return annotationVisitor;
     }
 
+    /** {@inheritDoc} */
     public void visitTypeInsn( final int opcode, final String desc )
     {
         if ( desc.charAt( 0 ) == '[' )
@@ -97,6 +107,7 @@ public class DefaultMethodVisitor
         }
     }
 
+    /** {@inheritDoc} */
     public void visitFieldInsn( final int opcode, final String owner, final String name, final String desc )
     {
         resultCollector.addName( owner );
@@ -108,12 +119,14 @@ public class DefaultMethodVisitor
          */
     }
 
+    /** {@inheritDoc} */
     @Override
     public void visitMethodInsn( int opcode, String owner, String name, String desc, boolean itf )
     {
         resultCollector.addName( owner );
     }
 
+    /** {@inheritDoc} */
     public void visitLdcInsn( final Object cst )
     {
         if ( cst instanceof Type )
@@ -122,16 +135,19 @@ public class DefaultMethodVisitor
         }
     }
 
+    /** {@inheritDoc} */
     public void visitMultiANewArrayInsn( final String desc, final int dims )
     {
         resultCollector.addDesc( desc );
     }
 
+    /** {@inheritDoc} */
     public void visitTryCatchBlock( final Label start, final Label end, final Label handler, final String type )
     {
         resultCollector.addName( type );
     }
 
+    /** {@inheritDoc} */
     public void visitLocalVariable( final String name, final String desc, final String signature, final Label start,
                                     final Label end, final int index )
     {
@@ -144,8 +160,6 @@ public class DefaultMethodVisitor
             addTypeSignature( signature );
         }
     }
-
-
 
     private void addTypeSignature( final String signature )
     {

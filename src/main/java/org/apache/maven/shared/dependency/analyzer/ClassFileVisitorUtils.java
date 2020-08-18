@@ -31,28 +31,26 @@ import java.net.URL;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-
 /**
  * Utility to visit classes in a library given either as a jar file or an exploded directory.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public final class ClassFileVisitorUtils
 {
-    // constants --------------------------------------------------------------
-
-    private static final String[] CLASS_INCLUDES = { "**/*.class" };
-
-    // constructors -----------------------------------------------------------
 
     private ClassFileVisitorUtils()
     {
         // private constructor for utility class
     }
 
-    // public methods ---------------------------------------------------------
-
+    /**
+     * <p>accept.</p>
+     *
+     * @param url a {@link java.net.URL} object.
+     * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object.
+     * @throws java.io.IOException if any.
+     */
     public static void accept( URL url, ClassFileVisitor visitor )
         throws IOException
     {
@@ -77,9 +75,8 @@ public final class ClassFileVisitorUtils
             }
             catch ( URISyntaxException exception )
             {
-                IllegalArgumentException e = new IllegalArgumentException( "Cannot accept visitor on URL: " + url );
-                e.initCause( exception );
-                throw e;
+                throw new IllegalArgumentException( "Cannot accept visitor on URL: " + url,
+                        exception );
             }
         }
         else
@@ -93,25 +90,18 @@ public final class ClassFileVisitorUtils
     private static void acceptJar( URL url, ClassFileVisitor visitor )
         throws IOException
     {
-        JarInputStream in = new JarInputStream( url.openStream() );
-        try
+        try ( JarInputStream in = new JarInputStream( url.openStream() ) )
         {
-            JarEntry entry = null;
-
+            JarEntry entry;
             while ( ( entry = in.getNextJarEntry() ) != null )
             {
                 String name = entry.getName();
-
                 // ignore files like package-info.class and module-info.class
                 if ( name.endsWith( ".class" ) && name.indexOf( '-' ) == -1 )
                 {
                     visitClass( name, in, visitor );
                 }
             }
-        }
-        finally
-        {
-            in.close();
         }
     }
 
@@ -126,7 +116,7 @@ public final class ClassFileVisitorUtils
         DirectoryScanner scanner = new DirectoryScanner();
 
         scanner.setBasedir( directory );
-        scanner.setIncludes( CLASS_INCLUDES );
+        scanner.setIncludes( new String[] { "**/*.class" } );
 
         scanner.scan();
 
@@ -137,15 +127,10 @@ public final class ClassFileVisitorUtils
             path = path.replace( File.separatorChar, '/' );
 
             File file = new File( directory, path );
-            FileInputStream in = new FileInputStream( file );
 
-            try
+            try ( InputStream in = new FileInputStream( file ) )
             {
                 visitClass( path, in, visitor );
-            }
-            finally
-            {
-                in.close();
             }
         }
     }

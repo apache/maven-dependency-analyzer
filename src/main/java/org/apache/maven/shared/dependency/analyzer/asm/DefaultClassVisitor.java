@@ -34,13 +34,10 @@ import org.objectweb.asm.signature.SignatureVisitor;
  * Inspired by <code>org.objectweb.asm.depend.DependencyVisitor</code> in the ASM dependencies example.
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public class DefaultClassVisitor
     extends ClassVisitor
 {
-    // fields -----------------------------------------------------------------
-
     private final ResultCollector resultCollector;
 
     private final SignatureVisitor signatureVisitor;
@@ -51,8 +48,15 @@ public class DefaultClassVisitor
 
     private final MethodVisitor methodVisitor;
 
-    // constructors -----------------------------------------------------------
-
+    /**
+     * <p>Constructor for DefaultClassVisitor.</p>
+     *
+     * @param signatureVisitor a {@link org.objectweb.asm.signature.SignatureVisitor} object.
+     * @param annotationVisitor a {@link org.objectweb.asm.AnnotationVisitor} object.
+     * @param fieldVisitor a {@link org.objectweb.asm.FieldVisitor} object.
+     * @param methodVisitor a {@link org.objectweb.asm.MethodVisitor} object.
+     * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
+     */
     public DefaultClassVisitor( SignatureVisitor signatureVisitor, AnnotationVisitor annotationVisitor,
                                 FieldVisitor fieldVisitor, MethodVisitor methodVisitor,
                                 ResultCollector resultCollector )
@@ -65,6 +69,16 @@ public class DefaultClassVisitor
         this.resultCollector = resultCollector;
     }
 
+    /**
+     * <p>visit.</p>
+     *
+     * @param version a int.
+     * @param access a int.
+     * @param name a {@link java.lang.String} object.
+     * @param signature a {@link java.lang.String} object.
+     * @param superName a {@link java.lang.String} object.
+     * @param interfaces an array of {@link java.lang.String} objects.
+     */
     public void visit( final int version, final int access, final String name, final String signature,
                        final String superName, final String[] interfaces )
     {
@@ -79,6 +93,7 @@ public class DefaultClassVisitor
         }
     }
 
+    /** {@inheritDoc} */
     public AnnotationVisitor visitAnnotation( final String desc, final boolean visible )
     {
         resultCollector.addDesc( desc );
@@ -86,6 +101,7 @@ public class DefaultClassVisitor
         return annotationVisitor;
     }
 
+    /** {@inheritDoc} */
     public FieldVisitor visitField( final int access, final String name, final String desc, final String signature,
                                     final Object value )
     {
@@ -106,6 +122,16 @@ public class DefaultClassVisitor
         return fieldVisitor;
     }
 
+    /**
+     * <p>visitMethod.</p>
+     *
+     * @param access a int.
+     * @param name a {@link java.lang.String} object.
+     * @param desc a {@link java.lang.String} object.
+     * @param signature a {@link java.lang.String} object.
+     * @param exceptions an array of {@link java.lang.String} objects.
+     * @return a {@link org.objectweb.asm.MethodVisitor} object.
+     */
     public MethodVisitor visitMethod( final int access, final String name, final String desc, final String signature,
                                       final String[] exceptions )
     {
@@ -123,17 +149,17 @@ public class DefaultClassVisitor
         return methodVisitor;
     }
 
+    /** {@inheritDoc} */
     public void visitNestHost( final String nestHost )
     {
         resultCollector.addName( nestHost );
     }
 
+    /** {@inheritDoc} */
     public void visitNestMember( final String nestMember )
     {
         resultCollector.addName( nestMember );
     }
-
-    // private methods --------------------------------------------------------
 
     private void addSignature( final String signature )
     {
@@ -150,6 +176,4 @@ public class DefaultClassVisitor
             new SignatureReader( signature ).acceptType( signatureVisitor );
         }
     }
-
-
 }

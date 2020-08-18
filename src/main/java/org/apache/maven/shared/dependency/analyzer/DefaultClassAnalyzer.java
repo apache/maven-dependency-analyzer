@@ -27,17 +27,16 @@ import java.util.zip.ZipException;
 import org.codehaus.plexus.component.annotations.Component;
 
 /**
- *
+ * <p>DefaultClassAnalyzer class.</p>
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 @Component( role = ClassAnalyzer.class )
 public class DefaultClassAnalyzer
     implements ClassAnalyzer
 {
-    // ClassAnalyzer methods --------------------------------------------------
 
+    /** {@inheritDoc} */
     public Set<String> analyze( URL url )
         throws IOException
     {

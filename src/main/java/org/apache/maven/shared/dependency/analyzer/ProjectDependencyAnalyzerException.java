@@ -20,28 +20,34 @@ package org.apache.maven.shared.dependency.analyzer;
  */
 
 /**
- * 
- * 
+ * <p>ProjectDependencyAnalyzerException class.</p>
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public class ProjectDependencyAnalyzerException
     extends Exception
 {
-    // constants --------------------------------------------------------------
-
     /**
      * The serialisation unique ID.
      */
     private static final long serialVersionUID = -5954447543668196977L;
 
-    // constructors -----------------------------------------------------------
-
+    /**
+     * <p>Constructor for ProjectDependencyAnalyzerException.</p>
+     *
+     * @param message a {@link java.lang.String} object.
+     */
     public ProjectDependencyAnalyzerException( String message )
     {
         super( message );
     }
 
+    /**
+     * <p>Constructor for ProjectDependencyAnalyzerException.</p>
+     *
+     * @param message a {@link java.lang.String} object.
+     * @param cause a {@link java.lang.Throwable} object.
+     */
     public ProjectDependencyAnalyzerException( String message, Throwable cause )
     {
         super( message, cause );

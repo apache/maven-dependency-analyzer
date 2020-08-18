@@ -37,28 +37,21 @@ import java.util.Set;
  * <a href="DependencyVisitor.html">DependencyVisitor</a>.
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  * @see #getDependencies()
  */
 public class DependencyClassFileVisitor
     implements ClassFileVisitor
 {
-    // fields -----------------------------------------------------------------
-
     private final ResultCollector resultCollector = new ResultCollector();
 
-    // constructors -----------------------------------------------------------
-
+    /**
+     * <p>Constructor for DependencyClassFileVisitor.</p>
+     */
     public DependencyClassFileVisitor()
     {
     }
 
-    // ClassFileVisitor methods -----------------------------------------------
-
-    /*
-     * @see org.apache.maven.shared.dependency.analyzer.ClassFileVisitor#visitClass(java.lang.String,
-     *      java.io.InputStream)
-     */
+    /** {@inheritDoc} */
     public void visitClass( String className, InputStream in )
     {
         try
@@ -93,9 +86,9 @@ public class DependencyClassFileVisitor
         }
     }
 
-    // public methods ---------------------------------------------------------
-
     /**
+     * <p>getDependencies.</p>
+     *
      * @return the set of classes referenced by visited class files
      */
     public Set<String> getDependencies()

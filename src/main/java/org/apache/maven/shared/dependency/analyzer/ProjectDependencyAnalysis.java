@@ -30,9 +30,8 @@ import org.apache.maven.artifact.Artifact;
 
 /**
  * Project dependencies analysis result.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public class ProjectDependencyAnalysis
 {
@@ -46,14 +45,21 @@ public class ProjectDependencyAnalysis
 
     private final Set<Artifact> testArtifactsWithNonTestScope;
 
-    // constructors -----------------------------------------------------------
-
+    /**
+     * <p>Constructor for ProjectDependencyAnalysis.</p>
+     */
     public ProjectDependencyAnalysis()
     {
         this( null, null, null, null );
     }
 
-    // constructor to maintain compatibility with old API
+    /**
+     * <p>Constructor for ProjectDependencyAnalysis to maintain compatibility with old API</p>
+     *
+     * @param usedDeclaredArtifacts a {@link java.util.Set} object.
+     * @param usedUndeclaredArtifacts a {@link java.util.Set} object.
+     * @param unusedDeclaredArtifacts a {@link java.util.Set} object.
+     */
     public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
                                       Set<Artifact> unusedDeclaredArtifacts )
     {
@@ -63,6 +69,14 @@ public class ProjectDependencyAnalysis
         this.testArtifactsWithNonTestScope = new HashSet<>();
     }
 
+    /**
+     * <p>Constructor for ProjectDependencyAnalysis.</p>
+     *
+     * @param usedDeclaredArtifacts a {@link java.util.Set} object.
+     * @param usedUndeclaredArtifacts a {@link java.util.Set} object.
+     * @param unusedDeclaredArtifacts a {@link java.util.Set} object.
+     * @param testArtifactsWithNonTestScope a {@link java.util.Set} object.
+     */
     public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
                                       Set<Artifact> unusedDeclaredArtifacts,
                                       Set<Artifact> testArtifactsWithNonTestScope )
@@ -73,11 +87,10 @@ public class ProjectDependencyAnalysis
         this.testArtifactsWithNonTestScope = safeCopy( testArtifactsWithNonTestScope );
     }
 
-    // public methods ---------------------------------------------------------
-
     /**
      * Used and declared artifacts.
-     * @return {@link Artifact}
+     *
+     * @return {@link org.apache.maven.artifact.Artifact}
      */
     public Set<Artifact> getUsedDeclaredArtifacts()
     {
@@ -86,7 +99,8 @@ public class ProjectDependencyAnalysis
 
     /**
      * Used but not declared artifacts.
-     * @return {@link Artifact}
+     *
+     * @return {@link org.apache.maven.artifact.Artifact}
      */
     public Set<Artifact> getUsedUndeclaredArtifacts()
     {
@@ -95,7 +109,8 @@ public class ProjectDependencyAnalysis
 
     /**
      * Unused but declared artifacts.
-     * @return {@link Artifact}
+     *
+     * @return {@link org.apache.maven.artifact.Artifact}
      */
     public Set<Artifact> getUnusedDeclaredArtifacts()
     {
@@ -104,7 +119,8 @@ public class ProjectDependencyAnalysis
 
     /**
      * Test Artifacts that have a non-test scope
-     * @return {@link Artifact}
+     *
+     * @return {@link org.apache.maven.artifact.Artifact}
      */
     public Set<Artifact> getTestArtifactsWithNonTestScope()
     {
@@ -113,13 +129,13 @@ public class ProjectDependencyAnalysis
 
     /**
      * Filter not-compile scoped artifacts from unused declared.
-     * 
+     *
      * @return updated project dependency analysis
      * @since 1.3
      */
     public ProjectDependencyAnalysis ignoreNonCompile()
     {
-        Set<Artifact> filteredUnusedDeclared = new HashSet<Artifact>( unusedDeclaredArtifacts );
+        Set<Artifact> filteredUnusedDeclared = new HashSet<>( unusedDeclaredArtifacts );
         for ( Iterator<Artifact> iter = filteredUnusedDeclared.iterator(); iter.hasNext(); )
         {
             Artifact artifact = iter.next();
@@ -136,23 +152,25 @@ public class ProjectDependencyAnalysis
     /**
      * Force use status of some declared dependencies, to manually fix consequences of bytecode-level analysis which
      * happens to not detect some effective use (constants, annotation with source-retention, javadoc).
-     * 
+     *
      * @param forceUsedDependencies dependencies to move from "unused-declared" to "used-declared", with
-     *            <code>groupId:artifactId</code> format
+     *                              <code>groupId:artifactId</code> format
      * @return updated project dependency analysis
      * @throws ProjectDependencyAnalyzerException if dependencies forced were either not declared or already detected as
-     *             used
+     *                                            used
      * @since 1.3
      */
+    @SuppressWarnings( "UnusedReturnValue" )
     public ProjectDependencyAnalysis forceDeclaredDependenciesUsage( String[] forceUsedDependencies )
         throws ProjectDependencyAnalyzerException
     {
-        Set<String> forced = new HashSet<String>( Arrays.asList( forceUsedDependencies ) );
+        Set<String> forced = new HashSet<>( Arrays.asList( forceUsedDependencies ) );
 
-        Set<Artifact> forcedUnusedDeclared = new HashSet<Artifact>( unusedDeclaredArtifacts );
-        Set<Artifact> forcedUsedDeclared = new HashSet<Artifact>( usedDeclaredArtifacts );
+        Set<Artifact> forcedUnusedDeclared = new HashSet<>( unusedDeclaredArtifacts );
+        Set<Artifact> forcedUsedDeclared = new HashSet<>( usedDeclaredArtifacts );
 
-        for ( Iterator<Artifact> iter = forcedUnusedDeclared.iterator(); iter.hasNext(); )
+        Iterator<Artifact> iter = forcedUnusedDeclared.iterator();
+        while ( iter.hasNext() )
         {
             Artifact artifact = iter.next();
 
@@ -167,7 +185,7 @@ public class ProjectDependencyAnalysis
         if ( !forced.isEmpty() )
         {
             // trying to force dependencies as used-declared which were not declared or already detected as used
-            Set<String> used = new HashSet<String>();
+            Set<String> used = new HashSet<>();
             for ( Artifact artifact : usedDeclaredArtifacts )
             {
                 String id = artifact.getGroupId() + ':' + artifact.getArtifactId();
@@ -197,10 +215,10 @@ public class ProjectDependencyAnalysis
                 testArtifactsWithNonTestScope );
     }
 
-    // Object methods ---------------------------------------------------------
-
-    /*
-     * @see java.lang.Object#hashCode()
+    /**
+     * <p>hashCode.</p>
+     *
+     * @return a int.
      */
     public int hashCode()
     {
@@ -212,9 +230,7 @@ public class ProjectDependencyAnalysis
         return hashCode;
     }
 
-    /*
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     public boolean equals( Object object )
     {
         if ( object instanceof ProjectDependencyAnalysis )
@@ -230,8 +246,10 @@ public class ProjectDependencyAnalysis
         return false;
     }
 
-    /*
-     * @see java.lang.Object#toString()
+    /**
+     * <p>toString.</p>
+     *
+     * @return a {@link java.lang.String} object.
      */
     public String toString()
     {
@@ -285,6 +303,6 @@ public class ProjectDependencyAnalysis
     private Set<Artifact> safeCopy( Set<Artifact> set )
     {
         return ( set == null ) ? Collections.<Artifact>emptySet()
-                        : Collections.unmodifiableSet( new LinkedHashSet<Artifact>( set ) );
+                        : Collections.unmodifiableSet( new LinkedHashSet<>( set ) );
     }
 }

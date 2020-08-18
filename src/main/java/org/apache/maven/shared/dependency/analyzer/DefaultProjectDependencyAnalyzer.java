@@ -38,15 +38,14 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 
 /**
+ * <p>DefaultProjectDependencyAnalyzer class.</p>
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 @Component( role = ProjectDependencyAnalyzer.class )
 public class DefaultProjectDependencyAnalyzer
     implements ProjectDependencyAnalyzer
 {
-    // fields -----------------------------------------------------------------
-
     /**
      * ClassAnalyzer
      */
@@ -59,11 +58,7 @@ public class DefaultProjectDependencyAnalyzer
     @Requirement
     private DependencyAnalyzer dependencyAnalyzer;
 
-    // ProjectDependencyAnalyzer methods --------------------------------------
-
-    /*
-     * @see org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzer#analyze(org.apache.maven.project.MavenProject)
-     */
+    /** {@inheritDoc} */
     public ProjectDependencyAnalysis analyze( MavenProject project )
         throws ProjectDependencyAnalyzerException
     {
@@ -81,13 +76,13 @@ public class DefaultProjectDependencyAnalyzer
 
             Set<Artifact> testOnlyArtifacts = buildUsedArtifacts( artifactClassMap, testOnlyDependencyClasses );
 
-            Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<Artifact>( declaredArtifacts );
+            Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<>( declaredArtifacts );
             usedDeclaredArtifacts.retainAll( usedArtifacts );
 
-            Set<Artifact> usedUndeclaredArtifacts = new LinkedHashSet<Artifact>( usedArtifacts );
+            Set<Artifact> usedUndeclaredArtifacts = new LinkedHashSet<>( usedArtifacts );
             usedUndeclaredArtifacts = removeAll( usedUndeclaredArtifacts, declaredArtifacts );
 
-            Set<Artifact> unusedDeclaredArtifacts = new LinkedHashSet<Artifact>( declaredArtifacts );
+            Set<Artifact> unusedDeclaredArtifacts = new LinkedHashSet<>( declaredArtifacts );
             unusedDeclaredArtifacts = removeAll( unusedDeclaredArtifacts, usedArtifacts );
 
             Set<Artifact> testArtifactsWithNonTestScope = getTestArtifactsWithNonTestScope( testOnlyArtifacts );
@@ -111,7 +106,7 @@ public class DefaultProjectDependencyAnalyzer
      */
     private Set<Artifact> removeAll( Set<Artifact> start, Set<Artifact> remove )
     {
-        Set<Artifact> results = new LinkedHashSet<Artifact>( start.size() );
+        Set<Artifact> results = new LinkedHashSet<>( start.size() );
 
         for ( Artifact artifact : start )
         {
@@ -137,7 +132,7 @@ public class DefaultProjectDependencyAnalyzer
 
     private Set<Artifact> getTestArtifactsWithNonTestScope( Set<Artifact> testOnlyArtifacts )
     {
-        Set<Artifact> nonTestScopeArtifacts = new LinkedHashSet<Artifact>();
+        Set<Artifact> nonTestScopeArtifacts = new LinkedHashSet<>();
 
         for ( Artifact artifact : testOnlyArtifacts )
         {
@@ -153,7 +148,7 @@ public class DefaultProjectDependencyAnalyzer
     private Map<Artifact, Set<String>> buildArtifactClassMap( MavenProject project )
         throws IOException
     {
-        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<Artifact, Set<String>>();
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
 
         @SuppressWarnings( "unchecked" )
         Set<Artifact> dependencyArtifacts = project.getArtifacts();
@@ -165,13 +160,12 @@ public class DefaultProjectDependencyAnalyzer
             if ( file != null && file.getName().endsWith( ".jar" ) )
             {
                 // optimized solution for the jar case
-                JarFile jarFile = new JarFile( file );
 
-                try
+                try ( JarFile jarFile = new JarFile( file ) )
                 {
                     Enumeration<JarEntry> jarEntries = jarFile.entries();
 
-                    Set<String> classes = new HashSet<String>();
+                    Set<String> classes = new HashSet<>();
 
                     while ( jarEntries.hasMoreElements() )
                     {
@@ -185,17 +179,6 @@ public class DefaultProjectDependencyAnalyzer
                     }
 
                     artifactClassMap.put( artifact, classes );
-                }
-                finally
-                {
-                    try
-                    {
-                        jarFile.close();
-                    }
-                    catch ( IOException ignore )
-                    {
-                        // ingore
-                    }
                 }
             }
             else if ( file != null && file.isDirectory() )
@@ -212,15 +195,13 @@ public class DefaultProjectDependencyAnalyzer
 
     private Set<String> buildTestDependencyClasses( MavenProject project ) throws IOException
     {
-        Set<String> nonTestDependencyClasses = new HashSet<>();
-        Set<String> testDependencyClasses = new HashSet<>();
         Set<String> testOnlyDependencyClasses = new HashSet<>();
 
         String outputDirectory = project.getBuild().getOutputDirectory();
-        nonTestDependencyClasses.addAll( buildDependencyClasses( outputDirectory ) );
+        Set<String> nonTestDependencyClasses = new HashSet<>( buildDependencyClasses( outputDirectory ) );
 
         String testOutputDirectory = project.getBuild().getTestOutputDirectory();
-        testDependencyClasses.addAll( buildDependencyClasses( testOutputDirectory ) );
+        Set<String> testDependencyClasses = new HashSet<>( buildDependencyClasses( testOutputDirectory ) );
 
         for ( String testString : testDependencyClasses )
         {
@@ -236,10 +217,9 @@ public class DefaultProjectDependencyAnalyzer
     private Set<String> buildDependencyClasses( MavenProject project )
         throws IOException
     {
-        Set<String> dependencyClasses = new HashSet<String>();
 
         String outputDirectory = project.getBuild().getOutputDirectory();
-        dependencyClasses.addAll( buildDependencyClasses( outputDirectory ) );
+        Set<String> dependencyClasses = new HashSet<>( buildDependencyClasses( outputDirectory ) );
 
         String testOutputDirectory = project.getBuild().getTestOutputDirectory();
         dependencyClasses.addAll( buildDependencyClasses( testOutputDirectory ) );
@@ -271,7 +251,7 @@ public class DefaultProjectDependencyAnalyzer
     private Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap,
                                               Set<String> dependencyClasses )
     {
-        Set<Artifact> usedArtifacts = new HashSet<Artifact>();
+        Set<Artifact> usedArtifacts = new HashSet<>();
 
         for ( String className : dependencyClasses )
         {

@@ -25,18 +25,22 @@ import java.util.Set;
 
 /**
  * Gets the set of classes contained in a library given either as a jar file or an exploded directory.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public interface ClassAnalyzer
 {
-    // fields -----------------------------------------------------------------
-
+    /** Constant <code>ROLE="ClassAnalyzer.class.getName()"</code> */
+    @Deprecated
     String ROLE = ClassAnalyzer.class.getName();
 
-    // public methods ---------------------------------------------------------
-
+    /**
+     * <p>analyze.</p>
+     *
+     * @param url a {@link java.net.URL} object.
+     * @return a {@link java.util.Set} object.
+     * @throws java.io.IOException if any.
+     */
     Set<String> analyze( URL url )
         throws IOException;
 }

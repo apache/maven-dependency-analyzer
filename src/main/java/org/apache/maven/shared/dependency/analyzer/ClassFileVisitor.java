@@ -22,12 +22,17 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.io.InputStream;
 
 /**
- * 
- * 
+ * <p>ClassFileVisitor interface.</p>
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public interface ClassFileVisitor
 {
+    /**
+     * <p>visitClass.</p>
+     *
+     * @param className a {@link java.lang.String} object.
+     * @param in a {@link java.io.InputStream} object.
+     */
     void visitClass( String className, InputStream in );
 }

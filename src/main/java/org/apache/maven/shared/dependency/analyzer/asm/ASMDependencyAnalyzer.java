@@ -28,20 +28,15 @@ import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.codehaus.plexus.component.annotations.Component;
 
 /**
- * ASMDependencyAnalyzer 
- * 
+ * ASMDependencyAnalyzer
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 @Component( role = DependencyAnalyzer.class )
 public class ASMDependencyAnalyzer
     implements DependencyAnalyzer
 {
-    // DependencyAnalyzer methods ---------------------------------------------
-
-    /*
-     * @see org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer#analyze(java.net.URL)
-     */
+    /** {@inheritDoc} */
     public Set<String> analyze( URL url )
         throws IOException
     {

@@ -25,38 +25,34 @@ import java.util.Set;
 
 /**
  * Simply collects the set of visited classes.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  * @see #getClasses()
  */
 public class CollectorClassFileVisitor
     implements ClassFileVisitor
 {
-    // fields -----------------------------------------------------------------
-
     private final Set<String> classes;
 
-    // constructors -----------------------------------------------------------
-
+    /**
+     * <p>Constructor for CollectorClassFileVisitor.</p>
+     */
     public CollectorClassFileVisitor()
     {
-        classes = new HashSet<String>();
+        classes = new HashSet<>();
     }
 
-    // ClassFileVisitor methods -----------------------------------------------
-
-    /*
-     * @see org.apache.maven.shared.dependency.analyzer.ClassFileVisitor#visitClass(java.lang.String,
-     *      java.io.InputStream)
-     */
+    /** {@inheritDoc} */
     public void visitClass( String className, InputStream in )
     {
         classes.add( className );
     }
 
-    // public methods ---------------------------------------------------------
-
+    /**
+     * <p>Getter for the field <code>classes</code>.</p>
+     *
+     * @return a {@link java.util.Set} object.
+     */
     public Set<String> getClasses()
     {
         return classes;
