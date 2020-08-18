@@ -23,12 +23,9 @@ package jarWithNoDependencies;
  * 
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public class Project
 {
-    // constructors -----------------------------------------------------------
-
     public Project()
     {
         // no-op

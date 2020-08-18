@@ -1,16 +1,4 @@
 package org.apache.maven.shared.dependency.analyzer;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-
-import org.apache.commons.lang3.JavaVersion;
-import org.apache.commons.lang3.SystemUtils;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -30,6 +18,7 @@ import org.apache.commons.lang3.SystemUtils;
  * under the License.
  */
 
+import org.apache.commons.lang3.JavaVersion;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.ArtifactHandler;
@@ -44,18 +33,25 @@ import org.apache.maven.shared.test.plugin.RepositoryTool;
 import org.apache.maven.shared.test.plugin.TestToolsException;
 import org.codehaus.plexus.PlexusTestCase;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
+import static org.apache.commons.lang3.SystemUtils.isJavaVersionAtLeast;
+
 /**
  * Tests <code>DefaultProjectDependencyAnalyzer</code>.
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  * @see DefaultProjectDependencyAnalyzer
  */
 public class DefaultProjectDependencyAnalyzerTest
     extends PlexusTestCase
 {
-    // fields -----------------------------------------------------------------
-
     private BuildTool buildTool;
 
     private ProjectTool projectTool;
@@ -63,8 +59,6 @@ public class DefaultProjectDependencyAnalyzerTest
     private ProjectDependencyAnalyzer analyzer;
 
     private static File localRepo;
-
-    // TestCase methods -------------------------------------------------------
 
     /*
      * @see org.codehaus.plexus.PlexusTestCase#setUp()
@@ -121,7 +115,7 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testJava8methodRefs()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        if ( !SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        if ( !isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
         {
             return;
         }
@@ -135,7 +129,7 @@ public class DefaultProjectDependencyAnalyzerTest
 
         Artifact project1 = createArtifact( "commons-io", "commons-io", "jar", "2.4", "compile" );
         Artifact project2 = createArtifact( "commons-lang", "commons-lang", "jar", "2.6", "compile" );
-        Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>( Arrays.asList( project1, project2 ) );
+        Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( project1, project2 ) );
 
         ProjectDependencyAnalysis expectedAnalysis =
             new ProjectDependencyAnalysis( usedDeclaredArtifacts, new HashSet<Artifact>(), new HashSet<Artifact>(),
@@ -147,7 +141,7 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testInlinedStaticReference()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        if ( !SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        if ( !isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
         {
             return;
         }
@@ -242,9 +236,9 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
 
         ProjectDependencyAnalysis expectedAnalysis;
-        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        if ( isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
         {
-            Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>( Arrays.asList( project1, junit ) );
+            Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( project1, junit ) );
             expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null, null );
         }
         else
@@ -292,7 +286,7 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "compile" );
 
         ProjectDependencyAnalysis expectedAnalysis;
-        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        if ( isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
         {
             Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( artifact1, junit ) );
             Set<Artifact> nonTestScopedTestArtifacts = Collections.singleton( junit );
@@ -325,7 +319,7 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "runtime" );
 
         ProjectDependencyAnalysis expectedAnalysis;
-        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        if ( isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
         {
             Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( artifact1, junit ) );
             expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
@@ -377,7 +371,7 @@ public class DefaultProjectDependencyAnalyzerTest
             throws TestToolsException, ProjectDependencyAnalyzerException
     {
         // java.lang.annotation.ElementType.TYPE_USE introduced with Java 1.8
-        if ( !SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        if ( !isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
         {
             return;
         }
@@ -404,7 +398,7 @@ public class DefaultProjectDependencyAnalyzerTest
             throws TestToolsException, ProjectDependencyAnalyzerException
     {
         // java.lang.annotation.ElementType.TYPE_USE introduced with Java 1.8
-        if ( !SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
+        if ( !isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
         {
             return;
         }
@@ -437,7 +431,7 @@ public class DefaultProjectDependencyAnalyzerTest
 
     private void compileProject(String pomPath, Properties properties) throws TestToolsException {
         File pom = getTestFile( "target/test-classes/", pomPath );
-        if ( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_9 )
+        if ( isJavaVersionAtLeast( JavaVersion.JAVA_9 )
              && !properties.containsKey( "maven.compiler.source" ) )
         {
           properties.put( "maven.compiler.source", "1.7" );

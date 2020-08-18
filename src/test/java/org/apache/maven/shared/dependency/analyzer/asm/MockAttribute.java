@@ -25,7 +25,6 @@ import org.objectweb.asm.Attribute;
  * A simple ASM <code>Attribute</code> for use in tests.
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public class MockAttribute extends Attribute
 {

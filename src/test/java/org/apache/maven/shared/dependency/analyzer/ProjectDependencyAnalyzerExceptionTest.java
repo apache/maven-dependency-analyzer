@@ -19,19 +19,19 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests <code>ProjectDependencyAnalyzerException</code>.
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  * @see ProjectDependencyAnalyzerException
  */
-public class ProjectDependencyAnalyzerExceptionTest extends TestCase
+public class ProjectDependencyAnalyzerExceptionTest
 {
-    // tests ------------------------------------------------------------------
-
+    @Test
     public void testConstructor()
     {
         ProjectDependencyAnalyzerException exception = new ProjectDependencyAnalyzerException( "a" );
@@ -39,6 +39,7 @@ public class ProjectDependencyAnalyzerExceptionTest extends TestCase
         assertEquals( "a", exception.getMessage() );
     }
 
+    @Test
     public void testConstructorWithThrowable()
     {
         Throwable throwable = new Exception();

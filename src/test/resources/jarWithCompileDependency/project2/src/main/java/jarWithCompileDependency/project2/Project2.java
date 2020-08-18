@@ -25,12 +25,9 @@ import jarWithCompileDependency.project1.Project1;
  * 
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public class Project2
 {
-    // constructors -----------------------------------------------------------
-
     public Project2()
     {
         Project1 project = new Project1();

@@ -24,78 +24,71 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.objectweb.asm.*;
 import org.objectweb.asm.signature.SignatureVisitor;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests <code>DependencyVisitor</code>.
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public class DependencyVisitorTest
-    extends TestCase
 {
-    private ResultCollector resultCollector = new ResultCollector();
-    private DefaultClassVisitor classVisitor;
+    private final ResultCollector resultCollector = new ResultCollector();
     private DefaultClassVisitor visitor;
-    private AnnotationVisitor annotationVisitor;
-    private SignatureVisitor signatureVisitor;
-    private FieldVisitor fieldVisitor;
     private MethodVisitor mv;
 
-    // TestCase methods -------------------------------------------------------
-
-    /*
-     * @see junit.framework.TestCase#setUp()
-     */
-    protected void setUp()
-            throws Exception
+    @Before
+    public void setUp()
     {
-        annotationVisitor = new DefaultAnnotationVisitor(resultCollector);
-        signatureVisitor = new DefaultSignatureVisitor(resultCollector);
-        fieldVisitor = new DefaultFieldVisitor(annotationVisitor, resultCollector);
-        mv = new DefaultMethodVisitor(annotationVisitor, signatureVisitor, resultCollector);
-        visitor = classVisitor = new DefaultClassVisitor(signatureVisitor, annotationVisitor,
-                fieldVisitor, mv, resultCollector);
+        AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor( resultCollector );
+        SignatureVisitor signatureVisitor = new DefaultSignatureVisitor( resultCollector );
+        FieldVisitor fieldVisitor = new DefaultFieldVisitor( annotationVisitor, resultCollector );
+        mv = new DefaultMethodVisitor( annotationVisitor, signatureVisitor, resultCollector);
+        visitor = new DefaultClassVisitor( signatureVisitor, annotationVisitor, fieldVisitor, mv, resultCollector);
     }
 
-    // visit tests ------------------------------------------------------------
-
+    @Test
     public void testVisitWithDefaultSuperclass()
     {
         // class a.b.c
-        classVisitor.visit( 50, 0, "a/b/c", null, "java/lang/Object", null );
+        visitor.visit( 50, 0, "a/b/c", null, "java/lang/Object", null );
 
         assertClasses( "java.lang.Object" );
     }
 
+    @Test
     public void testVisitWithSuperclass()
     {
         // class a.b.c
-        classVisitor.visit( 50, 0, "a/b/c", null, "x/y/z", null );
+        visitor.visit( 50, 0, "a/b/c", null, "x/y/z", null );
 
         assertClasses( "x.y.z" );
     }
 
+    @Test
     public void testVisitWithInterface()
     {
         // class a.b.c implements x.y.z
-        classVisitor.visit( 50, 0, "a/b/c", null, "java/lang/Object", new String[] { "x/y/z" } );
+        visitor.visit( 50, 0, "a/b/c", null, "java/lang/Object", new String[] { "x/y/z" } );
 
         assertClasses( "java.lang.Object", "x.y.z" );
     }
 
+    @Test
     public void testVisitWithInterfaces()
     {
         // class a.b.c implements p.q.r, x.y.z
-        classVisitor.visit( 50, 0, "a/b/c", null, "java/lang/Object", new String[] { "p/q/r", "x/y/z" } );
+        visitor.visit( 50, 0, "a/b/c", null, "java/lang/Object", new String[] { "p/q/r", "x/y/z" } );
 
         assertClasses( "java.lang.Object", "p.q.r", "x.y.z" );
     }
 
+    @Test
     public void testVisitWithUnboundedClassTypeParameter()
     {
         // class a.b.c<T>
@@ -106,6 +99,7 @@ public class DependencyVisitorTest
         assertClasses( "java.lang.Object" );
     }
 
+    @Test
     public void testVisitWithBoundedClassTypeParameter()
     {
         // class a.b.c<T extends x.y.z>
@@ -116,6 +110,7 @@ public class DependencyVisitorTest
         assertClasses( "java.lang.Object", "x.y.z" );
     }
 
+    @Test
     public void testVisitWithBoundedClassTypeParameters()
     {
         // class a.b.c<K extends p.q.r, V extends x.y.z>
@@ -126,6 +121,7 @@ public class DependencyVisitorTest
         assertClasses( "java.lang.Object", "p.q.r", "x.y.z" );
     }
 
+    @Test
     public void testVisitWithGenericInterface()
     {
         // class a.b.c implements p.q.r<x.y.z>
@@ -136,6 +132,7 @@ public class DependencyVisitorTest
         assertClasses( "java.lang.Object", "p.q.r", "x.y.z" );
     }
 
+    @Test
     public void testVisitWithInterfaceBound()
     {
         // class a.b.c<T> implements x.y.z<T>
@@ -148,6 +145,7 @@ public class DependencyVisitorTest
 
     // visitSource tests ------------------------------------------------------
 
+    @Test
     public void testVisitSource()
     {
         visitor.visitSource( null, null );
@@ -157,6 +155,7 @@ public class DependencyVisitorTest
 
     // visitOuterClass tests --------------------------------------------------
 
+    @Test
     public void testVisitOuterClass()
     {
         // class a.b.c
@@ -170,6 +169,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitOuterClassInMethod()
     {
         // class a.b.c
@@ -188,6 +188,7 @@ public class DependencyVisitorTest
 
     // visitAnnotation tests --------------------------------------------------
 
+    @Test
     public void testVisitAnnotation()
     {
         assertVisitor( visitor.visitAnnotation( "La/b/c;", false ) );
@@ -195,6 +196,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitAnnotationWithRuntimeVisibility()
     {
         assertVisitor( visitor.visitAnnotation( "La/b/c;", true ) );
@@ -204,6 +206,7 @@ public class DependencyVisitorTest
 
     // visitAttribute tests ---------------------------------------------------
 
+    @Test
     public void testVisitAttribute()
     {
         visitor.visitAttribute( new MockAttribute( "a" ) );
@@ -213,6 +216,7 @@ public class DependencyVisitorTest
 
     // visitInnerClass tests --------------------------------------------------
 
+    @Test
     public void testVisitInnerClass()
     {
         // TODO: ensure innerName is correct
@@ -223,6 +227,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitInnerClassAnonymous()
     {
         // class a.b.c { new class x.y.z { } }
@@ -233,6 +238,7 @@ public class DependencyVisitorTest
 
     // visitField tests -------------------------------------------------------
 
+    @Test
     public void testVisitField()
     {
         // a.b.c a
@@ -246,6 +252,7 @@ public class DependencyVisitorTest
     // {
     // }
 
+    @Test
     public void testVisitFieldArray()
     {
         // a.b.c[] a
@@ -254,6 +261,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitFieldGeneric()
     {
         // a.b.c<x.y.z> a
@@ -264,6 +272,7 @@ public class DependencyVisitorTest
 
     // visitMethod tests ------------------------------------------------------
 
+    @Test
     public void testVisitMethod()
     {
         // void a()
@@ -272,6 +281,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitMethodWithPrimitiveArgument()
     {
         // void a(int)
@@ -280,6 +290,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitMethodWithPrimitiveArrayArgument()
     {
         // void a(int[])
@@ -288,6 +299,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitMethodWithObjectArgument()
     {
         // void a(a.b.c)
@@ -296,6 +308,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodWithObjectArguments()
     {
         // void a(a.b.c, x.y.z)
@@ -304,6 +317,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c", "x.y.z" );
     }
 
+    @Test
     public void testVisitMethodWithObjectArrayArgument()
     {
         // void a(a.b.c[])
@@ -312,6 +326,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodWithGenericArgument()
     {
         // void a(a.b.c<x.y.z>)
@@ -320,6 +335,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c", "x.y.z" );
     }
 
+    @Test
     public void testVisitMethodWithPrimitiveReturnType()
     {
         // int a()
@@ -328,6 +344,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitMethodWithPrimitiveArrayReturnType()
     {
         // int[] a()
@@ -336,6 +353,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitMethodWithObjectReturnType()
     {
         // a.b.c a()
@@ -344,6 +362,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodWithObjectArrayReturnType()
     {
         // a.b.c[] a()
@@ -352,6 +371,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodWithException()
     {
         // void a() throws a.b.c
@@ -360,6 +380,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodWithExceptions()
     {
         // void a() throws a.b.c, x.y.z
@@ -370,6 +391,7 @@ public class DependencyVisitorTest
 
     // visitAnnotationDefault tests -------------------------------------------
 
+    @Test
     public void testVisitAnnotationDefault()
     {
         assertVisitor( mv.visitAnnotationDefault() );
@@ -378,6 +400,7 @@ public class DependencyVisitorTest
 
     // visitParameterAnnotation tests -------------------------------------------
 
+    @Test
     public void testVisitParameterAnnotation()
     {
         // @a.b.c
@@ -388,6 +411,7 @@ public class DependencyVisitorTest
 
     // visitCode tests --------------------------------------------------------
 
+    @Test
     public void testVisitCode()
     {
         mv.visitCode();
@@ -397,6 +421,7 @@ public class DependencyVisitorTest
 
     // visitFrame tests -------------------------------------------------------
 
+    @Test
     public void testVisitFrame()
     {
         mv.visitFrame( Opcodes.F_NEW, 0, new Object[0], 0, new Object[0] );
@@ -406,6 +431,7 @@ public class DependencyVisitorTest
 
     // visitInsn tests --------------------------------------------------------
 
+    @Test
     public void testVisitInsn()
     {
         mv.visitInsn( Opcodes.NOP );
@@ -415,6 +441,7 @@ public class DependencyVisitorTest
 
     // visitIntInsn tests -----------------------------------------------------
 
+    @Test
     public void testVisitIntInsn()
     {
         mv.visitIntInsn( Opcodes.BIPUSH, 0 );
@@ -424,6 +451,7 @@ public class DependencyVisitorTest
 
     // visitVarInsn tests -----------------------------------------------------
 
+    @Test
     public void testVisitVarInsn()
     {
         mv.visitVarInsn( Opcodes.ILOAD, 0 );
@@ -433,6 +461,7 @@ public class DependencyVisitorTest
 
     // visitTypeInsn tests ----------------------------------------------------
 
+    @Test
     public void testVisitTypeInsn()
     {
         mv.visitTypeInsn( Opcodes.NEW, "a/b/c" );
@@ -442,6 +471,7 @@ public class DependencyVisitorTest
 
     // visitFieldInsn tests ---------------------------------------------------
 
+    @Test
     public void testVisitFieldInsnWithPrimitive()
     {
         mv.visitFieldInsn( Opcodes.GETFIELD, "a/b/c", "x", "I" );
@@ -449,6 +479,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitFieldInsnWithObject()
     {
         mv.visitFieldInsn( Opcodes.GETFIELD, "a/b/c", "x", "Lx/y/z;" );
@@ -458,6 +489,7 @@ public class DependencyVisitorTest
 
     // visitMethodInsn tests --------------------------------------------------
 
+    @Test
     public void testVisitMethodInsn()
     {
         mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()V", false );
@@ -465,6 +497,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodInsnWithPrimitiveArgument()
     {
         mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(I)V", false );
@@ -472,6 +505,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodInsnWithPrimitiveArrayArgument()
     {
         mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "([I)V", false );
@@ -479,6 +513,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodInsnWithObjectArgument()
     {
         mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(Lx/y/z;)V", false );
@@ -486,6 +521,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodInsnWithObjectArguments()
     {
         mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(Lp/q/r;Lx/y/z;)V", false );
@@ -493,6 +529,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodInsnWithObjectArrayArgument()
     {
         mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "([Lx/y/z;)V", false );
@@ -500,6 +537,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodInsnWithPrimitiveReturnType()
     {
         mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()I", false );
@@ -507,6 +545,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodInsnWithPrimitiveArrayReturnType()
     {
         mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()[I", false );
@@ -514,6 +553,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodInsnWithObjectReturnType()
     {
         mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()Lx/y/z;", false );
@@ -521,6 +561,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitMethodInsnWithObjectArrayReturnType()
     {
         mv.visitMethodInsn( Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()[Lx/y/z;", false );
@@ -530,6 +571,7 @@ public class DependencyVisitorTest
 
     // visitJumpInsn tests ----------------------------------------------------
 
+    @Test
     public void testVisitJumpInsn()
     {
         mv.visitJumpInsn( Opcodes.IFEQ, new Label() );
@@ -539,6 +581,7 @@ public class DependencyVisitorTest
 
     // visitLabel tests -------------------------------------------------------
 
+    @Test
     public void testVisitLabel()
     {
         mv.visitLabel( new Label() );
@@ -548,6 +591,7 @@ public class DependencyVisitorTest
 
     // visitLdcInsn tests -----------------------------------------------------
 
+    @Test
     public void testVisitLdcInsnWithNonType()
     {
         mv.visitLdcInsn( "a" );
@@ -555,6 +599,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitLdcInsnWithPrimitiveType()
     {
         mv.visitLdcInsn( Type.INT_TYPE );
@@ -562,6 +607,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitLdcInsnWithObjectType()
     {
         mv.visitLdcInsn( Type.getType( "La/b/c;" ) );
@@ -571,6 +617,7 @@ public class DependencyVisitorTest
 
     // visitIincInsn tests ----------------------------------------------------
 
+    @Test
     public void testVisitIincInsn()
     {
         mv.visitIincInsn( 0, 1 );
@@ -580,15 +627,17 @@ public class DependencyVisitorTest
 
     // visitTableSwitchInsn tests ---------------------------------------------
 
+    @Test
     public void testVisitTableSwitchInsn()
     {
-        mv.visitTableSwitchInsn( 0, 1, new Label(), new Label[] { new Label() } );
+        mv.visitTableSwitchInsn( 0, 1, new Label(), new Label() );
 
         assertNoClasses();
     }
 
     // visitLookupSwitchInsn tests --------------------------------------------
 
+    @Test
     public void testVisitLookupSwitchInsn()
     {
         mv.visitLookupSwitchInsn( new Label(), new int[] { 0 }, new Label[] { new Label() } );
@@ -598,6 +647,7 @@ public class DependencyVisitorTest
 
     // visitMultiANewArrayInsn tests ------------------------------------------
 
+    @Test
     public void testVisitMultiANewArrayInsnWithPrimitive()
     {
         mv.visitMultiANewArrayInsn( "I", 2 );
@@ -605,6 +655,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitMultiANewArrayInsnWithObject()
     {
         mv.visitMultiANewArrayInsn( "La/b/c;", 2 );
@@ -614,6 +665,7 @@ public class DependencyVisitorTest
 
     // visitTryCatchBlock tests -----------------------------------------------
 
+    @Test
     public void testVisitTryCatchBlock()
     {
         mv.visitTryCatchBlock( new Label(), new Label(), new Label(), "a/b/c" );
@@ -621,6 +673,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitTryCatchBlockForFinally()
     {
         mv.visitTryCatchBlock( new Label(), new Label(), new Label(), null );
@@ -630,6 +683,7 @@ public class DependencyVisitorTest
 
     // visitLocalVariable tests -----------------------------------------------
 
+    @Test
     public void testVisitLocalVariableWithPrimitive()
     {
         mv.visitLocalVariable( "a", "I", null, new Label(), new Label(), 0 );
@@ -637,6 +691,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitLocalVariableWithPrimitiveArray()
     {
         mv.visitLocalVariable( "a", "[I", null, new Label(), new Label(), 0 );
@@ -644,6 +699,7 @@ public class DependencyVisitorTest
         assertNoClasses();
     }
 
+    @Test
     public void testVisitLocalVariableWithObject()
     {
         mv.visitLocalVariable( "a", "La/b/c;", null, new Label(), new Label(), 0 );
@@ -651,6 +707,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitLocalVariableWithObjectArray()
     {
         mv.visitLocalVariable( "a", "[La/b/c;", null, new Label(), new Label(), 0 );
@@ -658,6 +715,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c" );
     }
 
+    @Test
     public void testVisitLocalVariableWithGenericObject()
     {
         mv.visitLocalVariable( "a", "La/b/c;", "La/b/c<Lx/y/z;>;", new Label(), new Label(), 0 );
@@ -665,6 +723,7 @@ public class DependencyVisitorTest
         assertClasses( "a.b.c", "x.y.z" );
     }
 
+    @Test
     public void testVisitLocalVariableWithGenericObjectArray()
     {
         mv.visitLocalVariable( "a", "La/b/c;", "[La/b/c<Lx/y/z;>;", new Label(), new Label(), 0 );
@@ -674,6 +733,7 @@ public class DependencyVisitorTest
 
     // visitLineNumber tests --------------------------------------------------
 
+    @Test
     public void testVisitLineNumber()
     {
         mv.visitLineNumber( 0, new Label() );
@@ -683,14 +743,13 @@ public class DependencyVisitorTest
 
     // visitMaxs tests --------------------------------------------------------
 
+    @Test
     public void testVisitMaxs()
     {
         mv.visitMaxs( 0, 0 );
 
         assertNoClasses();
     }
-
-    // private methods --------------------------------------------------------
 
     private void assertVisitor( Object actualVisitor )
     {
@@ -719,7 +778,7 @@ public class DependencyVisitorTest
 
     private void assertClasses( String[] expectedClasses )
     {
-        assertClasses( new HashSet<String>( Arrays.asList( expectedClasses ) ) );
+        assertClasses( new HashSet<>( Arrays.asList( expectedClasses ) ) );
     }
 
     private void assertClasses( Set<String> expectedClasses )

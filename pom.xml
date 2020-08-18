@@ -60,6 +60,7 @@
 
   <properties>
     <mavenVersion>2.0.5</mavenVersion>
+    <surefire.version>2.22.2</surefire.version>
     <javaVersion>7</javaVersion>
     <project.build.outputTimestamp>2020-08-05T13:26:53Z</project.build.outputTimestamp>
   </properties>
@@ -73,6 +74,7 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.ow2.asm</groupId>

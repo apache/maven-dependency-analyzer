@@ -23,9 +23,7 @@ import jarWithTestDependency.project1.Project1;
 
 /**
  * 
- * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public class Project2
 {
@@ -33,8 +31,6 @@ public class Project2
     // value is copied, then nothing can be detected in bytecode
     // Not the case any more, since we sniff it from the constant pool
     public final static int STATUS_ERROR = junit.runner.TestRunListener.STATUS_ERROR;
-
-    // constructors -----------------------------------------------------------
 
     public Project2()
     {

@@ -20,12 +20,16 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  */
 
 import java.net.URL;
+import java.util.Set;
 
+import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
 
 public class ASMDependencyAnalyzerTest
 {
-    private ASMDependencyAnalyzer analyzer = new ASMDependencyAnalyzer(); 
+    private final DependencyAnalyzer analyzer = new ASMDependencyAnalyzer();
 
     @Test
     public void test() throws Exception
@@ -34,7 +38,9 @@ public class ASMDependencyAnalyzerTest
 
         String fileUrl = jarUrl.toString().substring( "jar:".length(), jarUrl.toString().indexOf( "!/" ) );
 
-        analyzer.analyze( new URL(fileUrl) );
+        Set<String> result = analyzer.analyze( new URL( fileUrl ) );
+
+        assertFalse( result.isEmpty() );
     }
 
 }

@@ -24,26 +24,25 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests <code>ProjectDependencyAnalysis</code>.
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  * @see ProjectDependencyAnalysis
  */
 public class ProjectDependencyAnalysisTest
-    extends TestCase
 {
-    // tests ------------------------------------------------------------------
-
+    @Test
     public void testConstructor()
     {
-        Set<Artifact> usedDeclaredArtifacts = new HashSet<Artifact>();
-        Set<Artifact> usedUndeclaredArtifacts = new HashSet<Artifact>();
-        Set<Artifact> unusedDeclaredArtifacts = new HashSet<Artifact>();
-        Set<Artifact> testArtifactsWithNonTestScope = new HashSet<Artifact>();
+        Set<Artifact> usedDeclaredArtifacts = new HashSet<>();
+        Set<Artifact> usedUndeclaredArtifacts = new HashSet<>();
+        Set<Artifact> unusedDeclaredArtifacts = new HashSet<>();
+        Set<Artifact> testArtifactsWithNonTestScope = new HashSet<>();
 
         ProjectDependencyAnalysis analysis =
             new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts,

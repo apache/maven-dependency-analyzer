@@ -21,14 +21,10 @@ package jarWithTestDependency.project1;
 
 /**
  * 
- * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  */
 public class Project1
 {
-    // constructors -----------------------------------------------------------
-
     public Project1()
     {
         // no-op

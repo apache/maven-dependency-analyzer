@@ -19,46 +19,37 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.maven.shared.dependency.analyzer.CollectorClassFileVisitor;
-
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests <code>CollectorClassFileVisitor</code>.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- * @version $Id$
  * @see CollectorClassFileVisitor
  */
 public class CollectorClassFileVisitorTest
-    extends TestCase
 {
-    // fields -----------------------------------------------------------------
-
     private CollectorClassFileVisitor visitor;
 
-    // TestCase thods ---------------------------------------------------------
-
-    /*
-     * @see junit.framework.TestCase#setUp()
-     */
-    protected void setUp()
-        throws Exception
+    @Before
+    public void setUp()
     {
         visitor = new CollectorClassFileVisitor();
     }
 
-    // tests ------------------------------------------------------------------
-
+    @Test
     public void testVisitClass()
     {
         visitor.visitClass( "a.b.c", null );
         visitor.visitClass( "x.y.z", null );
 
-        Set<String> expected = new HashSet<String>();
+        Set<String> expected = new HashSet<>();
         expected.add( "a.b.c" );
         expected.add( "x.y.z" );
 
