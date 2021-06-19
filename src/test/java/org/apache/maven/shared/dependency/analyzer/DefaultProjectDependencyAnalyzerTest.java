@@ -75,7 +75,6 @@ public class DefaultProjectDependencyAnalyzerTest
         throws Exception
     {
         super.setUp();
-
         buildTool = (BuildTool) lookup( BuildTool.ROLE );
 
         projectTool = (ProjectTool) lookup( ProjectTool.ROLE );
@@ -278,6 +277,20 @@ public class DefaultProjectDependencyAnalyzerTest
 
         // MSHARED-47: usedUndeclaredArtifacts=[xml-apis:xml-apis:jar:1.0.b2:compile]
         // assertEquals( expectedAnalysis, actualAnalysis );
+    }
+    
+    @Test
+    public void testJarWithDependencyUsedByTestAndModelCode()
+            throws TestToolsException, ProjectDependencyAnalyzerException {
+        
+        compileProject( "jarWithCompileScopedTestAndModelDependency/pom.xml" );
+
+        MavenProject project = getProject( "jarWithCompileScopedTestDependency/pom.xml" );
+
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project );
+        Set<Artifact> testArtifactsWithNonTestScope = actualAnalysis.getTestArtifactsWithNonTestScope();
+
+        assertTrue(testArtifactsWithNonTestScope.isEmpty());
     }
 
     @Test
@@ -500,7 +513,6 @@ public class DefaultProjectDependencyAnalyzerTest
         InvocationRequest request = buildTool.createBasicInvocationRequest( pom, properties, goals, log );
         request.setLocalRepositoryDirectory( localRepo );
         InvocationResult result = buildTool.executeMaven( request );
-
         assertNull( "Error compiling test project", result.getExecutionException() );
         assertEquals( "Error compiling test project", 0, result.getExitCode() );
     }
