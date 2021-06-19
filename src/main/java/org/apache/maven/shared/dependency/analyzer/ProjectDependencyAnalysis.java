@@ -56,9 +56,9 @@ public class ProjectDependencyAnalysis
     /**
      * <p>Constructor for ProjectDependencyAnalysis to maintain compatibility with old API</p>
      *
-     * @param usedDeclaredArtifacts a {@link java.util.Set} object.
-     * @param usedUndeclaredArtifacts a {@link java.util.Set} object.
-     * @param unusedDeclaredArtifacts a {@link java.util.Set} object.
+     * @param usedDeclaredArtifacts artifacts both used and declared
+     * @param usedUndeclaredArtifacts artifacts used but not declared
+     * @param unusedDeclaredArtifacts artifacts declared but not used
      */
     public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
                                       Set<Artifact> unusedDeclaredArtifacts )
@@ -72,10 +72,10 @@ public class ProjectDependencyAnalysis
     /**
      * <p>Constructor for ProjectDependencyAnalysis.</p>
      *
-     * @param usedDeclaredArtifacts a {@link java.util.Set} object.
-     * @param usedUndeclaredArtifacts a {@link java.util.Set} object.
-     * @param unusedDeclaredArtifacts a {@link java.util.Set} object.
-     * @param testArtifactsWithNonTestScope a {@link java.util.Set} object.
+     * @param usedDeclaredArtifacts artifacts both used and declared
+     * @param usedUndeclaredArtifacts artifacts used but not declared
+     * @param unusedDeclaredArtifacts artifacts declared but not used
+     * @param testArtifactsWithNonTestScope artifacts only used in tests but not declared with test scope
      */
     public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
                                       Set<Artifact> unusedDeclaredArtifacts,
@@ -88,9 +88,9 @@ public class ProjectDependencyAnalysis
     }
 
     /**
-     * Used and declared artifacts.
+     * Returns artifacts both used and declared.
      *
-     * @return {@link org.apache.maven.artifact.Artifact}
+     * @return artifacts both used and declared
      */
     public Set<Artifact> getUsedDeclaredArtifacts()
     {
@@ -98,9 +98,9 @@ public class ProjectDependencyAnalysis
     }
 
     /**
-     * Used but not declared artifacts.
+     * Returns artifacts used but not declared.
      *
-     * @return {@link org.apache.maven.artifact.Artifact}
+     * @return artifacts used but not declared
      */
     public Set<Artifact> getUsedUndeclaredArtifacts()
     {
@@ -108,9 +108,9 @@ public class ProjectDependencyAnalysis
     }
 
     /**
-     * Unused but declared artifacts.
+     * Returns artifacts declared but not used.
      *
-     * @return {@link org.apache.maven.artifact.Artifact}
+     * @return artifacts declared but not used
      */
     public Set<Artifact> getUnusedDeclaredArtifacts()
     {
@@ -118,9 +118,9 @@ public class ProjectDependencyAnalysis
     }
 
     /**
-     * Test Artifacts that have a non-test scope
+     * Returns artifacts only used in tests but not declared with test scope.
      *
-     * @return {@link org.apache.maven.artifact.Artifact}
+     * @return  artifacts only used in tests but not declared with test scope
      */
     public Set<Artifact> getTestArtifactsWithNonTestScope()
     {
@@ -128,7 +128,7 @@ public class ProjectDependencyAnalysis
     }
 
     /**
-     * Filter not-compile scoped artifacts from unused declared.
+     * Filter non-compile scoped artifacts from unused declared.
      *
      * @return updated project dependency analysis
      * @since 1.3
@@ -218,7 +218,7 @@ public class ProjectDependencyAnalysis
     /**
      * <p>hashCode.</p>
      *
-     * @return a int.
+     * @return an int
      */
     public int hashCode()
     {

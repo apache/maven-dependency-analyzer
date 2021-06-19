@@ -35,8 +35,8 @@ public interface DependencyAnalyzer
      * <p>analyze.</p>
      *
      * @param url the JAR file or directory to analyze
-     * @return a {@link java.util.Set} object
-     * @throws java.io.IOException if any
+     * @return the set of class names referenced by the library
+     * @throws IOException if an error occurs reading a JAR or .class file
      */
     Set<String> analyze( URL url )
         throws IOException;
