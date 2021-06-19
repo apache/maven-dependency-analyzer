@@ -27,22 +27,19 @@ import org.apache.maven.project.MavenProject;
  * <li>used and declared,</li>
  * <li>used but not declared,</li>
  * <li>not used but declared.</li>
+ * <li>used but declared in too broad a scope</li>
  * </ul>
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
 public interface ProjectDependencyAnalyzer
 {
-    /** Constant <code>ROLE="ProjectDependencyAnalyzer.class.getName"{trunked}</code> */
-    @Deprecated
-    String ROLE = ProjectDependencyAnalyzer.class.getName();
-
     /**
      * <p>analyze.</p>
      *
-     * @param project a {@link org.apache.maven.project.MavenProject} object.
-     * @return a {@link org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis} object.
-     * @throws org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException if any.
+     * @param project a {@link org.apache.maven.project.MavenProject} object
+     * @return a {@link org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis} object
+     * @throws org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException if any
      */
     ProjectDependencyAnalysis analyze( MavenProject project )
         throws ProjectDependencyAnalyzerException;

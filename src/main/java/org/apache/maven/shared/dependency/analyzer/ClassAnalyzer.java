@@ -30,16 +30,13 @@ import java.util.Set;
  */
 public interface ClassAnalyzer
 {
-    /** Constant <code>ROLE="ClassAnalyzer.class.getName()"</code> */
-    @Deprecated
-    String ROLE = ClassAnalyzer.class.getName();
 
     /**
      * <p>analyze.</p>
      *
-     * @param url a {@link java.net.URL} object.
-     * @return a {@link java.util.Set} object.
-     * @throws java.io.IOException if any.
+     * @param url the JAR file or directory to analyze
+     * @return a {@link java.util.Set} object
+     * @throws java.io.IOException if any
      */
     Set<String> analyze( URL url )
         throws IOException;
