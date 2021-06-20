@@ -20,18 +20,17 @@ package jarWithCompileDependency.project2;
  */
 
 import jarWithCompileDependency.project1.Project1;
-import com.google.common.base.Strings;
+import com.google.common.base.Preconditions;
 
 /**
  * 
  * 
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
-public class Project2
+public class Project2Test
 {
-    public Project2()
+    public Project2Test()
     {
-        Project1 project = new Project1();
-        System.out.println(Strings.emptyToNull("this"));
+        Preconditions.checkNotNull("");
     }
 }
