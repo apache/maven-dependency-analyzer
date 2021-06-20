@@ -184,7 +184,8 @@ public class DefaultProjectDependencyAnalyzerTest
 
         ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
         
-        assertTrue("Incorrectly classified Guava as testonly", actualAnalysis.getTestArtifactsWithNonTestScope().isEmpty());
+        assertTrue( "Incorrectly classified Guava as testonly",
+                   actualAnalysis.getTestArtifactsWithNonTestScope().isEmpty() );
 
         Artifact project1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
                                             "jarWithCompileDependency1", "jar", "1.0", "compile" );

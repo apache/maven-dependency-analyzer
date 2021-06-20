@@ -76,8 +76,8 @@ public class DefaultProjectDependencyAnalyzer
             Set<Artifact> usedArtifacts = buildUsedArtifacts( artifactClassMap, dependencyClasses );
             Set<Artifact> mainUsedArtifacts = buildUsedArtifacts( artifactClassMap, mainDependencyClasses );
             
-            Set<Artifact> testOnlyArtifacts = buildUsedArtifacts( artifactClassMap, testOnlyDependencyClasses );
-            testOnlyArtifacts = removeAll( testOnlyArtifacts, mainUsedArtifacts );
+            Set<Artifact> testArtifacts = buildUsedArtifacts( artifactClassMap, testOnlyDependencyClasses );
+            Set<Artifact> testOnlyArtifacts = removeAll( testArtifacts, mainUsedArtifacts );
             
             Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<>( declaredArtifacts );
             usedDeclaredArtifacts.retainAll( usedArtifacts );
