@@ -183,10 +183,14 @@ public class DefaultProjectDependencyAnalyzerTest
         }
 
         ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
+        
+        assertTrue( "Incorrectly classified Guava as testonly",
+                   actualAnalysis.getTestArtifactsWithNonTestScope().isEmpty() );
 
         Artifact project1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
                                             "jarWithCompileDependency1", "jar", "1.0", "compile" );
-        Set<Artifact> usedDeclaredArtifacts = Collections.singleton( project1 );
+        Artifact guava = createArtifact( "com.google.guava", "guava", "jar", "30.1.1-android", "compile" );
+        Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( project1, guava ) );
         ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
                 null );
 
@@ -237,7 +241,7 @@ public class DefaultProjectDependencyAnalyzerTest
         MavenProject project2 = getProject( "jarWithTestDependency/project2/pom.xml" );
 
         ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project2 );
-
+        
         Artifact project1 = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
                                             "jarWithTestDependency1", "jar", "1.0", "test" );
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
