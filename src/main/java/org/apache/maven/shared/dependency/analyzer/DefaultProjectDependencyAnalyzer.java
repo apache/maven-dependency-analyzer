@@ -67,15 +67,18 @@ public class DefaultProjectDependencyAnalyzer
             Map<Artifact, Set<String>> artifactClassMap = buildArtifactClassMap( project );
 
             Set<String> dependencyClasses = buildDependencyClasses( project );
+            Set<String> mainDependencyClasses = buildMainDependencyClasses( project );
 
             Set<String> testOnlyDependencyClasses = buildTestDependencyClasses( project );
 
             Set<Artifact> declaredArtifacts = buildDeclaredArtifacts( project );
 
             Set<Artifact> usedArtifacts = buildUsedArtifacts( artifactClassMap, dependencyClasses );
-
+            Set<Artifact> mainUsedArtifacts = buildUsedArtifacts( artifactClassMap, mainDependencyClasses );
+            
             Set<Artifact> testOnlyArtifacts = buildUsedArtifacts( artifactClassMap, testOnlyDependencyClasses );
-
+            testOnlyArtifacts = removeAll( testOnlyArtifacts, mainUsedArtifacts );
+            
             Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<>( declaredArtifacts );
             usedDeclaredArtifacts.retainAll( usedArtifacts );
 
@@ -223,6 +226,16 @@ public class DefaultProjectDependencyAnalyzer
 
         String testOutputDirectory = project.getBuild().getTestOutputDirectory();
         dependencyClasses.addAll( buildDependencyClasses( testOutputDirectory ) );
+
+        return dependencyClasses;
+    }
+    
+    private Set<String> buildMainDependencyClasses( MavenProject project )
+                    throws IOException
+    {
+
+        String outputDirectory = project.getBuild().getOutputDirectory();
+        Set<String> dependencyClasses = new HashSet<>( buildDependencyClasses( outputDirectory ) );
 
         return dependencyClasses;
     }
