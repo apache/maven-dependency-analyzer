@@ -41,7 +41,7 @@ public class DefaultAnnotationVisitor
      */
     public DefaultAnnotationVisitor( ResultCollector resultCollector )
     {
-        super( Opcodes.ASM8 );
+        super( Opcodes.ASM9 );
         this.resultCollector = resultCollector;
     }
 
