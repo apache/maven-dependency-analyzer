@@ -153,7 +153,6 @@ public class DefaultProjectDependencyAnalyzer
     {
         Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
 
-        @SuppressWarnings( "unchecked" )
         Set<Artifact> dependencyArtifacts = project.getArtifacts();
 
         for ( Artifact artifact : dependencyArtifacts )
@@ -250,7 +249,6 @@ public class DefaultProjectDependencyAnalyzer
 
     private Set<Artifact> buildDeclaredArtifacts( MavenProject project )
     {
-        @SuppressWarnings( "unchecked" )
         Set<Artifact> declaredArtifacts = project.getDependencyArtifacts();
 
         if ( declaredArtifacts == null )

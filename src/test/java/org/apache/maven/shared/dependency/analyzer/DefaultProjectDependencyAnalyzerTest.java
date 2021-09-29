@@ -18,8 +18,6 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import org.apache.commons.lang3.JavaVersion;
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.ArtifactHandler;
@@ -45,9 +43,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
-import static org.apache.commons.lang3.SystemUtils.isJavaVersionAtLeast;
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Tests <code>DefaultProjectDependencyAnalyzer</code>.
@@ -124,8 +119,6 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testJava8methodRefs()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        assumeTrue( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) );
-
         // Only visible through constant pool analysis (supported for JDK8+)
         compileProject( "java8methodRefs/pom.xml" );
 
@@ -138,8 +131,8 @@ public class DefaultProjectDependencyAnalyzerTest
         Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( project1, project2 ) );
 
         ProjectDependencyAnalysis expectedAnalysis =
-            new ProjectDependencyAnalysis( usedDeclaredArtifacts, new HashSet<Artifact>(), new HashSet<Artifact>(),
-                    new HashSet<Artifact>() );
+            new ProjectDependencyAnalysis( usedDeclaredArtifacts, new HashSet<>(), new HashSet<>(),
+                    new HashSet<>() );
 
         assertEquals( expectedAnalysis, actualAnalysis );
     }
@@ -148,8 +141,6 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testInlinedStaticReference()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        assumeTrue( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) );
-
         // Only visible through constant pool analysis (supported for JDK8+)
         compileProject( "inlinedStaticReference/pom.xml" );
 
@@ -161,8 +152,8 @@ public class DefaultProjectDependencyAnalyzerTest
         Set<Artifact> usedDeclaredArtifacts = Collections.singleton( project1 );
 
         ProjectDependencyAnalysis expectedAnalysis =
-            new ProjectDependencyAnalysis( usedDeclaredArtifacts, new HashSet<Artifact>(), new HashSet<Artifact>(),
-                    new HashSet<Artifact>() );
+            new ProjectDependencyAnalysis( usedDeclaredArtifacts, new HashSet<>(), new HashSet<>(),
+                    new HashSet<>() );
 
         assertEquals( expectedAnalysis, actualAnalysis );
     }
@@ -246,20 +237,8 @@ public class DefaultProjectDependencyAnalyzerTest
                                             "jarWithTestDependency1", "jar", "1.0", "test" );
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
 
-        ProjectDependencyAnalysis expectedAnalysis;
-        if ( isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
-        {
-            Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( project1, junit ) );
-            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null, null );
-        }
-        else
-        {
-            // With JDK 7 and earlier, not all deps are identified correctly
-            Set<Artifact> usedDeclaredArtifacts = Collections.singleton( project1 );
-            Set<Artifact> unusedDeclaredArtifacts = Collections.singleton( junit );
-            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, unusedDeclaredArtifacts,
-                    null );
-        }
+        Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( project1, junit ) );
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null, null );
 
         assertEquals( expectedAnalysis, actualAnalysis );
     }
@@ -298,22 +277,10 @@ public class DefaultProjectDependencyAnalyzerTest
                 "jarWithCompileScopedTestDependency1", "jar", "1.0", "test" );
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "compile" );
 
-        ProjectDependencyAnalysis expectedAnalysis;
-        if ( isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
-        {
-            Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( artifact1, junit ) );
-            Set<Artifact> nonTestScopedTestArtifacts = Collections.singleton( junit );
-            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
-                    nonTestScopedTestArtifacts );
-        }
-        else
-        {
-            // With JDK 7 and earlier, not all deps are identified correctly
-            Set<Artifact> usedDeclaredArtifacts = Collections.singleton( artifact1 );
-            Set<Artifact> unUsedDeclaredArtifacts = Collections.singleton( junit );
-            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, unUsedDeclaredArtifacts,
-                    null );
-        }
+        Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( artifact1, junit ) );
+        Set<Artifact> nonTestScopedTestArtifacts = Collections.singleton( junit );
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
+                nonTestScopedTestArtifacts );
 
         assertEquals( expectedAnalysis, actualAnalysis );
     }
@@ -332,21 +299,9 @@ public class DefaultProjectDependencyAnalyzerTest
                 "jarWithRuntimeScopedTestDependency1", "jar", "1.0", "test" );
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "runtime" );
 
-        ProjectDependencyAnalysis expectedAnalysis;
-        if ( isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) )
-        {
-            Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( artifact1, junit ) );
-            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
-                    null );
-        }
-        else
-        {
-            // With JDK 7 and earlier, not all deps are identified correctly
-            Set<Artifact> usedDeclaredArtifacts = Collections.singleton( artifact1 );
-            Set<Artifact> unUsedDeclaredArtifacts = Collections.singleton( junit );
-            expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, unUsedDeclaredArtifacts,
-                    null );
-        }
+        Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( artifact1, junit ) );
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
+                null );
 
         assertEquals( expectedAnalysis, actualAnalysis );
     }
@@ -386,9 +341,6 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testTypeUseAnnotationDependency()
             throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        // java.lang.annotation.ElementType.TYPE_USE introduced with Java 1.8
-        assumeTrue( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) );
-
         Properties properties = new Properties();
         properties.put( "maven.compiler.source", "1.8" );
         properties.put( "maven.compiler.target", "1.8" );
@@ -411,9 +363,6 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testTypeUseAnnotationDependencyOnLocalVariable()
             throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        // java.lang.annotation.ElementType.TYPE_USE introduced with Java 1.8
-        assumeTrue( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) );
-
         Properties properties = new Properties();
         properties.put( "maven.compiler.source", "1.8" );
         properties.put( "maven.compiler.target", "1.8" );
@@ -436,8 +385,6 @@ public class DefaultProjectDependencyAnalyzerTest
     public void testUnnamedPackageClassReference()
         throws TestToolsException, ProjectDependencyAnalyzerException
     {
-        assumeTrue( SystemUtils.isJavaVersionAtLeast( JavaVersion.JAVA_1_8 ) );
-
         // Only visible through constant pool analysis (supported for JDK8+)
         compileProject( "unnamedPackageClassReference/pom.xml" );
 
@@ -450,8 +397,8 @@ public class DefaultProjectDependencyAnalyzerTest
         Set<Artifact> unusedDeclaredArtifacts = Collections.singleton( dnsjava );
 
         ProjectDependencyAnalysis expectedAnalysis =
-            new ProjectDependencyAnalysis( new HashSet<Artifact>(), new HashSet<Artifact>(), unusedDeclaredArtifacts,
-                new HashSet<Artifact>() );
+            new ProjectDependencyAnalysis( new HashSet<>(), new HashSet<>(), unusedDeclaredArtifacts,
+                new HashSet<>() );
 
         assertEquals( expectedAnalysis, actualAnalysis );
     }
@@ -484,11 +431,10 @@ public class DefaultProjectDependencyAnalyzerTest
 
     private void compileProject(String pomPath, Properties properties) throws TestToolsException {
         File pom = getTestFile( "target/test-classes/", pomPath );
-        if ( isJavaVersionAtLeast( JavaVersion.JAVA_9 )
-             && !properties.containsKey( "maven.compiler.source" ) )
+        if ( !properties.containsKey( "maven.compiler.source" ) )
         {
-          properties.put( "maven.compiler.source", "1.7" );
-          properties.put( "maven.compiler.target", "1.7" );
+          properties.put( "maven.compiler.source", "1.8" );
+          properties.put( "maven.compiler.target", "1.8" );
         }
         
         String httpsProtocols = System.getProperty( "https.protocols" );

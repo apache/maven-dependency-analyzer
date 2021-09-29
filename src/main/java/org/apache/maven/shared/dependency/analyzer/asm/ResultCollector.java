@@ -32,7 +32,7 @@ import java.util.Set;
 public class ResultCollector
 {
 
-    private final Set<String> classes = new HashSet<String>();
+    private final Set<String> classes = new HashSet<>();
 
     /**
      * <p>getDependencies.</p>

@@ -758,7 +758,7 @@ public class DependencyVisitorTest
 
     private void assertNoClasses()
     {
-        assertClasses( Collections.<String>emptySet() );
+        assertClasses( Collections.emptySet() );
     }
 
     private void assertClasses( String element )

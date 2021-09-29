@@ -136,14 +136,7 @@ public class ProjectDependencyAnalysis
     public ProjectDependencyAnalysis ignoreNonCompile()
     {
         Set<Artifact> filteredUnusedDeclared = new HashSet<>( unusedDeclaredArtifacts );
-        for ( Iterator<Artifact> iter = filteredUnusedDeclared.iterator(); iter.hasNext(); )
-        {
-            Artifact artifact = iter.next();
-            if ( !artifact.getScope().equals( Artifact.SCOPE_COMPILE ) )
-            {
-                iter.remove();
-            }
-        }
+        filteredUnusedDeclared.removeIf( artifact -> !artifact.getScope().equals( Artifact.SCOPE_COMPILE ) );
 
         return new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, filteredUnusedDeclared,
                 testArtifactsWithNonTestScope );
@@ -302,7 +295,6 @@ public class ProjectDependencyAnalysis
 
     private Set<Artifact> safeCopy( Set<Artifact> set )
     {
-        return ( set == null ) ? Collections.<Artifact>emptySet()
-                        : Collections.unmodifiableSet( new LinkedHashSet<>( set ) );
+        return ( set == null ) ? Collections.emptySet() : Collections.unmodifiableSet( new LinkedHashSet<>( set ) );
     }
 }
