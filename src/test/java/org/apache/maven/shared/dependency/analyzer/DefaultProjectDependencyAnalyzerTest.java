@@ -43,6 +43,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -488,6 +489,11 @@ public class DefaultProjectDependencyAnalyzerTest
         Set<Artifact> expectedUsedUndeclaredArtifacts = Collections.singleton( xmlApis );
 
         assertEquals( expectedUsedUndeclaredArtifacts, actualAnalysis.getUsedUndeclaredArtifacts() );
+
+        Map<Artifact, Set<String>> expectedUsedUndeclaredArtifactsWithClasses =
+                Collections.singletonMap(xmlApis, Collections.singleton("org.apache.xmlcommons.Version") );
+
+        assertEquals( expectedUsedUndeclaredArtifactsWithClasses, actualAnalysis.getUsedUndeclaredArtifactsWithClasses() );
     }
 
     // private methods --------------------------------------------------------

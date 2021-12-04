@@ -119,6 +119,16 @@ public class ProjectDependencyAnalysis
     }
 
     /**
+     * Returns artifacts used but not declared.
+     *
+     * @return artifacts used but not declared
+     */
+    public Map<Artifact, Set<String>> getUsedUndeclaredArtifactsWithClasses()
+    {
+        return safeCopy( usedUndeclaredArtifacts );
+    }
+
+    /**
      * Returns artifacts declared but not used.
      *
      * @return artifacts declared but not used
