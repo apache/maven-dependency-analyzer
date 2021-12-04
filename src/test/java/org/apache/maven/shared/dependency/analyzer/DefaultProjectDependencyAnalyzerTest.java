@@ -474,6 +474,22 @@ public class DefaultProjectDependencyAnalyzerTest
         assertEquals( expectedAnalysis, actualAnalysis );
     }
 
+    @Test
+    public void testUsedUndeclaredClassReference()
+        throws TestToolsException, ProjectDependencyAnalyzerException
+    {
+        compileProject( "usedUndeclaredReference/pom.xml" );
+
+        MavenProject project = getProject( "usedUndeclaredReference/pom.xml" );
+
+        ProjectDependencyAnalysis actualAnalysis = analyzer.analyze( project );
+
+        Artifact xmlApis = createArtifact( "xml-apis", "xml-apis", "jar", "1.0.b2", "compile" );
+        Set<Artifact> expectedUsedUndeclaredArtifacts = Collections.singleton( xmlApis );
+
+        assertEquals( expectedUsedUndeclaredArtifacts, actualAnalysis.getUsedUndeclaredArtifacts() );
+    }
+
     // private methods --------------------------------------------------------
 
     private void compileProject( String pomPath )
