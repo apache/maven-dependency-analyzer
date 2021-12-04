@@ -21,9 +21,11 @@ package org.apache.maven.shared.dependency.analyzer;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -39,7 +41,7 @@ public class ProjectDependencyAnalysis
 
     private final Set<Artifact> usedDeclaredArtifacts;
 
-    private final Set<Artifact> usedUndeclaredArtifacts;
+    private final Map<Artifact, Set<String>> usedUndeclaredArtifacts;
 
     private final Set<Artifact> unusedDeclaredArtifacts;
 
@@ -50,7 +52,7 @@ public class ProjectDependencyAnalysis
      */
     public ProjectDependencyAnalysis()
     {
-        this( null, null, null, null );
+        this( null, (Map<Artifact, Set<String>>) null, null, null );
     }
 
     /**
@@ -63,10 +65,8 @@ public class ProjectDependencyAnalysis
     public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
                                       Set<Artifact> unusedDeclaredArtifacts )
     {
-        this.usedDeclaredArtifacts = safeCopy( usedDeclaredArtifacts );
-        this.usedUndeclaredArtifacts = safeCopy( usedUndeclaredArtifacts );
-        this.unusedDeclaredArtifacts = safeCopy( unusedDeclaredArtifacts );
-        this.testArtifactsWithNonTestScope = new HashSet<>();
+        this( usedDeclaredArtifacts, usedUndeclaredArtifacts,
+                unusedDeclaredArtifacts, Collections.<Artifact>emptySet() );
     }
 
     /**
@@ -80,6 +80,17 @@ public class ProjectDependencyAnalysis
     public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
                                       Set<Artifact> unusedDeclaredArtifacts,
                                       Set<Artifact> testArtifactsWithNonTestScope )
+    {
+        this( usedDeclaredArtifacts,
+                mapWithKeys(usedUndeclaredArtifacts),
+                unusedDeclaredArtifacts,
+                testArtifactsWithNonTestScope );
+    }
+
+    public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts,
+            Map<Artifact, Set<String>> usedUndeclaredArtifacts,
+            Set<Artifact> unusedDeclaredArtifacts,
+            Set<Artifact> testArtifactsWithNonTestScope )
     {
         this.usedDeclaredArtifacts = safeCopy( usedDeclaredArtifacts );
         this.usedUndeclaredArtifacts = safeCopy( usedUndeclaredArtifacts );
@@ -104,7 +115,7 @@ public class ProjectDependencyAnalysis
      */
     public Set<Artifact> getUsedUndeclaredArtifacts()
     {
-        return safeCopy( usedUndeclaredArtifacts );
+        return safeCopy( usedUndeclaredArtifacts.keySet() );
     }
 
     /**
@@ -304,5 +315,34 @@ public class ProjectDependencyAnalysis
     {
         return ( set == null ) ? Collections.<Artifact>emptySet()
                         : Collections.unmodifiableSet( new LinkedHashSet<>( set ) );
+    }
+
+    private static Map<Artifact, Set<String>> safeCopy( Map<Artifact, Set<String>> origMap )
+    {
+        if ( origMap == null )
+        {
+            return Collections.emptyMap();
+        }
+
+        Map<Artifact, Set<String>> map = new HashMap<>();
+
+        for (Map.Entry<Artifact, Set<String>> e : origMap.entrySet())
+        {
+            map.put( e.getKey(), Collections.unmodifiableSet( new LinkedHashSet<>( e.getValue() ) ) );
+        }
+
+        return map;
+    }
+
+    private static Map<Artifact, Set<String>> mapWithKeys(Set<Artifact> keys)
+    {
+        Map<Artifact, Set<String>> map = new HashMap<>();
+
+        for (Artifact k : keys)
+        {
+            map.put( k, Collections.<String>emptySet() );
+        }
+
+        return map;
     }
 }
