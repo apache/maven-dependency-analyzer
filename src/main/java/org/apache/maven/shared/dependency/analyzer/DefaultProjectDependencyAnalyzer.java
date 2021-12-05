@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -73,24 +74,26 @@ public class DefaultProjectDependencyAnalyzer
 
             Set<Artifact> declaredArtifacts = buildDeclaredArtifacts( project );
 
-            Set<Artifact> usedArtifacts = buildUsedArtifacts( artifactClassMap, dependencyClasses );
-            Set<Artifact> mainUsedArtifacts = buildUsedArtifacts( artifactClassMap, mainDependencyClasses );
-            
-            Set<Artifact> testArtifacts = buildUsedArtifacts( artifactClassMap, testOnlyDependencyClasses );
-            Set<Artifact> testOnlyArtifacts = removeAll( testArtifacts, mainUsedArtifacts );
-            
-            Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<>( declaredArtifacts );
-            usedDeclaredArtifacts.retainAll( usedArtifacts );
+            Map<Artifact, Set<String>> usedArtifacts = buildUsedArtifacts( artifactClassMap, dependencyClasses );
+            Set<Artifact>  mainUsedArtifacts = buildUsedArtifacts( artifactClassMap, mainDependencyClasses ).keySet();
 
-            Set<Artifact> usedUndeclaredArtifacts = new LinkedHashSet<>( usedArtifacts );
-            usedUndeclaredArtifacts = removeAll( usedUndeclaredArtifacts, declaredArtifacts );
+            Set<Artifact>  testArtifacts = buildUsedArtifacts( artifactClassMap, testOnlyDependencyClasses ).keySet();
+            Set<Artifact> testOnlyArtifacts = removeAll( testArtifacts, mainUsedArtifacts );
+
+            Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<>( declaredArtifacts );
+            usedDeclaredArtifacts.retainAll( usedArtifacts.keySet() );
+
+            Map<Artifact, Set<String>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>( usedArtifacts );
+            Set<Artifact> usedUndeclaredArtifacts = removeAll(
+                    usedUndeclaredArtifactsWithClasses.keySet(), declaredArtifacts );
+            usedUndeclaredArtifactsWithClasses.keySet().retainAll( usedUndeclaredArtifacts );
 
             Set<Artifact> unusedDeclaredArtifacts = new LinkedHashSet<>( declaredArtifacts );
-            unusedDeclaredArtifacts = removeAll( unusedDeclaredArtifacts, usedArtifacts );
+            unusedDeclaredArtifacts = removeAll( unusedDeclaredArtifacts, usedArtifacts.keySet() );
 
             Set<Artifact> testArtifactsWithNonTestScope = getTestArtifactsWithNonTestScope( testOnlyArtifacts );
 
-            return new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts,
+            return new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifactsWithClasses,
                                                   unusedDeclaredArtifacts, testArtifactsWithNonTestScope );
         }
         catch ( IOException exception )
@@ -259,10 +262,10 @@ public class DefaultProjectDependencyAnalyzer
         return declaredArtifacts;
     }
 
-    private Set<Artifact> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap,
+    private Map<Artifact, Set<String>> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap,
                                               Set<String> dependencyClasses )
     {
-        Set<Artifact> usedArtifacts = new HashSet<>();
+        Map<Artifact, Set<String>> usedArtifacts = new HashMap<>();
 
         for ( String className : dependencyClasses )
         {
@@ -270,7 +273,13 @@ public class DefaultProjectDependencyAnalyzer
 
             if ( artifact != null )
             {
-                usedArtifacts.add( artifact );
+                Set<String> classesFromArtifact = usedArtifacts.get( artifact );
+                if ( classesFromArtifact == null )
+                {
+                    classesFromArtifact = new HashSet<String>();
+                    usedArtifacts.put( artifact, classesFromArtifact );
+                }
+                classesFromArtifact.add( className );
             }
         }
 
