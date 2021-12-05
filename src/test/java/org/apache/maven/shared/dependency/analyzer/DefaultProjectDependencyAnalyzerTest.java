@@ -182,7 +182,7 @@ public class DefaultProjectDependencyAnalyzerTest
                                             "jarWithCompileDependency1", "jar", "1.0", "compile" );
         Artifact guava = createArtifact( "com.google.guava", "guava", "jar", "30.1.1-android", "compile" );
         Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( project1, guava ) );
-        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, (Set<Artifact>) null, null,
                 null );
 
         assertEquals( expectedAnalysis, actualAnalysis );
@@ -238,7 +238,7 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "test" );
 
         Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( project1, junit ) );
-        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null, null );
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, (Set<Artifact>) null, null, null );
 
         assertEquals( expectedAnalysis, actualAnalysis );
     }
@@ -256,7 +256,7 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact jdom = createArtifact( "dom4j", "dom4j", "jar", "1.6.1", "compile" );
         Set<Artifact> usedDeclaredArtifacts = Collections.singleton( jdom );
 
-        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, (Set<Artifact>) null, null,
                 null );
 
         // MSHARED-47: usedUndeclaredArtifacts=[xml-apis:xml-apis:jar:1.0.b2:compile]
@@ -279,7 +279,7 @@ public class DefaultProjectDependencyAnalyzerTest
 
         Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( artifact1, junit ) );
         Set<Artifact> nonTestScopedTestArtifacts = Collections.singleton( junit );
-        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, (Set<Artifact>) null, null,
                 nonTestScopedTestArtifacts );
 
         assertEquals( expectedAnalysis, actualAnalysis );
@@ -300,7 +300,7 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact junit = createArtifact( "junit", "junit", "jar", "3.8.1", "runtime" );
 
         Set<Artifact> usedDeclaredArtifacts = new HashSet<>( Arrays.asList( artifact1, junit ) );
-        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, (Set<Artifact>) null, null,
                 null );
 
         assertEquals( expectedAnalysis, actualAnalysis );
@@ -331,7 +331,7 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact junit = createArtifact( "org.apache.maven.its.dependency", "test-module1", "jar", "1.0", "compile" );
         Set<Artifact> usedDeclaredArtifacts = Collections.singleton( junit );
 
-        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, null, null,
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis( usedDeclaredArtifacts, (Set<Artifact>) null, null,
                 null );
 
         assertEquals( expectedAnalysis, actualAnalysis );
@@ -353,7 +353,7 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact annotation = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
                                             "typeUseAnnotationDependencyAnnotation", "jar", "1.0", "compile" );
         Set<Artifact> usedDeclaredArtifacts = Collections.singleton( annotation );
-        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis(usedDeclaredArtifacts, null, null,
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis(usedDeclaredArtifacts, (Set<Artifact>) null, null,
                 null );
 
         assertEquals( expectedAnalysis, actualAnalysis );
@@ -375,7 +375,7 @@ public class DefaultProjectDependencyAnalyzerTest
         Artifact annotation = createArtifact( "org.apache.maven.shared.dependency-analyzer.tests",
                                             "typeUseAnnotationDependencyAnnotation", "jar", "1.0", "compile" );
         Set<Artifact> usedDeclaredArtifacts = Collections.singleton( annotation );
-        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis(usedDeclaredArtifacts, null, null,
+        ProjectDependencyAnalysis expectedAnalysis = new ProjectDependencyAnalysis(usedDeclaredArtifacts, (Set<Artifact>) null, null,
                 null);
 
         assertEquals( expectedAnalysis, actualAnalysis );
