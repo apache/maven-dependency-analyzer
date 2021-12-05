@@ -37,7 +37,8 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests <code>DefaultClassAnalyzer</code>.
@@ -79,7 +80,7 @@ public class DefaultClassAnalyzerTest
         DefaultClassAnalyzer analyzer = new DefaultClassAnalyzer();
         Set<String> actualClasses = analyzer.analyze( file.toUri().toURL() );
 
-        assertEquals( expectedClasses, actualClasses );
+        assertThat( actualClasses ).isEqualTo( expectedClasses );
     }
 
     @Test
@@ -106,7 +107,7 @@ public class DefaultClassAnalyzerTest
         }
         catch ( ZipException e )
         {
-            assertTrue( e.getMessage().startsWith( "Cannot process Jar entry on URL:" ) );
+            assertThat( e ).hasMessageStartingWith( "Cannot process Jar entry on URL:" );
         }
     }
 

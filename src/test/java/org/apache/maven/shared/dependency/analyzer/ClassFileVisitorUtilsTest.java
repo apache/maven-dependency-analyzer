@@ -37,7 +37,8 @@ import java.util.List;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests <code>ClassFileVisitorUtils</code>.
@@ -90,10 +91,10 @@ public class ClassFileVisitorUtilsTest
 
         ClassFileVisitorUtils.accept( file.toURI().toURL(), visitor );
 
-        assertTrue( visitor.classNames.contains( "a.b.c" ) );
-        assertTrue( visitor.classNames.contains( "x.y.z" ) );
-        assertTrue( visitor.data.contains( "class a.b.c" ) );
-        assertTrue( visitor.data.contains( "class x.y.z" ) );
+        assertThat( visitor.classNames ).contains( "a.b.c" );
+        assertThat( visitor.classNames ).contains( "x.y.z" );
+        assertThat( visitor.data ).contains( "class a.b.c" );
+        assertThat( visitor.data ).contains( "class x.y.z" );
     }
 
     @Test
@@ -109,7 +110,7 @@ public class ClassFileVisitorUtilsTest
 
         ClassFileVisitorUtils.accept( file.toURI().toURL(), visitor );
 
-        assertTrue( visitor.classNames.isEmpty() );
+        assertThat( visitor.classNames ) .isEmpty();
     }
 
     @Test
@@ -127,10 +128,10 @@ public class ClassFileVisitorUtilsTest
 
         FileUtils.deleteDirectory( dir.toFile() );
 
-        assertTrue( visitor.classNames.contains( "a.b.c" ) );
-        assertTrue( visitor.classNames.contains( "x.y.z" ) );
-        assertTrue( visitor.data.contains( "class a.b.c" ) );
-        assertTrue( visitor.data.contains( "class x.y.z" ) );
+        assertThat( visitor.classNames ).contains( "a.b.c" );
+        assertThat( visitor.classNames ).contains( "x.y.z" );
+        assertThat( visitor.data ).contains( "class a.b.c" );
+        assertThat( visitor.data ).contains( "class x.y.z" );
     }
 
     @Test
@@ -145,7 +146,7 @@ public class ClassFileVisitorUtilsTest
 
         FileUtils.deleteDirectory( dir.toFile() );
 
-        assertTrue( visitor.classNames.isEmpty() );
+        assertThat( visitor.classNames ).isEmpty();
     }
 
     @Test
@@ -163,7 +164,7 @@ public class ClassFileVisitorUtilsTest
         }
         catch ( IllegalArgumentException exception )
         {
-            assertEquals( "Cannot accept visitor on URL: " + url, exception.getMessage() );
+            assertThat( exception ).hasMessage( "Cannot accept visitor on URL: " + url );
         }
     }
 
@@ -179,7 +180,7 @@ public class ClassFileVisitorUtilsTest
         }
         catch ( IllegalArgumentException exception )
         {
-            assertEquals( "Cannot accept visitor on URL: " + url, exception.getMessage() );
+            assertThat( exception ).hasMessage( "Cannot accept visitor on URL: " + url );
         }
     }
 

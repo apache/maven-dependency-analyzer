@@ -21,7 +21,7 @@ package org.apache.maven.shared.dependency.analyzer;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests <code>ProjectDependencyAnalyzerException</code>.
@@ -34,9 +34,7 @@ public class ProjectDependencyAnalyzerExceptionTest
     @Test
     public void testConstructor()
     {
-        ProjectDependencyAnalyzerException exception = new ProjectDependencyAnalyzerException( "a" );
-
-        assertEquals( "a", exception.getMessage() );
+        assertThat( new ProjectDependencyAnalyzerException( "a" ) ).hasMessage( "a" );
     }
 
     @Test
@@ -45,7 +43,6 @@ public class ProjectDependencyAnalyzerExceptionTest
         Throwable throwable = new Exception();
         ProjectDependencyAnalyzerException exception = new ProjectDependencyAnalyzerException( "a", throwable );
 
-        assertEquals( "a", exception.getMessage() );
-        assertEquals( throwable, exception.getCause() );
+        assertThat( exception ).hasMessage( "a" ).hasCause( throwable );
     }
 }

@@ -25,7 +25,7 @@ import org.junit.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests <code>CollectorClassFileVisitor</code>.
@@ -53,6 +53,6 @@ public class CollectorClassFileVisitorTest
         expected.add( "a.b.c" );
         expected.add( "x.y.z" );
 
-        assertEquals( expected, visitor.getClasses() );
+        assertThat( visitor.getClasses() ).isEqualTo( expected );
     }
 }

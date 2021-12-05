@@ -26,7 +26,7 @@ import org.apache.maven.artifact.Artifact;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests <code>ProjectDependencyAnalysis</code>.
@@ -48,8 +48,8 @@ public class ProjectDependencyAnalysisTest
             new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts,
                     testArtifactsWithNonTestScope);
 
-        assertEquals( usedDeclaredArtifacts, analysis.getUsedDeclaredArtifacts() );
-        assertEquals( usedUndeclaredArtifacts, analysis.getUsedUndeclaredArtifacts() );
-        assertEquals( unusedDeclaredArtifacts, analysis.getUnusedDeclaredArtifacts() );
+        assertThat( analysis.getUsedDeclaredArtifacts() ).isEqualTo( usedDeclaredArtifacts );
+        assertThat( analysis.getUsedUndeclaredArtifacts() ).isEqualTo( usedUndeclaredArtifacts );
+        assertThat( analysis.getUnusedDeclaredArtifacts() ).isEqualTo( unusedDeclaredArtifacts );
     }
 }
