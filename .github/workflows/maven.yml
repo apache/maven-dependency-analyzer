@@ -26,3 +26,6 @@ jobs:
   build:
     name: Verify
     uses: apache/maven-gh-actions-shared/.github/workflows/maven-verify.yml@v1
+    with:
+      # remove after MSHARED-916
+      maven_version: '3.6.3'
