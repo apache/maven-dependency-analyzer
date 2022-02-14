@@ -28,7 +28,6 @@ import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.test.plugin.BuildTool;
 import org.apache.maven.shared.test.plugin.ProjectTool;
-import org.apache.maven.shared.test.plugin.RepositoryTool;
 import org.apache.maven.shared.test.plugin.TestToolsException;
 import org.codehaus.plexus.PlexusTestCase;
 import org.junit.Before;
@@ -37,6 +36,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -78,8 +78,11 @@ public class DefaultProjectDependencyAnalyzerTest
 
         if ( localRepo == null )
         {
-            RepositoryTool repositoryTool = (RepositoryTool) lookup( RepositoryTool.ROLE );
-            localRepo = repositoryTool.findLocalRepositoryDirectory();
+            localRepo = new File( System.getProperty( "local.repo" ) );
+            if ( !localRepo.isDirectory() )
+            {
+                Files.createDirectories( localRepo.toPath() );
+            }
             System.out.println( "Local repository: " + localRepo );
         }
 
@@ -465,7 +468,7 @@ public class DefaultProjectDependencyAnalyzerTest
             properties.put( "https.protocols", httpsProtocols );
         }
 
-        List<String> goals = Arrays.asList( "clean", "test-compile" );
+        List<String> goals = Arrays.asList( "clean", "install" );
         File log = new File( pom.getParentFile(), "build.log" );
 
         InvocationRequest request = buildTool.createBasicInvocationRequest( pom, properties, goals, log );
@@ -483,7 +486,7 @@ public class DefaultProjectDependencyAnalyzerTest
     {
         File pom = getTestFile( "target/test-classes/", pomPath );
 
-        return projectTool.readProjectWithDependencies( pom );
+        return projectTool.readProjectWithDependencies( pom, localRepo );
     }
 
     private Artifact createArtifact( String groupId, String artifactId, String type, String version, String scope )
