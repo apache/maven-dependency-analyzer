@@ -465,11 +465,13 @@ public class DefaultProjectDependencyAnalyzerTest
             properties.put( "https.protocols", httpsProtocols );
         }
 
-        List<String> goals = Arrays.asList( "clean", "verify" );
+        List<String> goals = Arrays.asList( "clean", "test-compile" );
         File log = new File( pom.getParentFile(), "build.log" );
 
         InvocationRequest request = buildTool.createBasicInvocationRequest( pom, properties, goals, log );
         request.setLocalRepositoryDirectory( localRepo );
+        request.setBatchMode( true );
+
         InvocationResult result = buildTool.executeMaven( request );
 
         assertNull( "Error compiling test project", result.getExecutionException() );
