@@ -465,10 +465,9 @@ public class DefaultProjectDependencyAnalyzerTest
             properties.put( "https.protocols", httpsProtocols );
         }
 
-        List<String> goals = Arrays.asList( "clean", "install" );
+        List<String> goals = Arrays.asList( "clean", "verify" );
         File log = new File( pom.getParentFile(), "build.log" );
 
-        // TODO: don't install test artifacts to local repository
         InvocationRequest request = buildTool.createBasicInvocationRequest( pom, properties, goals, log );
         request.setLocalRepositoryDirectory( localRepo );
         InvocationResult result = buildTool.executeMaven( request );
