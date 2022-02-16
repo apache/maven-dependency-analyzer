@@ -19,18 +19,20 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests <code>ProjectDependencyAnalysis</code>.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @see ProjectDependencyAnalysis
  */
@@ -46,10 +48,47 @@ public class ProjectDependencyAnalysisTest
 
         ProjectDependencyAnalysis analysis =
             new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts,
-                    testArtifactsWithNonTestScope);
+                testArtifactsWithNonTestScope );
 
         assertThat( analysis.getUsedDeclaredArtifacts() ).isEqualTo( usedDeclaredArtifacts );
         assertThat( analysis.getUsedUndeclaredArtifacts() ).isEqualTo( usedUndeclaredArtifacts );
         assertThat( analysis.getUnusedDeclaredArtifacts() ).isEqualTo( unusedDeclaredArtifacts );
+    }
+
+    @Test
+    public void ignoreNonCompileShouldFilterOnlyUnusedDeclare()
+    {
+        Artifact artifactCompile = aTestArtifact( "test1", Artifact.SCOPE_COMPILE );
+        Artifact artifactProvided = aTestArtifact( "test2", Artifact.SCOPE_PROVIDED );
+        Artifact artifactTest = aTestArtifact( "test3", Artifact.SCOPE_TEST );
+
+        ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
+            asSet( artifactCompile, artifactProvided, artifactTest ),
+            asSet( artifactCompile, artifactProvided, artifactTest ),
+            asSet( artifactCompile, artifactProvided, artifactTest ),
+            asSet( artifactCompile, artifactProvided, artifactTest ) );
+
+        ProjectDependencyAnalysis compileOnlyAnalysis = analysis.ignoreNonCompile();
+
+        assertThat( compileOnlyAnalysis.getUsedDeclaredArtifacts() ).hasSize( 3 );
+        assertThat( compileOnlyAnalysis.getUsedUndeclaredArtifacts() ).hasSize( 3 );
+
+        assertThat( compileOnlyAnalysis.getUnusedDeclaredArtifacts() )
+            .hasSize( 1 )
+            .allSatisfy( a -> assertThat( a.getScope() ).isEqualTo( Artifact.SCOPE_COMPILE ) );
+
+        assertThat( compileOnlyAnalysis.getTestArtifactsWithNonTestScope() )
+            .hasSize( 3 );
+    }
+
+    private <T> Set<T> asSet( T... items )
+    {
+        return new HashSet<>( Arrays.asList( items ) );
+    }
+
+    private Artifact aTestArtifact( String artifactId, String scope )
+    {
+        return new DefaultArtifact( "groupId", artifactId, VersionRange.createFromVersion( "1.0" ),
+            scope, "jar", "", null );
     }
 }
