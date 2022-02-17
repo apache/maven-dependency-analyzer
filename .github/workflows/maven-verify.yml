@@ -21,6 +21,14 @@ on:
   pull_request:
 
 jobs:
-  build:
-    name: Verify
+  build-3-2-5:
+    name: Verify-3.2.5
     uses: apache/maven-gh-actions-shared/.github/workflows/maven-verify.yml@v2
+    with:
+      maven_version: '3.2.5'
+
+  build-3-8-4:
+    name: Verify-3.8.4
+    uses: apache/maven-gh-actions-shared/.github/workflows/maven-verify.yml@v2
+    with:
+      maven_version: '3.8.4'
