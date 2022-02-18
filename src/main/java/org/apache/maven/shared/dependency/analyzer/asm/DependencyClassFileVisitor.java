@@ -19,18 +19,18 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  * under the License.
  */
 
-import org.apache.commons.io.IOUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Set;
+
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
+import org.codehaus.plexus.util.IOUtil;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.signature.SignatureVisitor;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Set;
 
 /**
  * Computes the set of classes referenced by visited class files, using
@@ -56,7 +56,7 @@ public class DependencyClassFileVisitor
     {
         try
         {
-            byte[] byteCode = IOUtils.toByteArray( in );
+            byte[] byteCode = IOUtil.toByteArray( in );
             ClassReader reader = new ClassReader( byteCode );
 
             final Set<String> constantPoolClassRefs = ConstantPoolParser.getConstantPoolClassReferences( byteCode );

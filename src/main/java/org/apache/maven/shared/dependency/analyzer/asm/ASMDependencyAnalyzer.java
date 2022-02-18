@@ -19,20 +19,23 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  * under the License.
  */
 
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitorUtils;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
-import org.codehaus.plexus.component.annotations.Component;
 
 /**
  * ASMDependencyAnalyzer
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
-@Component( role = DependencyAnalyzer.class )
+@Named
+@Singleton
 public class ASMDependencyAnalyzer
     implements DependencyAnalyzer
 {

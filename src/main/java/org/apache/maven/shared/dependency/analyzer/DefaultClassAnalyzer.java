@@ -19,19 +19,21 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
 import java.util.zip.ZipException;
-
-import org.codehaus.plexus.component.annotations.Component;
 
 /**
  * <p>DefaultClassAnalyzer class.</p>
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
-@Component( role = ClassAnalyzer.class )
+@Named
+@Singleton
 public class DefaultClassAnalyzer
     implements ClassAnalyzer
 {
