@@ -17,5 +17,4 @@
  * under the License.
  */
 
-// remove maven version after MSHARED-916
-asfMavenTlpStdBuild( maven: '3.6.x' )
+asfMavenTlpStdBuild()
