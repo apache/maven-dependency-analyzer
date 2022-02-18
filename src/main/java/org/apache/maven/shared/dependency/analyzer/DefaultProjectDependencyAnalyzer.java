@@ -19,6 +19,10 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -35,28 +39,27 @@ import java.util.jar.JarFile;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 
 /**
  * <p>DefaultProjectDependencyAnalyzer class.</p>
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
-@Component( role = ProjectDependencyAnalyzer.class )
+@Named
+@Singleton
 public class DefaultProjectDependencyAnalyzer
     implements ProjectDependencyAnalyzer
 {
     /**
      * ClassAnalyzer
      */
-    @Requirement
+    @Inject
     private ClassAnalyzer classAnalyzer;
 
     /**
      * DependencyAnalyzer
      */
-    @Requirement
+    @Inject
     private DependencyAnalyzer dependencyAnalyzer;
 
     /** {@inheritDoc} */
@@ -75,9 +78,9 @@ public class DefaultProjectDependencyAnalyzer
             Set<Artifact> declaredArtifacts = buildDeclaredArtifacts( project );
 
             Map<Artifact, Set<String>> usedArtifacts = buildUsedArtifacts( artifactClassMap, dependencyClasses );
-            Set<Artifact>  mainUsedArtifacts = buildUsedArtifacts( artifactClassMap, mainDependencyClasses ).keySet();
+            Set<Artifact> mainUsedArtifacts = buildUsedArtifacts( artifactClassMap, mainDependencyClasses ).keySet();
 
-            Set<Artifact>  testArtifacts = buildUsedArtifacts( artifactClassMap, testOnlyDependencyClasses ).keySet();
+            Set<Artifact> testArtifacts = buildUsedArtifacts( artifactClassMap, testOnlyDependencyClasses ).keySet();
             Set<Artifact> testOnlyArtifacts = removeAll( testArtifacts, mainUsedArtifacts );
 
             Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<>( declaredArtifacts );
@@ -85,7 +88,7 @@ public class DefaultProjectDependencyAnalyzer
 
             Map<Artifact, Set<String>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>( usedArtifacts );
             Set<Artifact> usedUndeclaredArtifacts = removeAll(
-                    usedUndeclaredArtifactsWithClasses.keySet(), declaredArtifacts );
+                usedUndeclaredArtifactsWithClasses.keySet(), declaredArtifacts );
             usedUndeclaredArtifactsWithClasses.keySet().retainAll( usedUndeclaredArtifacts );
 
             Set<Artifact> unusedDeclaredArtifacts = new LinkedHashSet<>( declaredArtifacts );
@@ -94,7 +97,7 @@ public class DefaultProjectDependencyAnalyzer
             Set<Artifact> testArtifactsWithNonTestScope = getTestArtifactsWithNonTestScope( testOnlyArtifacts );
 
             return new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifactsWithClasses,
-                                                  unusedDeclaredArtifacts, testArtifactsWithNonTestScope );
+                unusedDeclaredArtifacts, testArtifactsWithNonTestScope );
         }
         catch ( IOException exception )
         {
@@ -105,8 +108,8 @@ public class DefaultProjectDependencyAnalyzer
     /**
      * This method defines a new way to remove the artifacts by using the conflict id. We don't care about the version
      * here because there can be only 1 for a given artifact anyway.
-     * 
-     * @param start initial set
+     *
+     * @param start  initial set
      * @param remove set to exclude
      * @return set with remove excluded
      */
@@ -231,9 +234,9 @@ public class DefaultProjectDependencyAnalyzer
 
         return dependencyClasses;
     }
-    
+
     private Set<String> buildMainDependencyClasses( MavenProject project )
-                    throws IOException
+        throws IOException
     {
 
         String outputDirectory = project.getBuild().getOutputDirectory();
@@ -263,7 +266,7 @@ public class DefaultProjectDependencyAnalyzer
     }
 
     private Map<Artifact, Set<String>> buildUsedArtifacts( Map<Artifact, Set<String>> artifactClassMap,
-                                              Set<String> dependencyClasses )
+                                                           Set<String> dependencyClasses )
     {
         Map<Artifact, Set<String>> usedArtifacts = new HashMap<>();
 
