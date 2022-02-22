@@ -19,10 +19,10 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  * under the License.
  */
 
-import org.objectweb.asm.Type;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import org.objectweb.asm.Type;
 
 /**
  * <p>ResultCollector class.</p>
@@ -57,15 +57,24 @@ public class ResultCollector
         }
 
         // decode arrays
-        if ( name.startsWith( "[L" ) && name.endsWith( ";" ) )
+        if ( name.charAt( 0 ) == '[' )
         {
-            name = name.substring( 2, name.length() - 1 );
+            int i = 0;
+            do
+            {
+                ++i;
+            }
+            while ( name.charAt( i ) == '[' ); // could have array of array ...
+            if ( name.charAt( i ) != 'L' )
+            {
+                // ignore array of scalar types
+                return;
+            }
+            name = name.substring( i + 1, name.length() - 1 );
         }
 
         // decode internal representation
-        name = name.replace( '/', '.' );
-
-        classes.add( name );
+        add( name.replace( '/', '.' ) );
     }
 
     void addDesc( final String desc )
@@ -82,7 +91,7 @@ public class ResultCollector
                 break;
 
             case Type.OBJECT:
-                addName( t.getClassName().replace( '.', '/' ) );
+                addName( t.getClassName() );
                 break;
 
             default:
