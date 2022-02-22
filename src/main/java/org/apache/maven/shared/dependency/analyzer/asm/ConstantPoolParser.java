@@ -124,10 +124,12 @@ public class ConstantPoolParser
                     throw new RuntimeException( "Unknown constant pool type '" + tag + "'" );
                 case CONSTANT_UTF8:
                     stringConstants.put( ix, decodeString( buf ) );
-                    continue;
+                    break;
                 case CONSTANT_CLASS:
-                case CONSTANT_METHOD_TYPE:
                     classes.add( (int) buf.getChar() );
+                    break;
+                case CONSTANT_METHOD_TYPE:
+                    consumeMethodType( buf );
                     break;
                 case CONSTANT_FIELDREF:
                 case CONSTANT_METHODREF:
@@ -217,6 +219,11 @@ public class ConstantPoolParser
     {
         // without a slash, class must be in unnamed package, which can't be imported
         return className.indexOf( '/' ) != -1;
+    }
+
+    private static void consumeMethodType( ByteBuffer buf )
+    {
+        buf.getChar();
     }
 
     private static void consumeReference( ByteBuffer buf )
