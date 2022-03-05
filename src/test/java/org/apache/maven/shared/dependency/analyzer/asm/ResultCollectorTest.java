@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.testcases.ArrayCases;
+import org.apache.maven.shared.dependency.analyzer.testcases.MethodHandleCases;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
@@ -52,5 +53,16 @@ public class ResultCollectorTest
         assertThat( dependencies )
             .contains( "java.lang.annotation.Annotation" )
             .contains( "java.lang.reflect.Constructor" );
+    }
+
+    @Test
+    public void testNoMethodHandle()
+        throws IOException
+    {
+        Set<String> dependencies = getDependencies( MethodHandleCases.class );
+        for ( String dependency : dependencies )
+        {
+            assertThat( dependency ).doesNotStartWith( "(" );
+        }
     }
 }
