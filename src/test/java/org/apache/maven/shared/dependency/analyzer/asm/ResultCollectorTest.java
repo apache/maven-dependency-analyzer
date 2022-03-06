@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.testcases.ArrayCases;
+import org.apache.maven.shared.dependency.analyzer.testcases.InnerClassCase;
 import org.apache.maven.shared.dependency.analyzer.testcases.MethodHandleCases;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
@@ -64,5 +65,17 @@ public class ResultCollectorTest
         {
             assertThat( dependency ).doesNotStartWith( "(" );
         }
+    }
+
+    @Test
+    public void testInnerClassAsContainer()
+        throws IOException
+    {
+        Set<String> dependencies = getDependencies( InnerClassCase.class );
+        for ( String dependency : dependencies )
+        {
+            assertThat( dependency ).doesNotContain( "$" );
+        }
+        assertThat( dependencies ).contains( "java.lang.System" );
     }
 }

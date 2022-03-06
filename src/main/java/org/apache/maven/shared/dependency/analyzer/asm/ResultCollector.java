@@ -105,7 +105,11 @@ public class ResultCollector
      */
     public void add( String name )
     {
-        classes.add( name );
+        // inner classes have equivalent compilation requirement as container class
+        if ( name.indexOf( '$' ) < 0 )
+        {
+            classes.add( name );
+        }
     }
 
     void addNames( final String[] names )

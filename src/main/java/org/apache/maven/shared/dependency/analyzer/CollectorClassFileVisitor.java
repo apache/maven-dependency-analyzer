@@ -45,7 +45,11 @@ public class CollectorClassFileVisitor
     /** {@inheritDoc} */
     public void visitClass( String className, InputStream in )
     {
-        classes.add( className );
+        // inner classes have equivalent compilation requirement as container class
+        if ( className.indexOf( '$' ) < 0 )
+        {
+            classes.add( className );
+        }
     }
 
     /**
