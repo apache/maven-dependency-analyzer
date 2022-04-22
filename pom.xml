@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.apache.maven.shared</groupId>
     <artifactId>maven-shared-components</artifactId>
-    <version>34</version>
+    <version>36</version>
     <relativePath />
   </parent>
 
