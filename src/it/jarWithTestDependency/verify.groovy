@@ -22,7 +22,7 @@ def analysis = new File( basedir, 'project2/target/analysis.txt' ).text
 def expected = '''
 UsedDeclaredArtifacts:
  org.apache.maven.shared.dependency-analyzer.tests:jarWithTestDependency1:jar:1.0:test
- junit:junit:jar:3.8.1:test
+ junit:junit:jar:4.13.2:test
 
 UsedUndeclaredArtifactsWithClasses:
 
