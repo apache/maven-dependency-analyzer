@@ -21,7 +21,7 @@ def analysis = new File( basedir, 'target/analysis.txt' ).text
 
 def expected = '''
 UsedDeclaredArtifacts:
- commons-io:commons-io:jar:2.4:compile
+ commons-io:commons-io:jar:2.11.0:compile
  commons-lang:commons-lang:jar:2.6:compile
 
 UsedUndeclaredArtifactsWithClasses:

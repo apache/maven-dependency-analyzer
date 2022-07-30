@@ -37,19 +37,19 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <version>3.2.5</version>
+      <version>@mavenVersion@</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>3.2.5</version>
+      <version>@mavenVersion@</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-tools-annotations</artifactId>
-      <version>3.6.4</version>
+      <version>@maven.plugin.tools.version@</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -65,7 +65,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.6.4</version>
+          <version>@maven.plugin.tools.version@</version>
         </plugin>
       </plugins>
     </pluginManagement>
