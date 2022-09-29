@@ -19,11 +19,6 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,6 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -71,7 +71,7 @@ public class ClassFileVisitorUtilsTest
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
         visitor = new MockVisitor();

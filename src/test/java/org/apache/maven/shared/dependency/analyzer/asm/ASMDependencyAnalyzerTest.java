@@ -23,7 +23,7 @@ import java.net.URL;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

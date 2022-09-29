@@ -19,11 +19,12 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import org.junit.Before;
-import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,7 +38,7 @@ public class CollectorClassFileVisitorTest
 {
     private CollectorClassFileVisitor visitor;
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
         visitor = new CollectorClassFileVisitor();

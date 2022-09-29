@@ -26,8 +26,9 @@ import java.util.Set;
 import org.apache.maven.shared.dependency.analyzer.testcases.ArrayCases;
 import org.apache.maven.shared.dependency.analyzer.testcases.InnerClassCase;
 import org.apache.maven.shared.dependency.analyzer.testcases.MethodHandleCases;
+import org.junit.jupiter.api.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.Test;
 
 public class ResultCollectorTest
 {

@@ -19,11 +19,6 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import org.codehaus.plexus.util.IOUtil;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -36,6 +31,11 @@ import java.util.Set;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
+
+import org.codehaus.plexus.util.IOUtil;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -50,7 +50,7 @@ public class DefaultClassAnalyzerTest
 {
     private Path file;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException
     {
         file = Files.createTempFile( "test", ".jar" );
@@ -61,7 +61,7 @@ public class DefaultClassAnalyzerTest
         }
     }
 
-    @After
+    @AfterEach
     public void cleanup() throws IOException
     {
         if ( file != null )
