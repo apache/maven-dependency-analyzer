@@ -19,13 +19,15 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import org.apache.maven.api.services.MavenException;
+
 /**
  * <p>ProjectDependencyAnalyzerException class.</p>
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
 public class ProjectDependencyAnalyzerException
-    extends Exception
+        extends MavenException
 {
     /**
      * The serialisation unique ID.

@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.zip.ZipException;
 
@@ -54,6 +55,29 @@ public class DefaultClassAnalyzer
             // we prefer to wrap another ZipException for better error visibility
             ZipException ze =
                 new ZipException( "Cannot process Jar entry on URL: " + url + " due to " + e.getMessage() );
+            ze.initCause( e );
+            throw ze;
+        }
+
+        return visitor.getClasses();
+    }
+
+    /** {@inheritDoc} */
+    public Set<String> analyze( Path path )
+            throws IOException
+    {
+        CollectorClassFileVisitor visitor = new CollectorClassFileVisitor();
+
+        try
+        {
+            ClassFileVisitorUtils.accept( path, visitor );
+        }
+        catch ( ZipException e )
+        {
+            // since the current ZipException gives no indication what jar file is corrupted
+            // we prefer to wrap another ZipException for better error visibility
+            ZipException ze =
+                    new ZipException( "Cannot process Jar entry on path: " + path + " due to " + e.getMessage() );
             ze.initCause( e );
             throw ze;
         }

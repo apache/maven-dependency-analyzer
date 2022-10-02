@@ -19,6 +19,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,12 +27,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 
+import org.apache.maven.shared.dependency.analyzer.asm.ASMDependencyAnalyzer;
 import org.codehaus.plexus.util.IOUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +43,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests <code>DefaultClassAnalyzer</code>.
@@ -88,27 +93,19 @@ public class DefaultClassAnalyzerTest
     {
         //to reproduce MDEP-143
         // corrupt the jar file by altering its contents
-        FileInputStream fis = new FileInputStream( file.toFile() );
         ByteArrayOutputStream baos = new ByteArrayOutputStream( 100 );
-        IOUtil.copy( fis, baos, 100 );
-        fis.close();
+        Files.copy( file, baos );
         byte[] ba = baos.toByteArray();
-        ba[50] = 1;
-        FileOutputStream fos = new FileOutputStream( file.toFile() );
-        IOUtil.copy( ba, fos );
-        fos.close();
+        ba[49] = 1;
+        Files.copy( new ByteArrayInputStream( ba ), file, StandardCopyOption.REPLACE_EXISTING );
 
-        ClassAnalyzer analyzer = new DefaultClassAnalyzer();
+        DependencyAnalyzer analyzer = new ASMDependencyAnalyzer();
 
-        try
-        {
-            analyzer.analyze( file.toUri().toURL() );
-            fail( "Exception expected" );
-        }
-        catch ( ZipException e )
-        {
-            assertThat( e ).hasMessageStartingWith( "Cannot process Jar entry on URL:" );
-        }
+        ProjectDependencyAnalyzerException exception = assertThrows( ProjectDependencyAnalyzerException.class, () -> analyzer.analyze( file.toUri().toURL() ) );
+        assertThat( exception ).hasMessageStartingWith( "Cannot process jar entry on path:" );
+        assertThat( exception.getCause() ).isInstanceOf( ProjectDependencyAnalyzerException.class )
+                .hasMessageStartingWith( "Unable to process class " );
+        assertThat( exception.getCause().getCause() ).isInstanceOf( ZipException.class );
     }
 
     private void addZipEntry( JarOutputStream out, String fileName, String content ) throws IOException

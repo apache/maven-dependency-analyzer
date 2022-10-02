@@ -20,7 +20,6 @@ package org.apache.maven.shared.dependency.analyzer;
  */
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -38,7 +37,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests <code>ClassFileVisitorUtils</code>.
@@ -56,10 +55,10 @@ public class ClassFileVisitorUtilsTest
         final List<String> data = new ArrayList<>();
 
         @Override
-        public void visitClass( String className, InputStream in )
+        public void visitClass( String className, InputStreamProvider provider )
         {
             classNames.add( className );
-            try
+            try ( InputStream in = provider.open() )
             {
                 List<String> lines = IOUtils.readLines( in, StandardCharsets.UTF_8 );
                 data.addAll( lines );
@@ -83,7 +82,7 @@ public class ClassFileVisitorUtilsTest
         File file = File.createTempFile( "test", ".jar" );
         file.deleteOnExit();
 
-        try ( JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) ) )
+        try ( JarOutputStream out = new JarOutputStream( Files.newOutputStream( file.toPath() ) ) )
         {
             addZipEntry( out, "a/b/c.class", "class a.b.c" );
             addZipEntry( out, "x/y/z.class", "class x.y.z" );
@@ -103,7 +102,7 @@ public class ClassFileVisitorUtilsTest
         File file = File.createTempFile( "test", ".jar" );
         file.deleteOnExit();
 
-        try ( JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) ) )
+        try ( JarOutputStream out = new JarOutputStream( Files.newOutputStream( file.toPath() ) ) )
         {
             addZipEntry( out, "a/b/c.jpg", "jpeg a.b.c" );
         }
@@ -157,15 +156,9 @@ public class ClassFileVisitorUtilsTest
 
         URL url = file.toURI().toURL();
 
-        try
-        {
-            ClassFileVisitorUtils.accept( url, visitor );
-            fail( "expected IllegalArgumentException" );
-        }
-        catch ( IllegalArgumentException exception )
-        {
-            assertThat( exception ).hasMessage( "Cannot accept visitor on URL: " + url );
-        }
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> ClassFileVisitorUtils.accept( url, visitor ) );
+        assertThat( exception ).hasMessage( "Cannot accept visitor on path: " + file );
     }
 
     @Test
@@ -173,15 +166,9 @@ public class ClassFileVisitorUtilsTest
     {
         URL url = new URL( "http://localhost/" );
 
-        try
-        {
-            ClassFileVisitorUtils.accept( url, visitor );
-            fail( "expected IllegalArgumentException" );
-        }
-        catch ( IllegalArgumentException exception )
-        {
-            assertThat( exception ).hasMessage( "Cannot accept visitor on URL: " + url );
-        }
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> ClassFileVisitorUtils.accept( url, visitor ) );
+        assertThat( exception ).hasMessage( "Cannot accept visitor on URL: " + url );
     }
 
     private void writeToFile( Path parent, String file, String data ) throws IOException

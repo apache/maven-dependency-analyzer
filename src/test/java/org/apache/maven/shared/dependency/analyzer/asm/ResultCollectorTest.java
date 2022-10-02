@@ -38,10 +38,7 @@ public class ResultCollectorTest
         String className = inspectClass.getName();
         String path = '/' + className.replace( '.', '/' ) + ".class";
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
-        try ( InputStream is = inspectClass.getResourceAsStream( path ) )
-        {
-            visitor.visitClass( className, is );
-        }
+        visitor.visitClass( className, () -> inspectClass.getResourceAsStream( path ) );
         return visitor.getDependencies();
     }
 

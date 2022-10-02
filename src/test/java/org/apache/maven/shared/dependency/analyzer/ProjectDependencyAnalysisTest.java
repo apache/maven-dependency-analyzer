@@ -23,12 +23,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.api.Dependency;
+import org.apache.maven.api.Scope;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests <code>ProjectDependencyAnalysis</code>.
@@ -41,10 +42,10 @@ public class ProjectDependencyAnalysisTest
     @Test
     public void testConstructor()
     {
-        Set<Artifact> usedDeclaredArtifacts = new HashSet<>();
-        Set<Artifact> usedUndeclaredArtifacts = new HashSet<>();
-        Set<Artifact> unusedDeclaredArtifacts = new HashSet<>();
-        Set<Artifact> testArtifactsWithNonTestScope = new HashSet<>();
+        Set<Dependency> usedDeclaredArtifacts = new HashSet<>();
+        Set<Dependency> usedUndeclaredArtifacts = new HashSet<>();
+        Set<Dependency> unusedDeclaredArtifacts = new HashSet<>();
+        Set<Dependency> testArtifactsWithNonTestScope = new HashSet<>();
 
         ProjectDependencyAnalysis analysis =
             new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts,
@@ -58,9 +59,9 @@ public class ProjectDependencyAnalysisTest
     @Test
     public void ignoreNonCompileShouldFilterOnlyUnusedDeclare()
     {
-        Artifact artifactCompile = aTestArtifact( "test1", Artifact.SCOPE_COMPILE );
-        Artifact artifactProvided = aTestArtifact( "test2", Artifact.SCOPE_PROVIDED );
-        Artifact artifactTest = aTestArtifact( "test3", Artifact.SCOPE_TEST );
+        Dependency artifactCompile = aTestArtifact( "test1", Scope.COMPILE );
+        Dependency artifactProvided = aTestArtifact( "test2", Scope.PROVIDED );
+        Dependency artifactTest = aTestArtifact( "test3", Scope.TEST );
 
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
             asSet( artifactCompile, artifactProvided, artifactTest ),
@@ -75,7 +76,7 @@ public class ProjectDependencyAnalysisTest
 
         assertThat( compileOnlyAnalysis.getUnusedDeclaredArtifacts() )
             .hasSize( 1 )
-            .allSatisfy( a -> assertThat( a.getScope() ).isEqualTo( Artifact.SCOPE_COMPILE ) );
+            .allSatisfy( a -> assertThat( a.getScope() ).isEqualTo( Scope.COMPILE ) );
 
         assertThat( compileOnlyAnalysis.getTestArtifactsWithNonTestScope() )
             .hasSize( 3 );
@@ -86,9 +87,13 @@ public class ProjectDependencyAnalysisTest
         return new HashSet<>( Arrays.asList( items ) );
     }
 
-    private Artifact aTestArtifact( String artifactId, String scope )
+    private Dependency aTestArtifact( String artifactId, Scope scope )
     {
-        return new DefaultArtifact( "groupId", artifactId, VersionRange.createFromVersion( "1.0" ),
-            scope, "jar", "", null );
+        Dependency dependency = Mockito.mock( Dependency.class );
+        when( dependency.getGroupId() ).thenReturn( "groupId" );
+        when( dependency.getArtifactId() ).thenReturn( artifactId );
+        when( dependency.getScope() ).thenReturn( scope );
+        when( dependency.key() ).thenReturn( artifactId );
+        return dependency;
     }
 }

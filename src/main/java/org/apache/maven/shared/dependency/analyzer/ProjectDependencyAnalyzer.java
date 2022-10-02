@@ -19,7 +19,8 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.Session;
 
 /**
  * Analyze a project's declared dependencies and effective classes used to find which artifacts are:
@@ -37,10 +38,10 @@ public interface ProjectDependencyAnalyzer
     /**
      * <p>analyze.</p>
      *
-     * @param project a {@link org.apache.maven.project.MavenProject} object
+     * @param project a {@link Project} object
      * @return a {@link org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis} object
      * @throws org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException if any
      */
-    ProjectDependencyAnalysis analyze( MavenProject project )
+    ProjectDependencyAnalysis analyze( Session session, Project project )
         throws ProjectDependencyAnalyzerException;
 }

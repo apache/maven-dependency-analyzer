@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitorUtils;
@@ -46,6 +47,17 @@ public class ASMDependencyAnalyzer
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
 
         ClassFileVisitorUtils.accept( url, visitor );
+
+        return visitor.getDependencies();
+    }
+
+    /** {@inheritDoc} */
+    public Set<String> analyze( Path path )
+            throws IOException
+    {
+        DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
+
+        ClassFileVisitorUtils.accept( path, visitor );
 
         return visitor.getDependencies();
     }

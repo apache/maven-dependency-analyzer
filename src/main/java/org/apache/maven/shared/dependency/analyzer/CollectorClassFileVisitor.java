@@ -19,7 +19,6 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,7 +42,7 @@ public class CollectorClassFileVisitor
     }
 
     /** {@inheritDoc} */
-    public void visitClass( String className, InputStream in )
+    public void visitClass( String className, InputStreamProvider in )
     {
         // inner classes have equivalent compilation requirement as container class
         if ( className.indexOf( '$' ) < 0 )
