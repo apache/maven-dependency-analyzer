@@ -30,6 +30,8 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.signature.SignatureVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Computes the set of classes referenced by visited class files, using
@@ -40,6 +42,8 @@ import org.objectweb.asm.signature.SignatureVisitor;
  */
 public class DependencyClassFileVisitor implements ClassFileVisitor {
     private final ResultCollector resultCollector = new ResultCollector();
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * <p>Constructor for DependencyClassFileVisitor.</p>
@@ -70,7 +74,7 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
         } catch (IndexOutOfBoundsException e) {
             // some bug inside ASM causes an IOB exception. Log it and move on?
             // this happens when the class isn't valid.
-            System.out.println("Unable to process: " + className);
+            logger.warn("Unable to process: " + className);
         }
     }
 
