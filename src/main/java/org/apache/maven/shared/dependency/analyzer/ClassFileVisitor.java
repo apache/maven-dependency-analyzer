@@ -19,6 +19,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -34,5 +35,13 @@ public interface ClassFileVisitor
      * @param className a {@link java.lang.String} object.
      * @param in a {@link java.io.InputStream} object.
      */
-    void visitClass( String className, InputStream in );
+    void visitClass( String className, InputStreamProvider in );
+
+    /**
+     * Provider for the input stream on the class file
+     */
+    interface InputStreamProvider
+    {
+        InputStream open() throws IOException;
+    }
 }

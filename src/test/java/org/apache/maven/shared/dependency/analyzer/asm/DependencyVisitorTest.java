@@ -19,9 +19,15 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  * under the License.
  */
 
-import org.junit.Before;
-import org.junit.Test;
-import org.objectweb.asm.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Attribute;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureVisitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +43,7 @@ public class DependencyVisitorTest
     private DefaultClassVisitor visitor;
     private MethodVisitor mv;
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
         AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor( resultCollector );

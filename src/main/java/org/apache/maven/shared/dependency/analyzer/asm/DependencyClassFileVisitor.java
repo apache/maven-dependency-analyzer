@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
+import org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException;
 import org.codehaus.plexus.util.IOUtil;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -52,9 +53,9 @@ public class DependencyClassFileVisitor
     }
 
     /** {@inheritDoc} */
-    public void visitClass( String className, InputStream in )
+    public void visitClass( String className, InputStreamProvider provider )
     {
-        try
+        try ( InputStream in = provider.open() )
         {
             byte[] byteCode = IOUtil.toByteArray( in );
             ClassReader reader = new ClassReader( byteCode );
@@ -76,7 +77,7 @@ public class DependencyClassFileVisitor
         }
         catch ( IOException exception )
         {
-            exception.printStackTrace();
+            throw new ProjectDependencyAnalyzerException( "Unable to process class " + className, exception );
         }
         catch ( IndexOutOfBoundsException e )
         {

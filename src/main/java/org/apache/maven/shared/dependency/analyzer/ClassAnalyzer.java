@@ -21,6 +21,7 @@ package org.apache.maven.shared.dependency.analyzer;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Set;
 
 /**
@@ -40,4 +41,14 @@ public interface ClassAnalyzer
      */
     Set<String> analyze( URL url )
         throws IOException;
+
+    /**
+     * <p>analyze.</p>
+     *
+     * @param path the JAR file or directory to analyze
+     * @return a {@link java.util.Set} object
+     * @throws java.io.IOException if any
+     */
+    Set<String> analyze( Path path )
+            throws IOException;
 }
