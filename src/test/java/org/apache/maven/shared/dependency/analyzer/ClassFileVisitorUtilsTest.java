@@ -80,7 +80,7 @@ public class ClassFileVisitorUtilsTest
     @Test
     public void testAcceptJar() throws IOException
     {
-        File file = File.createTempFile( "test", ".jar" );
+        File file = Files.createTempFile( "test", ".jar" ).toFile();
         file.deleteOnExit();
 
         try ( JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) ) )
@@ -100,7 +100,7 @@ public class ClassFileVisitorUtilsTest
     @Test
     public void testAcceptJarWithNonClassEntry() throws IOException
     {
-        File file = File.createTempFile( "test", ".jar" );
+        File file = Files.createTempFile( "test", ".jar" ).toFile();
         file.deleteOnExit();
 
         try ( JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) ) )
@@ -152,7 +152,7 @@ public class ClassFileVisitorUtilsTest
     @Test
     public void testAcceptWithFile() throws IOException
     {
-        File file = File.createTempFile( "test", ".class" );
+        File file = Files.createTempFile( "test", ".class" ).toFile();
         file.deleteOnExit();
 
         URL url = file.toURI().toURL();
