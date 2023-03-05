@@ -19,7 +19,6 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import org.codehaus.plexus.util.IOUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,15 +87,11 @@ public class DefaultClassAnalyzerTest
     {
         //to reproduce MDEP-143
         // corrupt the jar file by altering its contents
-        FileInputStream fis = new FileInputStream( file.toFile() );
         ByteArrayOutputStream baos = new ByteArrayOutputStream( 100 );
-        IOUtil.copy( fis, baos, 100 );
-        fis.close();
+        Files.copy( file, baos );
         byte[] ba = baos.toByteArray();
         ba[50] = 1;
-        FileOutputStream fos = new FileOutputStream( file.toFile() );
-        IOUtil.copy( ba, fos );
-        fos.close();
+        Files.write( file, ba );
 
         ClassAnalyzer analyzer = new DefaultClassAnalyzer();
 
