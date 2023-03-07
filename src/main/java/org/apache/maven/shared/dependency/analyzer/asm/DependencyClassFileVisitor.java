@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
-import org.codehaus.plexus.util.IOUtil;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -56,7 +56,7 @@ public class DependencyClassFileVisitor
     {
         try
         {
-            byte[] byteCode = IOUtil.toByteArray( in );
+            byte[] byteCode = IOUtils.toByteArray( in );
             ClassReader reader = new ClassReader( byteCode );
 
             final Set<String> constantPoolClassRefs = ConstantPoolParser.getConstantPoolClassReferences( byteCode );
