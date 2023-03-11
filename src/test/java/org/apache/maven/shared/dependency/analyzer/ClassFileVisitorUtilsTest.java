@@ -21,7 +21,6 @@ package org.apache.maven.shared.dependency.analyzer;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -48,9 +47,9 @@ import static org.assertj.core.api.Assertions.fail;
  */
 public class ClassFileVisitorUtilsTest
 {
-    private MockVisitor visitor;
+    private TestVisitor visitor = new TestVisitor();
 
-    private static class MockVisitor implements ClassFileVisitor
+    private static class TestVisitor implements ClassFileVisitor
     {
         final List<String> classNames = new ArrayList<>();
         final List<String> data = new ArrayList<>();
@@ -69,12 +68,6 @@ public class ClassFileVisitorUtilsTest
                 throw new RuntimeException( ex );
             }
         }
-    }
-
-    @Before
-    public void setUp()
-    {
-        visitor = new MockVisitor();
     }
 
     @Test
@@ -110,7 +103,7 @@ public class ClassFileVisitorUtilsTest
 
         ClassFileVisitorUtils.accept( file.toURI().toURL(), visitor );
 
-        assertThat( visitor.classNames ) .isEmpty();
+        assertThat( visitor.classNames ).isEmpty();
     }
 
     @Test

@@ -19,17 +19,18 @@ package org.apache.maven.shared.dependency.analyzer;
  * under the License.
  */
 
-import org.codehaus.plexus.util.DirectoryScanner;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import java.util.stream.Collectors;
 
 /**
  * Utility to visit classes in a library given either as a jar file or an exploded directory.
@@ -45,11 +46,10 @@ public final class ClassFileVisitorUtils
     }
 
     /**
-     * <p>accept.</p>
      *
-     * @param url a {@link java.net.URL} object.
-     * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object.
-     * @throws java.io.IOException if any.
+     * @param url a {@link java.net.URL} object
+     * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object
+     * @throws java.io.IOException if any
      */
     public static void accept( URL url, ClassFileVisitor visitor )
         throws IOException
@@ -85,8 +85,6 @@ public final class ClassFileVisitorUtils
         }
     }
 
-    // private methods --------------------------------------------------------
-
     private static void acceptJar( URL url, ClassFileVisitor visitor )
         throws IOException
     {
@@ -108,41 +106,30 @@ public final class ClassFileVisitorUtils
     private static void acceptDirectory( File directory, ClassFileVisitor visitor )
         throws IOException
     {
-        if ( !directory.isDirectory() )
+    
+        List<Path> classFiles = Files.walk( directory.toPath() )
+            .filter( path -> path.toFile().getName().endsWith( ".class" ) )
+            .collect( Collectors.toList() );
+            
+        for ( Path path : classFiles )
         {
-            throw new IllegalArgumentException( "File is not a directory" );
-        }
-
-        DirectoryScanner scanner = new DirectoryScanner();
-
-        scanner.setBasedir( directory );
-        scanner.setIncludes( new String[] { "**/*.class" } );
-
-        scanner.scan();
-
-        String[] paths = scanner.getIncludedFiles();
-
-        for ( String path : paths )
-        {
-            path = path.replace( File.separatorChar, '/' );
-
-            File file = new File( directory, path );
-
-            try ( InputStream in = new FileInputStream( file ) )
+            try ( InputStream in = Files.newInputStream( path ) )
             {
-                visitClass( path, in, visitor );
+                visitClass( directory, path, in, visitor );
             }
         }
     }
 
-    private static void visitClass( String path, InputStream in, ClassFileVisitor visitor )
+    private static void visitClass( File baseDirectory, Path path, InputStream in, ClassFileVisitor visitor )
     {
-        if ( !path.endsWith( ".class" ) )
-        {
-            throw new IllegalArgumentException( "Path is not a class" );
-        }
+        // getPath() returns a String, not a java.nio.file.Path
+        String stringPath = path.toFile().getPath().substring( baseDirectory.getPath().length() + 1 );
+        visitClass( stringPath, in, visitor );
+    }
 
-        String className = path.substring( 0, path.length() - 6 );
+    private static void visitClass( String stringPath, InputStream in, ClassFileVisitor visitor )
+    {
+        String className = stringPath.substring( 0, stringPath.length() - 6 );
 
         className = className.replace( '/', '.' );
 
