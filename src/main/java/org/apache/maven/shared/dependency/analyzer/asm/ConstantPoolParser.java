@@ -115,8 +115,8 @@ public class ConstantPoolParser
             return Collections.emptySet();
         }
         buf.getChar() ; buf.getChar(); // minor + ver
-        Set<Integer> classes = new HashSet<>();
-        Set<Integer> types = new HashSet<>();
+        Set<Integer> classReferences = new HashSet<>();
+        Set<Integer> typeReferences = new HashSet<>();
         Map<Integer, String> stringConstants = new HashMap<>();
         for ( int ix = 1, num = buf.getChar(); ix < num; ix++ )
         {
@@ -129,7 +129,7 @@ public class ConstantPoolParser
                     stringConstants.put( ix, decodeString( buf ) );
                     break;
                 case CONSTANT_CLASS:
-                    classes.add( (int) buf.getChar() );
+                    classReferences.add( (int) buf.getChar() );
                     break;
                 case CONSTANT_METHOD_TYPE:
                     consumeMethodType( buf );
@@ -141,7 +141,7 @@ public class ConstantPoolParser
                     break;
                 case CONSTANT_NAME_AND_TYPE:
                     buf.getChar();
-                    types.add( (int) buf.getChar() );
+                    typeReferences.add( (int) buf.getChar() );
                     break;
                 case CONSTANT_INTEGER:
                     consumeInt( buf );
@@ -177,14 +177,14 @@ public class ConstantPoolParser
         
         Set<String> result = new HashSet<>();
         
-        for ( Integer aClass : classes )
+        for ( Integer classRef : classReferences )
         {
-            addClassToResult( result, stringConstants.get( aClass ) );
+            addClassToResult( result, stringConstants.get( classRef ) );
         }
         
-        for ( Integer aType : types )
+        for ( Integer typeRef : typeReferences )
         {
-            String typeName = stringConstants.get( aType );
+            String typeName = stringConstants.get( typeRef );
             
             Type type = Type.getType( typeName );
             switch ( type.getSort() )
