@@ -186,19 +186,14 @@ public class ConstantPoolParser
         {
             String typeName = stringConstants.get( typeRef );
             
-            Type type = Type.getType( typeName );
-            switch ( type.getSort() )
+            if ( Type.getType( typeName ).getSort() == Type.METHOD )
             {
-            case Type.METHOD:
                 addClassToResult( result, Type.getReturnType( typeName ).getInternalName() );
                 Type[] argumentTypes = Type.getArgumentTypes( typeName );
                 for ( Type argumentType : argumentTypes )
                 {
                     addClassToResult( result, argumentType.getInternalName() );
                 }
-                break;
-            default:
-                // Ignore
             }
         }
         
