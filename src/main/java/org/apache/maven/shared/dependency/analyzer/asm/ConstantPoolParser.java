@@ -28,6 +28,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.objectweb.asm.Type;
+
 /**
  * A small parser to read the constant pool directly, in case it contains references
  * ASM does not support.
@@ -113,7 +115,8 @@ public class ConstantPoolParser
             return Collections.emptySet();
         }
         buf.getChar() ; buf.getChar(); // minor + ver
-        Set<Integer> classes = new HashSet<>();
+        Set<Integer> classReferences = new HashSet<>();
+        Set<Integer> typeReferences = new HashSet<>();
         Map<Integer, String> stringConstants = new HashMap<>();
         for ( int ix = 1, num = buf.getChar(); ix < num; ix++ )
         {
@@ -126,7 +129,7 @@ public class ConstantPoolParser
                     stringConstants.put( ix, decodeString( buf ) );
                     break;
                 case CONSTANT_CLASS:
-                    classes.add( (int) buf.getChar() );
+                    classReferences.add( (int) buf.getChar() );
                     break;
                 case CONSTANT_METHOD_TYPE:
                     consumeMethodType( buf );
@@ -134,8 +137,11 @@ public class ConstantPoolParser
                 case CONSTANT_FIELDREF:
                 case CONSTANT_METHODREF:
                 case CONSTANT_INTERFACEMETHODREF:
-                case CONSTANT_NAME_AND_TYPE:
                     consumeReference( buf );
+                    break;
+                case CONSTANT_NAME_AND_TYPE:
+                    buf.getChar();
+                    typeReferences.add( (int) buf.getChar() );
                     break;
                 case CONSTANT_INTEGER:
                     consumeInt( buf );
@@ -168,18 +174,39 @@ public class ConstantPoolParser
                     break;
             }
         }
+        
         Set<String> result = new HashSet<>();
-        for ( Integer aClass : classes )
+        
+        for ( Integer classRef : classReferences )
         {
-            String className = stringConstants.get( aClass );
-
-            // filter out things from unnamed package, probably a false-positive
-            if ( isImportableClass( className ) )
+            addClassToResult( result, stringConstants.get( classRef ) );
+        }
+        
+        for ( Integer typeRef : typeReferences )
+        {
+            String typeName = stringConstants.get( typeRef );
+            
+            if ( Type.getType( typeName ).getSort() == Type.METHOD )
             {
-                result.add( className );
+                addClassToResult( result, Type.getReturnType( typeName ).getInternalName() );
+                Type[] argumentTypes = Type.getArgumentTypes( typeName );
+                for ( Type argumentType : argumentTypes )
+                {
+                    addClassToResult( result, argumentType.getInternalName() );
+                }
             }
         }
+        
         return result;
+    }
+
+    private static void addClassToResult( Set<String> result, String className )
+    {
+        // filter out things from unnamed package, probably a false-positive
+        if ( isImportableClass( className ) )
+        {
+            result.add( className );
+        }
     }
 
     private static String decodeString( ByteBuffer buf )
