@@ -109,7 +109,7 @@ public final class ClassFileVisitorUtils
     {
     
         List<Path> classFiles = Files.walk( directory.toPath() )
-            .filter( path -> path.toFile().getName().endsWith( ".class" ) )
+            .filter( path -> path.getFileName().toString().endsWith( ".class" ) )
             .collect( Collectors.toList() );
             
         for ( Path path : classFiles )
