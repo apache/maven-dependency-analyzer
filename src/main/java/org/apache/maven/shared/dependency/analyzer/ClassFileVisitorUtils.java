@@ -131,7 +131,7 @@ public final class ClassFileVisitorUtils
     {
         String className = stringPath.substring( 0, stringPath.length() - 6 );
 
-        className = className.replace( '/', '.' );
+        className = className.replace( File.separatorChar, '.' );
 
         visitor.visitClass( className, in );
     }
