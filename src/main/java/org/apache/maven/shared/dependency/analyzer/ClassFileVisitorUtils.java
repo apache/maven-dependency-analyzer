@@ -97,7 +97,8 @@ public final class ClassFileVisitorUtils
                 // ignore files like package-info.class and module-info.class
                 if ( name.endsWith( ".class" ) && name.indexOf( '-' ) == -1 )
                 {
-                    visitClass( name, in, visitor );
+                    // Even on Windows Jars use / as the separator character
+                    visitClass( name, in, visitor, '/' );
                 }
             }
         }
@@ -124,14 +125,14 @@ public final class ClassFileVisitorUtils
     {
         // getPath() returns a String, not a java.nio.file.Path
         String stringPath = path.toFile().getPath().substring( baseDirectory.getPath().length() + 1 );
-        visitClass( stringPath, in, visitor );
+        visitClass( stringPath, in, visitor, File.separatorChar );
     }
 
-    private static void visitClass( String stringPath, InputStream in, ClassFileVisitor visitor )
+    private static void visitClass( String stringPath, InputStream in, ClassFileVisitor visitor, char separator )
     {
         String className = stringPath.substring( 0, stringPath.length() - 6 );
 
-        className = className.replace( File.separatorChar, '.' );
+        className = className.replace( separator, '.' );
 
         visitor.visitClass( className, in );
     }
