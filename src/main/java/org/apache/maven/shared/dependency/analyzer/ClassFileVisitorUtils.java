@@ -108,7 +108,7 @@ public final class ClassFileVisitorUtils
     {
     
         List<Path> classFiles = Files.walk( directory.toPath() )
-            .filter( path -> path.getFileName().toString().endsWith( ".class" ) )
+            .filter( path -> path.toFile().getName().endsWith( ".class" ) )
             .collect( Collectors.toList() );
             
         for ( Path path : classFiles )
@@ -122,7 +122,8 @@ public final class ClassFileVisitorUtils
 
     private static void visitClass( File baseDirectory, Path path, InputStream in, ClassFileVisitor visitor )
     {
-        String stringPath = path.toString().substring( baseDirectory.getPath().length() + 1 );
+        // getPath() returns a String, not a java.nio.file.Path
+        String stringPath = path.toFile().getPath().substring( baseDirectory.getPath().length() + 1 );
         visitClass( stringPath, in, visitor );
     }
 
