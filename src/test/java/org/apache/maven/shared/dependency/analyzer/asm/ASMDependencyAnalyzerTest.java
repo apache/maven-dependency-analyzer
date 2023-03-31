@@ -22,15 +22,15 @@ import java.net.URL;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ASMDependencyAnalyzerTest {
+class ASMDependencyAnalyzerTest {
     private final DependencyAnalyzer analyzer = new ASMDependencyAnalyzer();
 
     @Test
-    public void test() throws Exception {
+    void test() throws Exception {
         URL jarUrl = this.getClass().getResource("/org/objectweb/asm/ClassReader.class");
         assertThat(jarUrl).isNotNull();
         String fileUrl =

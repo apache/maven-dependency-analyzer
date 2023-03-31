@@ -21,8 +21,8 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,16 +32,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @see CollectorClassFileVisitor
  */
-public class CollectorClassFileVisitorTest {
+class CollectorClassFileVisitorTest {
     private CollectorClassFileVisitor visitor;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         visitor = new CollectorClassFileVisitor();
     }
 
     @Test
-    public void testVisitClass() {
+    void testVisitClass() {
         visitor.visitClass("a.b.c", null);
         visitor.visitClass("x.y.z", null);
 

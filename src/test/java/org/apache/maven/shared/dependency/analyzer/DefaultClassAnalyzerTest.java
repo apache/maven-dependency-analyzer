@@ -30,9 +30,9 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -43,27 +43,24 @@ import static org.assertj.core.api.Assertions.fail;
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @see DefaultClassAnalyzer
  */
-public class DefaultClassAnalyzerTest {
+class DefaultClassAnalyzerTest {
+
+    @TempDir
+    private Path tempDir;
+
     private Path file;
 
-    @Before
-    public void setUp() throws IOException {
-        file = Files.createTempFile("test", ".jar");
+    @BeforeEach
+    void setUp() throws IOException {
+        file = Files.createTempFile(tempDir, "test", ".jar");
         try (JarOutputStream out = new JarOutputStream(new FileOutputStream(file.toFile()))) {
             addZipEntry(out, "a/b/c.class", "class a.b.c");
             addZipEntry(out, "x/y/z.class", "class x.y.z");
         }
     }
 
-    @After
-    public void cleanup() throws IOException {
-        if (file != null) {
-            Files.deleteIfExists(file);
-        }
-    }
-
     @Test
-    public void testAnalyzeWithJar() throws IOException {
+    void testAnalyzeWithJar() throws IOException {
         Set<String> expectedClasses = new HashSet<>();
         expectedClasses.add("a.b.c");
         expectedClasses.add("x.y.z");
@@ -75,7 +72,7 @@ public class DefaultClassAnalyzerTest {
     }
 
     @Test
-    public void testAnalyzeBadJar() throws IOException {
+    void testAnalyzeBadJar() throws IOException {
         // to reproduce MDEP-143
         // corrupt the jar file by altering its contents
         ByteArrayOutputStream baos = new ByteArrayOutputStream(100);
