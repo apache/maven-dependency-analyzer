@@ -18,7 +18,7 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,14 +28,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @see ProjectDependencyAnalyzerException
  */
-public class ProjectDependencyAnalyzerExceptionTest {
+class ProjectDependencyAnalyzerExceptionTest {
     @Test
-    public void testConstructor() {
+    void testConstructor() {
         assertThat(new ProjectDependencyAnalyzerException("a")).hasMessage("a");
     }
 
     @Test
-    public void testConstructorWithThrowable() {
+    void testConstructorWithThrowable() {
         Throwable throwable = new Exception();
         ProjectDependencyAnalyzerException exception = new ProjectDependencyAnalyzerException("a", throwable);
 

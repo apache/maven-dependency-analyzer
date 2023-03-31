@@ -28,11 +28,11 @@ import java.util.Set;
 import org.apache.maven.shared.dependency.analyzer.testcases.ArrayCases;
 import org.apache.maven.shared.dependency.analyzer.testcases.InnerClassCase;
 import org.apache.maven.shared.dependency.analyzer.testcases.MethodHandleCases;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ResultCollectorTest {
+class ResultCollectorTest {
     Set<String> getDependencies(Class<?> inspectClass) throws IOException {
         String className = inspectClass.getName();
         String path = '/' + className.replace('.', '/') + ".class";
@@ -44,7 +44,7 @@ public class ResultCollectorTest {
     }
 
     @Test
-    public void testJava11Invoke() throws IOException {
+    void testJava11Invoke() throws IOException {
         String className = "issue362.Bcel362";
         Path path = Paths.get(
                 "src/test/resources/org/apache/maven/shared/dependency/analyzer/commons-bcel-issue362/Bcel362.class");
@@ -55,7 +55,7 @@ public class ResultCollectorTest {
     }
 
     @Test
-    public void testArrayCases() throws IOException {
+    void testArrayCases() throws IOException {
         Set<String> dependencies = getDependencies(ArrayCases.class);
         assertThat(dependencies).doesNotContain("[I");
         assertThat(dependencies).allSatisfy(dependency -> assertThat(dependency).doesNotStartWith("["));
@@ -63,7 +63,7 @@ public class ResultCollectorTest {
     }
 
     @Test
-    public void testNoMethodHandle() throws IOException {
+    void testNoMethodHandle() throws IOException {
         Set<String> dependencies = getDependencies(MethodHandleCases.class);
         for (String dependency : dependencies) {
             assertThat(dependency).doesNotStartWith("(");
@@ -71,7 +71,7 @@ public class ResultCollectorTest {
     }
 
     @Test
-    public void testInnerClassAsContainer() throws IOException {
+    void testInnerClassAsContainer() throws IOException {
         Set<String> dependencies = getDependencies(InnerClassCase.class);
         for (String dependency : dependencies) {
             assertThat(dependency).doesNotContain("$");
