@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.analyzer;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.analyzer;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -36,59 +35,51 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @see ProjectDependencyAnalysis
  */
-public class ProjectDependencyAnalysisTest
-{
+public class ProjectDependencyAnalysisTest {
     @Test
-    public void testConstructor()
-    {
+    public void testConstructor() {
         Set<Artifact> usedDeclaredArtifacts = new HashSet<>();
         Set<Artifact> usedUndeclaredArtifacts = new HashSet<>();
         Set<Artifact> unusedDeclaredArtifacts = new HashSet<>();
         Set<Artifact> testArtifactsWithNonTestScope = new HashSet<>();
 
-        ProjectDependencyAnalysis analysis =
-            new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts,
-                testArtifactsWithNonTestScope );
+        ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
+                usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts, testArtifactsWithNonTestScope);
 
-        assertThat( analysis.getUsedDeclaredArtifacts() ).isEqualTo( usedDeclaredArtifacts );
-        assertThat( analysis.getUsedUndeclaredArtifacts() ).isEqualTo( usedUndeclaredArtifacts );
-        assertThat( analysis.getUnusedDeclaredArtifacts() ).isEqualTo( unusedDeclaredArtifacts );
+        assertThat(analysis.getUsedDeclaredArtifacts()).isEqualTo(usedDeclaredArtifacts);
+        assertThat(analysis.getUsedUndeclaredArtifacts()).isEqualTo(usedUndeclaredArtifacts);
+        assertThat(analysis.getUnusedDeclaredArtifacts()).isEqualTo(unusedDeclaredArtifacts);
     }
 
     @Test
-    public void ignoreNonCompileShouldFilterOnlyUnusedDeclare()
-    {
-        Artifact artifactCompile = aTestArtifact( "test1", Artifact.SCOPE_COMPILE );
-        Artifact artifactProvided = aTestArtifact( "test2", Artifact.SCOPE_PROVIDED );
-        Artifact artifactTest = aTestArtifact( "test3", Artifact.SCOPE_TEST );
+    public void ignoreNonCompileShouldFilterOnlyUnusedDeclare() {
+        Artifact artifactCompile = aTestArtifact("test1", Artifact.SCOPE_COMPILE);
+        Artifact artifactProvided = aTestArtifact("test2", Artifact.SCOPE_PROVIDED);
+        Artifact artifactTest = aTestArtifact("test3", Artifact.SCOPE_TEST);
 
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
-            asSet( artifactCompile, artifactProvided, artifactTest ),
-            asSet( artifactCompile, artifactProvided, artifactTest ),
-            asSet( artifactCompile, artifactProvided, artifactTest ),
-            asSet( artifactCompile, artifactProvided, artifactTest ) );
+                asSet(artifactCompile, artifactProvided, artifactTest),
+                asSet(artifactCompile, artifactProvided, artifactTest),
+                asSet(artifactCompile, artifactProvided, artifactTest),
+                asSet(artifactCompile, artifactProvided, artifactTest));
 
         ProjectDependencyAnalysis compileOnlyAnalysis = analysis.ignoreNonCompile();
 
-        assertThat( compileOnlyAnalysis.getUsedDeclaredArtifacts() ).hasSize( 3 );
-        assertThat( compileOnlyAnalysis.getUsedUndeclaredArtifacts() ).hasSize( 3 );
+        assertThat(compileOnlyAnalysis.getUsedDeclaredArtifacts()).hasSize(3);
+        assertThat(compileOnlyAnalysis.getUsedUndeclaredArtifacts()).hasSize(3);
 
-        assertThat( compileOnlyAnalysis.getUnusedDeclaredArtifacts() )
-            .hasSize( 1 )
-            .allSatisfy( a -> assertThat( a.getScope() ).isEqualTo( Artifact.SCOPE_COMPILE ) );
+        assertThat(compileOnlyAnalysis.getUnusedDeclaredArtifacts()).hasSize(1).allSatisfy(a -> assertThat(a.getScope())
+                .isEqualTo(Artifact.SCOPE_COMPILE));
 
-        assertThat( compileOnlyAnalysis.getTestArtifactsWithNonTestScope() )
-            .hasSize( 3 );
+        assertThat(compileOnlyAnalysis.getTestArtifactsWithNonTestScope()).hasSize(3);
     }
 
-    private <T> Set<T> asSet( T... items )
-    {
-        return new HashSet<>( Arrays.asList( items ) );
+    private <T> Set<T> asSet(T... items) {
+        return new HashSet<>(Arrays.asList(items));
     }
 
-    private Artifact aTestArtifact( String artifactId, String scope )
-    {
-        return new DefaultArtifact( "groupId", artifactId, VersionRange.createFromVersion( "1.0" ),
-            scope, "jar", "", null );
+    private Artifact aTestArtifact(String artifactId, String scope) {
+        return new DefaultArtifact(
+                "groupId", artifactId, VersionRange.createFromVersion("1.0"), scope, "jar", "", null);
     }
 }

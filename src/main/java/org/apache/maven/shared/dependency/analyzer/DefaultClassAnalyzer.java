@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.analyzer;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.analyzer;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -34,27 +33,19 @@ import java.util.zip.ZipException;
  */
 @Named
 @Singleton
-public class DefaultClassAnalyzer
-    implements ClassAnalyzer
-{
+public class DefaultClassAnalyzer implements ClassAnalyzer {
 
     /** {@inheritDoc} */
-    public Set<String> analyze( URL url )
-        throws IOException
-    {
+    public Set<String> analyze(URL url) throws IOException {
         CollectorClassFileVisitor visitor = new CollectorClassFileVisitor();
 
-        try
-        {
-            ClassFileVisitorUtils.accept( url, visitor );
-        }
-        catch ( ZipException e )
-        {
+        try {
+            ClassFileVisitorUtils.accept(url, visitor);
+        } catch (ZipException e) {
             // since the current ZipException gives no indication what jar file is corrupted
             // we prefer to wrap another ZipException for better error visibility
-            ZipException ze =
-                new ZipException( "Cannot process Jar entry on URL: " + url + " due to " + e.getMessage() );
-            ze.initCause( e );
+            ZipException ze = new ZipException("Cannot process Jar entry on URL: " + url + " due to " + e.getMessage());
+            ze.initCause(e);
             throw ze;
         }
 

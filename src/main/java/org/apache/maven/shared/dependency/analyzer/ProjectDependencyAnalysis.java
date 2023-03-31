@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.analyzer;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.analyzer;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,8 +34,7 @@ import org.apache.maven.artifact.Artifact;
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
-public class ProjectDependencyAnalysis
-{
+public class ProjectDependencyAnalysis {
     // fields -----------------------------------------------------------------
 
     private final Set<Artifact> usedDeclaredArtifacts;
@@ -50,9 +48,8 @@ public class ProjectDependencyAnalysis
     /**
      * <p>Constructor for ProjectDependencyAnalysis.</p>
      */
-    public ProjectDependencyAnalysis()
-    {
-        this( null, (Map<Artifact, Set<String>>) null, null, null );
+    public ProjectDependencyAnalysis() {
+        this(null, (Map<Artifact, Set<String>>) null, null, null);
     }
 
     /**
@@ -62,11 +59,11 @@ public class ProjectDependencyAnalysis
      * @param usedUndeclaredArtifacts artifacts used but not declared
      * @param unusedDeclaredArtifacts artifacts declared but not used
      */
-    public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
-                                      Set<Artifact> unusedDeclaredArtifacts )
-    {
-        this( usedDeclaredArtifacts, usedUndeclaredArtifacts,
-                unusedDeclaredArtifacts, Collections.<Artifact>emptySet() );
+    public ProjectDependencyAnalysis(
+            Set<Artifact> usedDeclaredArtifacts,
+            Set<Artifact> usedUndeclaredArtifacts,
+            Set<Artifact> unusedDeclaredArtifacts) {
+        this(usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts, Collections.<Artifact>emptySet());
     }
 
     /**
@@ -77,25 +74,27 @@ public class ProjectDependencyAnalysis
      * @param unusedDeclaredArtifacts artifacts declared but not used
      * @param testArtifactsWithNonTestScope artifacts only used in tests but not declared with test scope
      */
-    public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts, Set<Artifact> usedUndeclaredArtifacts,
-                                      Set<Artifact> unusedDeclaredArtifacts,
-                                      Set<Artifact> testArtifactsWithNonTestScope )
-    {
-        this( usedDeclaredArtifacts,
-                mapWithKeys( usedUndeclaredArtifacts ),
+    public ProjectDependencyAnalysis(
+            Set<Artifact> usedDeclaredArtifacts,
+            Set<Artifact> usedUndeclaredArtifacts,
+            Set<Artifact> unusedDeclaredArtifacts,
+            Set<Artifact> testArtifactsWithNonTestScope) {
+        this(
+                usedDeclaredArtifacts,
+                mapWithKeys(usedUndeclaredArtifacts),
                 unusedDeclaredArtifacts,
-                testArtifactsWithNonTestScope );
+                testArtifactsWithNonTestScope);
     }
 
-    public ProjectDependencyAnalysis( Set<Artifact> usedDeclaredArtifacts,
+    public ProjectDependencyAnalysis(
+            Set<Artifact> usedDeclaredArtifacts,
             Map<Artifact, Set<String>> usedUndeclaredArtifacts,
             Set<Artifact> unusedDeclaredArtifacts,
-            Set<Artifact> testArtifactsWithNonTestScope )
-    {
-        this.usedDeclaredArtifacts = safeCopy( usedDeclaredArtifacts );
-        this.usedUndeclaredArtifacts = safeCopy( usedUndeclaredArtifacts );
-        this.unusedDeclaredArtifacts = safeCopy( unusedDeclaredArtifacts );
-        this.testArtifactsWithNonTestScope = safeCopy( testArtifactsWithNonTestScope );
+            Set<Artifact> testArtifactsWithNonTestScope) {
+        this.usedDeclaredArtifacts = safeCopy(usedDeclaredArtifacts);
+        this.usedUndeclaredArtifacts = safeCopy(usedUndeclaredArtifacts);
+        this.unusedDeclaredArtifacts = safeCopy(unusedDeclaredArtifacts);
+        this.testArtifactsWithNonTestScope = safeCopy(testArtifactsWithNonTestScope);
     }
 
     /**
@@ -103,9 +102,8 @@ public class ProjectDependencyAnalysis
      *
      * @return artifacts both used and declared
      */
-    public Set<Artifact> getUsedDeclaredArtifacts()
-    {
-        return safeCopy( usedDeclaredArtifacts );
+    public Set<Artifact> getUsedDeclaredArtifacts() {
+        return safeCopy(usedDeclaredArtifacts);
     }
 
     /**
@@ -113,9 +111,8 @@ public class ProjectDependencyAnalysis
      *
      * @return artifacts used but not declared
      */
-    public Set<Artifact> getUsedUndeclaredArtifacts()
-    {
-        return safeCopy( usedUndeclaredArtifacts.keySet() );
+    public Set<Artifact> getUsedUndeclaredArtifacts() {
+        return safeCopy(usedUndeclaredArtifacts.keySet());
     }
 
     /**
@@ -123,9 +120,8 @@ public class ProjectDependencyAnalysis
      *
      * @return artifacts used but not declared
      */
-    public Map<Artifact, Set<String>> getUsedUndeclaredArtifactsWithClasses()
-    {
-        return safeCopy( usedUndeclaredArtifacts );
+    public Map<Artifact, Set<String>> getUsedUndeclaredArtifactsWithClasses() {
+        return safeCopy(usedUndeclaredArtifacts);
     }
 
     /**
@@ -133,9 +129,8 @@ public class ProjectDependencyAnalysis
      *
      * @return artifacts declared but not used
      */
-    public Set<Artifact> getUnusedDeclaredArtifacts()
-    {
-        return safeCopy( unusedDeclaredArtifacts );
+    public Set<Artifact> getUnusedDeclaredArtifacts() {
+        return safeCopy(unusedDeclaredArtifacts);
     }
 
     /**
@@ -143,9 +138,8 @@ public class ProjectDependencyAnalysis
      *
      * @return  artifacts only used in tests but not declared with test scope
      */
-    public Set<Artifact> getTestArtifactsWithNonTestScope()
-    {
-        return safeCopy( testArtifactsWithNonTestScope );
+    public Set<Artifact> getTestArtifactsWithNonTestScope() {
+        return safeCopy(testArtifactsWithNonTestScope);
     }
 
     /**
@@ -154,13 +148,12 @@ public class ProjectDependencyAnalysis
      * @return updated project dependency analysis
      * @since 1.3
      */
-    public ProjectDependencyAnalysis ignoreNonCompile()
-    {
-        Set<Artifact> filteredUnusedDeclared = new HashSet<>( unusedDeclaredArtifacts );
-        filteredUnusedDeclared.removeIf( artifact -> !artifact.getScope().equals( Artifact.SCOPE_COMPILE ) );
+    public ProjectDependencyAnalysis ignoreNonCompile() {
+        Set<Artifact> filteredUnusedDeclared = new HashSet<>(unusedDeclaredArtifacts);
+        filteredUnusedDeclared.removeIf(artifact -> !artifact.getScope().equals(Artifact.SCOPE_COMPILE));
 
-        return new ProjectDependencyAnalysis( usedDeclaredArtifacts, usedUndeclaredArtifacts, filteredUnusedDeclared,
-                testArtifactsWithNonTestScope );
+        return new ProjectDependencyAnalysis(
+                usedDeclaredArtifacts, usedUndeclaredArtifacts, filteredUnusedDeclared, testArtifactsWithNonTestScope);
     }
 
     /**
@@ -174,59 +167,50 @@ public class ProjectDependencyAnalysis
      *                                            used
      * @since 1.3
      */
-    @SuppressWarnings( "UnusedReturnValue" )
-    public ProjectDependencyAnalysis forceDeclaredDependenciesUsage( String[] forceUsedDependencies )
-        throws ProjectDependencyAnalyzerException
-    {
-        Set<String> forced = new HashSet<>( Arrays.asList( forceUsedDependencies ) );
+    @SuppressWarnings("UnusedReturnValue")
+    public ProjectDependencyAnalysis forceDeclaredDependenciesUsage(String[] forceUsedDependencies)
+            throws ProjectDependencyAnalyzerException {
+        Set<String> forced = new HashSet<>(Arrays.asList(forceUsedDependencies));
 
-        Set<Artifact> forcedUnusedDeclared = new HashSet<>( unusedDeclaredArtifacts );
-        Set<Artifact> forcedUsedDeclared = new HashSet<>( usedDeclaredArtifacts );
+        Set<Artifact> forcedUnusedDeclared = new HashSet<>(unusedDeclaredArtifacts);
+        Set<Artifact> forcedUsedDeclared = new HashSet<>(usedDeclaredArtifacts);
 
         Iterator<Artifact> iter = forcedUnusedDeclared.iterator();
-        while ( iter.hasNext() )
-        {
+        while (iter.hasNext()) {
             Artifact artifact = iter.next();
 
-            if ( forced.remove( artifact.getGroupId() + ':' + artifact.getArtifactId() ) )
-            {
+            if (forced.remove(artifact.getGroupId() + ':' + artifact.getArtifactId())) {
                 // ok, change artifact status from unused-declared to used-declared
                 iter.remove();
-                forcedUsedDeclared.add( artifact );
+                forcedUsedDeclared.add(artifact);
             }
         }
 
-        if ( !forced.isEmpty() )
-        {
+        if (!forced.isEmpty()) {
             // trying to force dependencies as used-declared which were not declared or already detected as used
             Set<String> used = new HashSet<>();
-            for ( Artifact artifact : usedDeclaredArtifacts )
-            {
+            for (Artifact artifact : usedDeclaredArtifacts) {
                 String id = artifact.getGroupId() + ':' + artifact.getArtifactId();
-                if ( forced.remove( id ) )
-                {
-                    used.add( id );
+                if (forced.remove(id)) {
+                    used.add(id);
                 }
             }
 
             StringBuilder builder = new StringBuilder();
-            if ( !forced.isEmpty() )
-            {
-                builder.append( "not declared: " ).append( forced );
+            if (!forced.isEmpty()) {
+                builder.append("not declared: ").append(forced);
             }
-            if ( !used.isEmpty() )
-            {
-                if ( builder.length() > 0 )
-                {
-                    builder.append( " and " );
+            if (!used.isEmpty()) {
+                if (builder.length() > 0) {
+                    builder.append(" and ");
                 }
-                builder.append( "declared but already detected as used: " ).append( used );
+                builder.append("declared but already detected as used: ").append(used);
             }
-            throw new ProjectDependencyAnalyzerException( "Trying to force use of dependencies which are " + builder );
+            throw new ProjectDependencyAnalyzerException("Trying to force use of dependencies which are " + builder);
         }
 
-        return new ProjectDependencyAnalysis( forcedUsedDeclared, usedUndeclaredArtifacts, forcedUnusedDeclared,
-                testArtifactsWithNonTestScope );
+        return new ProjectDependencyAnalysis(
+                forcedUsedDeclared, usedUndeclaredArtifacts, forcedUnusedDeclared, testArtifactsWithNonTestScope);
     }
 
     /**
@@ -234,27 +218,24 @@ public class ProjectDependencyAnalysis
      *
      * @return an int
      */
-    public int hashCode()
-    {
+    public int hashCode() {
         int hashCode = getUsedDeclaredArtifacts().hashCode();
-        hashCode = ( hashCode * 37 ) + getUsedUndeclaredArtifacts().hashCode();
-        hashCode = ( hashCode * 37 ) + getUnusedDeclaredArtifacts().hashCode();
-        hashCode = ( hashCode * 37 ) + getTestArtifactsWithNonTestScope().hashCode();
+        hashCode = (hashCode * 37) + getUsedUndeclaredArtifacts().hashCode();
+        hashCode = (hashCode * 37) + getUnusedDeclaredArtifacts().hashCode();
+        hashCode = (hashCode * 37) + getTestArtifactsWithNonTestScope().hashCode();
 
         return hashCode;
     }
 
     /** {@inheritDoc} */
-    public boolean equals( Object object )
-    {
-        if ( object instanceof ProjectDependencyAnalysis )
-        {
+    public boolean equals(Object object) {
+        if (object instanceof ProjectDependencyAnalysis) {
             ProjectDependencyAnalysis analysis = (ProjectDependencyAnalysis) object;
 
-            return getUsedDeclaredArtifacts().equals( analysis.getUsedDeclaredArtifacts() )
-                && getUsedUndeclaredArtifacts().equals( analysis.getUsedUndeclaredArtifacts() )
-                && getUnusedDeclaredArtifacts().equals( analysis.getUnusedDeclaredArtifacts() )
-                && getTestArtifactsWithNonTestScope().equals( analysis.getTestArtifactsWithNonTestScope() );
+            return getUsedDeclaredArtifacts().equals(analysis.getUsedDeclaredArtifacts())
+                    && getUsedUndeclaredArtifacts().equals(analysis.getUsedUndeclaredArtifacts())
+                    && getUnusedDeclaredArtifacts().equals(analysis.getUnusedDeclaredArtifacts())
+                    && getTestArtifactsWithNonTestScope().equals(analysis.getTestArtifactsWithNonTestScope());
         }
 
         return false;
@@ -265,89 +246,74 @@ public class ProjectDependencyAnalysis
      *
      * @return a {@link java.lang.String} object.
      */
-    public String toString()
-    {
+    public String toString() {
         StringBuilder buffer = new StringBuilder();
 
-        if ( !getUsedDeclaredArtifacts().isEmpty() )
-        {
-            buffer.append( "usedDeclaredArtifacts=" ).append( getUsedDeclaredArtifacts() );
+        if (!getUsedDeclaredArtifacts().isEmpty()) {
+            buffer.append("usedDeclaredArtifacts=").append(getUsedDeclaredArtifacts());
         }
 
-        if ( !getUsedUndeclaredArtifacts().isEmpty() )
-        {
-            if ( buffer.length() > 0 )
-            {
-                buffer.append( "," );
+        if (!getUsedUndeclaredArtifacts().isEmpty()) {
+            if (buffer.length() > 0) {
+                buffer.append(",");
             }
 
-            buffer.append( "usedUndeclaredArtifacts=" ).append( getUsedUndeclaredArtifacts() );
+            buffer.append("usedUndeclaredArtifacts=").append(getUsedUndeclaredArtifacts());
         }
 
-        if ( !getUnusedDeclaredArtifacts().isEmpty() )
-        {
-            if ( buffer.length() > 0 )
-            {
-                buffer.append( "," );
+        if (!getUnusedDeclaredArtifacts().isEmpty()) {
+            if (buffer.length() > 0) {
+                buffer.append(",");
             }
 
-            buffer.append( "unusedDeclaredArtifacts=" ).append( getUnusedDeclaredArtifacts() );
+            buffer.append("unusedDeclaredArtifacts=").append(getUnusedDeclaredArtifacts());
         }
 
-        if ( !getTestArtifactsWithNonTestScope().isEmpty() )
-        {
-            if ( buffer.length() > 0 )
-            {
-                buffer.append( "," );
+        if (!getTestArtifactsWithNonTestScope().isEmpty()) {
+            if (buffer.length() > 0) {
+                buffer.append(",");
             }
 
-            buffer.append( "testArtifactsWithNonTestScope=" ).append( getTestArtifactsWithNonTestScope() );
+            buffer.append("testArtifactsWithNonTestScope=").append(getTestArtifactsWithNonTestScope());
         }
 
-        buffer.insert( 0, "[" );
-        buffer.insert( 0, getClass().getName() );
+        buffer.insert(0, "[");
+        buffer.insert(0, getClass().getName());
 
-        buffer.append( "]" );
+        buffer.append("]");
 
         return buffer.toString();
     }
 
     // private methods --------------------------------------------------------
 
-    private Set<Artifact> safeCopy( Set<Artifact> set )
-    {
-        return ( set == null ) ? Collections.emptySet() : Collections.unmodifiableSet( new LinkedHashSet<>( set ) );
+    private Set<Artifact> safeCopy(Set<Artifact> set) {
+        return (set == null) ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(set));
     }
 
-    private static Map<Artifact, Set<String>> safeCopy( Map<Artifact, Set<String>> origMap )
-    {
-        if ( origMap == null )
-        {
+    private static Map<Artifact, Set<String>> safeCopy(Map<Artifact, Set<String>> origMap) {
+        if (origMap == null) {
             return Collections.emptyMap();
         }
 
         Map<Artifact, Set<String>> map = new HashMap<>();
 
-        for ( Map.Entry<Artifact, Set<String>> e : origMap.entrySet() )
-        {
-            map.put( e.getKey(), Collections.unmodifiableSet( new LinkedHashSet<>( e.getValue() ) ) );
+        for (Map.Entry<Artifact, Set<String>> e : origMap.entrySet()) {
+            map.put(e.getKey(), Collections.unmodifiableSet(new LinkedHashSet<>(e.getValue())));
         }
 
         return map;
     }
 
-    private static Map<Artifact, Set<String>> mapWithKeys( Set<Artifact> keys )
-    {
-        if ( keys == null )
-        {
+    private static Map<Artifact, Set<String>> mapWithKeys(Set<Artifact> keys) {
+        if (keys == null) {
             return Collections.emptyMap();
         }
 
         Map<Artifact, Set<String>> map = new HashMap<>();
 
-        for ( Artifact k : keys )
-        {
-            map.put( k, Collections.<String>emptySet() );
+        for (Artifact k : keys) {
+            map.put(k, Collections.<String>emptySet());
         }
 
         return map;
