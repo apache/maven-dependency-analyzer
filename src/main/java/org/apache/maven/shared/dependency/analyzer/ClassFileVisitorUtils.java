@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.analyzer;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,8 +16,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.codehaus.plexus.util.DirectoryScanner;
+package org.apache.maven.shared.dependency.analyzer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,16 +28,16 @@ import java.net.URL;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
+import org.codehaus.plexus.util.DirectoryScanner;
+
 /**
  * Utility to visit classes in a library given either as a jar file or an exploded directory.
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
-public final class ClassFileVisitorUtils
-{
+public final class ClassFileVisitorUtils {
 
-    private ClassFileVisitorUtils()
-    {
+    private ClassFileVisitorUtils() {
         // private constructor for utility class
     }
 
@@ -51,101 +48,75 @@ public final class ClassFileVisitorUtils
      * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object.
      * @throws java.io.IOException if any.
      */
-    public static void accept( URL url, ClassFileVisitor visitor )
-        throws IOException
-    {
-        if ( url.getPath().endsWith( ".jar" ) )
-        {
-            acceptJar( url, visitor );
-        }
-        else if ( url.getProtocol().equalsIgnoreCase( "file" ) )
-        {
-            try
-            {
-                File file = new File( new URI( url.toString() ) );
+    public static void accept(URL url, ClassFileVisitor visitor) throws IOException {
+        if (url.getPath().endsWith(".jar")) {
+            acceptJar(url, visitor);
+        } else if (url.getProtocol().equalsIgnoreCase("file")) {
+            try {
+                File file = new File(new URI(url.toString()));
 
-                if ( file.isDirectory() )
-                {
-                    acceptDirectory( file, visitor );
+                if (file.isDirectory()) {
+                    acceptDirectory(file, visitor);
+                } else if (file.exists()) {
+                    throw new IllegalArgumentException("Cannot accept visitor on URL: " + url);
                 }
-                else if ( file.exists() )
-                {
-                    throw new IllegalArgumentException( "Cannot accept visitor on URL: " + url );
-                }
+            } catch (URISyntaxException exception) {
+                throw new IllegalArgumentException("Cannot accept visitor on URL: " + url, exception);
             }
-            catch ( URISyntaxException exception )
-            {
-                throw new IllegalArgumentException( "Cannot accept visitor on URL: " + url,
-                        exception );
-            }
-        }
-        else
-        {
-            throw new IllegalArgumentException( "Cannot accept visitor on URL: " + url );
+        } else {
+            throw new IllegalArgumentException("Cannot accept visitor on URL: " + url);
         }
     }
 
     // private methods --------------------------------------------------------
 
-    private static void acceptJar( URL url, ClassFileVisitor visitor )
-        throws IOException
-    {
-        try ( JarInputStream in = new JarInputStream( url.openStream() ) )
-        {
+    private static void acceptJar(URL url, ClassFileVisitor visitor) throws IOException {
+        try (JarInputStream in = new JarInputStream(url.openStream())) {
             JarEntry entry;
-            while ( ( entry = in.getNextJarEntry() ) != null )
-            {
+            while ((entry = in.getNextJarEntry()) != null) {
                 String name = entry.getName();
                 // ignore files like package-info.class and module-info.class
-                if ( name.endsWith( ".class" ) && name.indexOf( '-' ) == -1 )
-                {
-                    visitClass( name, in, visitor );
+                if (name.endsWith(".class") && name.indexOf('-') == -1) {
+                    visitClass(name, in, visitor);
                 }
             }
         }
     }
 
-    private static void acceptDirectory( File directory, ClassFileVisitor visitor )
-        throws IOException
-    {
-        if ( !directory.isDirectory() )
-        {
-            throw new IllegalArgumentException( "File is not a directory" );
+    private static void acceptDirectory(File directory, ClassFileVisitor visitor) throws IOException {
+        if (!directory.isDirectory()) {
+            throw new IllegalArgumentException("File is not a directory");
         }
 
         DirectoryScanner scanner = new DirectoryScanner();
 
-        scanner.setBasedir( directory );
-        scanner.setIncludes( new String[] { "**/*.class" } );
+        scanner.setBasedir(directory);
+        scanner.setIncludes(new String[] {"**/*.class"});
 
         scanner.scan();
 
         String[] paths = scanner.getIncludedFiles();
 
-        for ( String path : paths )
-        {
-            path = path.replace( File.separatorChar, '/' );
+        for (String path : paths) {
+            path = path.replace(File.separatorChar, '/');
 
-            File file = new File( directory, path );
+            File file = new File(directory, path);
 
-            try ( InputStream in = new FileInputStream( file ) )
-            {
-                visitClass( path, in, visitor );
+            try (InputStream in = new FileInputStream(file)) {
+                visitClass(path, in, visitor);
             }
         }
     }
 
-    private static void visitClass( String path, InputStream in, ClassFileVisitor visitor )
-    {
-        if ( !path.endsWith( ".class" ) )
-        {
-            throw new IllegalArgumentException( "Path is not a class" );
+    private static void visitClass(String path, InputStream in, ClassFileVisitor visitor) {
+        if (!path.endsWith(".class")) {
+            throw new IllegalArgumentException("Path is not a class");
         }
 
-        String className = path.substring( 0, path.length() - 6 );
+        String className = path.substring(0, path.length() - 6);
 
-        className = className.replace( '/', '.' );
+        className = className.replace('/', '.');
 
-        visitor.visitClass( className, in );
+        visitor.visitClass(className, in);
     }
 }

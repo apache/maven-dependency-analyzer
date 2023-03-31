@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.analyzer;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.analyzer;
 
 import org.junit.Test;
 
@@ -25,24 +24,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests <code>ProjectDependencyAnalyzerException</code>.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @see ProjectDependencyAnalyzerException
  */
-public class ProjectDependencyAnalyzerExceptionTest
-{
+public class ProjectDependencyAnalyzerExceptionTest {
     @Test
-    public void testConstructor()
-    {
-        assertThat( new ProjectDependencyAnalyzerException( "a" ) ).hasMessage( "a" );
+    public void testConstructor() {
+        assertThat(new ProjectDependencyAnalyzerException("a")).hasMessage("a");
     }
 
     @Test
-    public void testConstructorWithThrowable()
-    {
+    public void testConstructorWithThrowable() {
         Throwable throwable = new Exception();
-        ProjectDependencyAnalyzerException exception = new ProjectDependencyAnalyzerException( "a", throwable );
+        ProjectDependencyAnalyzerException exception = new ProjectDependencyAnalyzerException("a", throwable);
 
-        assertThat( exception ).hasMessage( "a" ).hasCause( throwable );
+        assertThat(exception).hasMessage("a").hasCause(throwable);
     }
 }

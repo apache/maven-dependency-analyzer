@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.analyzer.asm;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.analyzer.asm;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.analyzer.asm;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -41,8 +40,7 @@ import org.objectweb.asm.Type;
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.4">JVM 9 Sepc</a>
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se10/html/jvms-4.html#jvms-4.4">JVM 10 Sepc</a>
  */
-public class ConstantPoolParser
-{
+public class ConstantPoolParser {
     /** Constant <code>HEAD=0xcafebabe</code> */
     public static final int HEAD = 0xcafebabe;
 
@@ -102,207 +100,176 @@ public class ConstantPoolParser
 
     private static final int OX3F = 0x3F;
 
-    static Set<String> getConstantPoolClassReferences( byte[] b )
-    {
-        return parseConstantPoolClassReferences( ByteBuffer.wrap( b ) );
+    static Set<String> getConstantPoolClassReferences(byte[] b) {
+        return parseConstantPoolClassReferences(ByteBuffer.wrap(b));
     }
 
-    static Set<String> parseConstantPoolClassReferences( ByteBuffer buf )
-    {
-        if ( buf.order( ByteOrder.BIG_ENDIAN )
-                .getInt() != HEAD )
-        {
+    static Set<String> parseConstantPoolClassReferences(ByteBuffer buf) {
+        if (buf.order(ByteOrder.BIG_ENDIAN).getInt() != HEAD) {
             return Collections.emptySet();
         }
-        buf.getChar() ; buf.getChar(); // minor + ver
+        buf.getChar();
+        buf.getChar(); // minor + ver
         Set<Integer> classReferences = new HashSet<>();
         Set<Integer> typeReferences = new HashSet<>();
         Map<Integer, String> stringConstants = new HashMap<>();
-        for ( int ix = 1, num = buf.getChar(); ix < num; ix++ )
-        {
+        for (int ix = 1, num = buf.getChar(); ix < num; ix++) {
             byte tag = buf.get();
-            switch ( tag )
-            {
+            switch (tag) {
                 default:
-                    throw new RuntimeException( "Unknown constant pool type '" + tag + "'" );
+                    throw new RuntimeException("Unknown constant pool type '" + tag + "'");
                 case CONSTANT_UTF8:
-                    stringConstants.put( ix, decodeString( buf ) );
+                    stringConstants.put(ix, decodeString(buf));
                     break;
                 case CONSTANT_CLASS:
-                    classReferences.add( (int) buf.getChar() );
+                    classReferences.add((int) buf.getChar());
                     break;
                 case CONSTANT_METHOD_TYPE:
-                    consumeMethodType( buf );
+                    consumeMethodType(buf);
                     break;
                 case CONSTANT_FIELDREF:
                 case CONSTANT_METHODREF:
                 case CONSTANT_INTERFACEMETHODREF:
-                    consumeReference( buf );
+                    consumeReference(buf);
                     break;
                 case CONSTANT_NAME_AND_TYPE:
                     buf.getChar();
-                    typeReferences.add( (int) buf.getChar() );
+                    typeReferences.add((int) buf.getChar());
                     break;
                 case CONSTANT_INTEGER:
-                    consumeInt( buf );
+                    consumeInt(buf);
                     break;
                 case CONSTANT_FLOAT:
-                    consumeFloat( buf );
+                    consumeFloat(buf);
                     break;
                 case CONSTANT_DOUBLE:
-                    consumeDouble( buf );
+                    consumeDouble(buf);
                     ix++;
                     break;
                 case CONSTANT_LONG:
-                    consumeLong( buf );
+                    consumeLong(buf);
                     ix++;
                     break;
                 case CONSTANT_STRING:
-                    consumeString( buf );
+                    consumeString(buf);
                     break;
                 case CONSTANT_METHODHANDLE:
-                    consumeMethodHandle( buf );
+                    consumeMethodHandle(buf);
                     break;
                 case CONSTANT_INVOKE_DYNAMIC:
-                    consumeInvokeDynamic( buf );
+                    consumeInvokeDynamic(buf);
                     break;
                 case CONSTANT_MODULE:
-                    consumeModule( buf );
+                    consumeModule(buf);
                     break;
                 case CONSTANT_PACKAGE:
-                    consumePackage( buf );
+                    consumePackage(buf);
                     break;
             }
         }
-        
+
         Set<String> result = new HashSet<>();
-        
-        for ( Integer classRef : classReferences )
-        {
-            addClassToResult( result, stringConstants.get( classRef ) );
+
+        for (Integer classRef : classReferences) {
+            addClassToResult(result, stringConstants.get(classRef));
         }
-        
-        for ( Integer typeRef : typeReferences )
-        {
-            String typeName = stringConstants.get( typeRef );
-            
-            if ( Type.getType( typeName ).getSort() == Type.METHOD )
-            {
-                addClassToResult( result, Type.getReturnType( typeName ).getInternalName() );
-                Type[] argumentTypes = Type.getArgumentTypes( typeName );
-                for ( Type argumentType : argumentTypes )
-                {
-                    addClassToResult( result, argumentType.getInternalName() );
+
+        for (Integer typeRef : typeReferences) {
+            String typeName = stringConstants.get(typeRef);
+
+            if (Type.getType(typeName).getSort() == Type.METHOD) {
+                addClassToResult(result, Type.getReturnType(typeName).getInternalName());
+                Type[] argumentTypes = Type.getArgumentTypes(typeName);
+                for (Type argumentType : argumentTypes) {
+                    addClassToResult(result, argumentType.getInternalName());
                 }
             }
         }
-        
+
         return result;
     }
 
-    private static void addClassToResult( Set<String> result, String className )
-    {
+    private static void addClassToResult(Set<String> result, String className) {
         // filter out things from unnamed package, probably a false-positive
-        if ( isImportableClass( className ) )
-        {
-            result.add( className );
+        if (isImportableClass(className)) {
+            result.add(className);
         }
     }
 
-    private static String decodeString( ByteBuffer buf )
-    {
+    private static String decodeString(ByteBuffer buf) {
         int size = buf.getChar();
         // Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
-        @SuppressWarnings( "RedundantCast" )
-        int oldLimit = ( (Buffer) buf ).limit();
-        ( (Buffer) buf ).limit( buf.position() + size );
-        StringBuilder sb = new StringBuilder( size + ( size >> 1 ) + 16 );
-        while ( buf.hasRemaining() )
-        {
+        @SuppressWarnings("RedundantCast")
+        int oldLimit = ((Buffer) buf).limit();
+        ((Buffer) buf).limit(buf.position() + size);
+        StringBuilder sb = new StringBuilder(size + (size >> 1) + 16);
+        while (buf.hasRemaining()) {
             byte b = buf.get();
-            if ( b > 0 )
-            {
-                sb.append( (char) b );
-            }
-            else
-            {
+            if (b > 0) {
+                sb.append((char) b);
+            } else {
                 int b2 = buf.get();
-                if ( ( b & OXF0 ) != OXE0 )
-                {
-                    sb.append( (char) ( ( b & 0x1F ) << 6 | b2 & OX3F ) );
-                }
-                else
-                {
+                if ((b & OXF0) != OXE0) {
+                    sb.append((char) ((b & 0x1F) << 6 | b2 & OX3F));
+                } else {
                     int b3 = buf.get();
-                    sb.append( (char) ( ( b & 0x0F ) << 12 | ( b2 & OX3F ) << 6 | b3 & OX3F ) );
+                    sb.append((char) ((b & 0x0F) << 12 | (b2 & OX3F) << 6 | b3 & OX3F));
                 }
             }
         }
-        ( (Buffer) buf ).limit( oldLimit );
+        ((Buffer) buf).limit(oldLimit);
         return sb.toString();
     }
 
-    private static boolean isImportableClass( String className )
-    {
+    private static boolean isImportableClass(String className) {
         // without a slash, class must be in unnamed package, which can't be imported
-        return className.indexOf( '/' ) != -1;
+        return className.indexOf('/') != -1;
     }
 
-    private static void consumeMethodType( ByteBuffer buf )
-    {
+    private static void consumeMethodType(ByteBuffer buf) {
         buf.getChar();
     }
 
-    private static void consumeReference( ByteBuffer buf )
-    {
+    private static void consumeReference(ByteBuffer buf) {
         buf.getChar();
         buf.getChar();
     }
 
-    private static void consumeInt( ByteBuffer buf )
-    {
+    private static void consumeInt(ByteBuffer buf) {
         buf.getInt();
     }
 
-    private static void consumeFloat( ByteBuffer buf )
-    {
+    private static void consumeFloat(ByteBuffer buf) {
         buf.getFloat();
     }
 
-    private static void consumeDouble( ByteBuffer buf )
-    {
+    private static void consumeDouble(ByteBuffer buf) {
         buf.getDouble();
     }
 
-    private static void consumeLong( ByteBuffer buf )
-    {
+    private static void consumeLong(ByteBuffer buf) {
         buf.getLong();
     }
 
-    private static void consumeString( ByteBuffer buf )
-    {
+    private static void consumeString(ByteBuffer buf) {
         buf.getChar();
     }
 
-    private static void consumeMethodHandle( ByteBuffer buf )
-    {
+    private static void consumeMethodHandle(ByteBuffer buf) {
         buf.get();
         buf.getChar();
     }
 
-    private static void consumeInvokeDynamic( ByteBuffer buf )
-    {
+    private static void consumeInvokeDynamic(ByteBuffer buf) {
         buf.getChar();
         buf.getChar();
     }
 
-    private static void consumeModule( ByteBuffer buf )
-    {
+    private static void consumeModule(ByteBuffer buf) {
         buf.getChar();
     }
 
-    private static void consumePackage( ByteBuffer buf )
-    {
+    private static void consumePackage(ByteBuffer buf) {
         buf.getChar();
     }
 }

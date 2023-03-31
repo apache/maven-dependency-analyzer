@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.analyzer;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,15 +16,14 @@ package org.apache.maven.shared.dependency.analyzer;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.analyzer;
 
 /**
  * <p>ProjectDependencyAnalyzerException class.</p>
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
-public class ProjectDependencyAnalyzerException
-    extends Exception
-{
+public class ProjectDependencyAnalyzerException extends Exception {
     /**
      * The serialisation unique ID.
      */
@@ -37,9 +34,8 @@ public class ProjectDependencyAnalyzerException
      *
      * @param message a {@link java.lang.String} object.
      */
-    public ProjectDependencyAnalyzerException( String message )
-    {
-        super( message );
+    public ProjectDependencyAnalyzerException(String message) {
+        super(message);
     }
 
     /**
@@ -48,8 +44,7 @@ public class ProjectDependencyAnalyzerException
      * @param message a {@link java.lang.String} object.
      * @param cause a {@link java.lang.Throwable} object.
      */
-    public ProjectDependencyAnalyzerException( String message, Throwable cause )
-    {
-        super( message, cause );
+    public ProjectDependencyAnalyzerException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
