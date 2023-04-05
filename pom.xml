@@ -60,6 +60,8 @@
     <mavenVersion>3.2.5</mavenVersion>
     <javaVersion>8</javaVersion>
     <project.build.outputTimestamp>2022-08-20T15:25:47Z</project.build.outputTimestamp>
+    <!-- TODO check with next parent -->
+    <maven.plugin.tools.version>3.8.1</maven.plugin.tools.version>
   </properties>
 
   <dependencies>
@@ -131,6 +133,8 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
+            <!-- TODO check with next parent -->
+            <version>3.5.1</version>
             <configuration>
               <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
               <localRepositoryPath>target/local-repo</localRepositoryPath>
