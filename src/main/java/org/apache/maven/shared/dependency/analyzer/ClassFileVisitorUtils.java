@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Utility to visit classes in a library given either as a jar file or an exploded directory.
@@ -76,7 +77,7 @@ public final class ClassFileVisitorUtils {
                 String name = entry.getName();
                 // ignore files like package-info.class and module-info.class
                 if (name.endsWith(".class") && name.indexOf('-') == -1) {
-                    // Even on Windows Jars use / as the separator character
+                    // Jars(ZIP) always use / as the separator character
                     visitClass(name, in, visitor, '/');
                 }
             }
@@ -85,9 +86,12 @@ public final class ClassFileVisitorUtils {
 
     private static void acceptDirectory(File directory, ClassFileVisitor visitor) throws IOException {
 
-        List<Path> classFiles = Files.walk(directory.toPath())
-                .filter(path -> path.getFileName().toString().endsWith(".class"))
-                .collect(Collectors.toList());
+        List<Path> classFiles;
+        try (Stream<Path> walk = Files.walk(directory.toPath())) {
+            classFiles = walk
+                    .filter(path -> path.getFileName().toString().endsWith(".class"))
+                    .collect(Collectors.toList());
+        }
 
         for (Path path : classFiles) {
             try (InputStream in = Files.newInputStream(path)) {
