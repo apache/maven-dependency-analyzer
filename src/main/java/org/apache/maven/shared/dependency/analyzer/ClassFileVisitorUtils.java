@@ -88,8 +88,7 @@ public final class ClassFileVisitorUtils {
 
         List<Path> classFiles;
         try (Stream<Path> walk = Files.walk(directory.toPath())) {
-            classFiles = walk
-                    .filter(path -> path.getFileName().toString().endsWith(".class"))
+            classFiles = walk.filter(path -> path.getFileName().toString().endsWith(".class"))
                     .collect(Collectors.toList());
         }
 
