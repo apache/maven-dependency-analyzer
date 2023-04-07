@@ -1,5 +1,5 @@
-<?xml version='1.0' encoding='UTF-8'?>
-  <!--
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -24,24 +24,22 @@
   <parent>
     <groupId>org.apache.maven.shared</groupId>
     <artifactId>maven-shared-components</artifactId>
-    <version>37</version>
+    <version>39</version>
     <relativePath />
   </parent>
 
   <artifactId>maven-dependency-analyzer</artifactId>
-  <packaging>jar</packaging>
   <version>1.13.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
 
   <name>Apache Maven Dependency Analyzer</name>
-  <description>
-    Analyzes the dependencies of a project for undeclared or unused artifacts.
-  </description>
+  <description>Analyzes the dependencies of a project for undeclared or unused artifacts.</description>
 
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-analyzer.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-analyzer.git</developerConnection>
-    <url>https://github.com/apache/maven-dependency-analyzer/tree/${project.scm.tag}</url>
     <tag>HEAD</tag>
+    <url>https://github.com/apache/maven-dependency-analyzer/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
     <system>jira</system>
@@ -62,6 +60,8 @@
     <mavenVersion>3.2.5</mavenVersion>
     <javaVersion>8</javaVersion>
     <project.build.outputTimestamp>2022-08-20T15:25:47Z</project.build.outputTimestamp>
+    <!-- TODO check with next parent -->
+    <maven.plugin.tools.version>3.8.1</maven.plugin.tools.version>
   </properties>
 
   <dependencies>
@@ -86,15 +86,14 @@
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>9.3</version>
+      <version>9.5</version>
     </dependency>
-    
+
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>2.11.0</version>
     </dependency>
-
 
     <!-- testing support -->
     <dependency>
@@ -128,15 +127,8 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>install</goal>
-                  <goal>integration-test</goal>
-                  <goal>verify</goal>
-                </goals>
-              </execution>
-            </executions>
+            <!-- TODO check with next parent -->
+            <version>3.5.1</version>
             <configuration>
               <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
               <localRepositoryPath>target/local-repo</localRepositoryPath>
@@ -151,6 +143,15 @@
                 <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
               </properties>
             </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>install</goal>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>

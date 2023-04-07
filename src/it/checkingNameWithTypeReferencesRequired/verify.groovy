@@ -16,20 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.shared.dependency.analyzer.testcases;
 
-import java.util.function.Consumer;
+def analysis = new File( basedir, 'consumer/target/analysis.txt' ).text
 
-public class MethodHandleCases {
-    public void sayHello() {
-        sayHello(this::callSite);
-    }
+def expected = '''
+UsedDeclaredArtifacts:
+ example:provider:jar:0.0.1-SNAPSHOT:compile
+ example:library:jar:0.0.1-SNAPSHOT:compile
 
-    void sayHello(Consumer<String> consumer) {
-        consumer.accept("hello");
-    }
+UsedUndeclaredArtifactsWithClasses:
 
-    private void callSite(String output) {
-        System.out.println(output);
-    }
-}
+UnusedDeclaredArtifacts:
+
+TestArtifactsWithNonTestScope:
+'''
+
+assert analysis == expected

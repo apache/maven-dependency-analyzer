@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.analyzer;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.analyzer;
 
 import org.apache.maven.project.MavenProject;
 
@@ -32,8 +31,7 @@ import org.apache.maven.project.MavenProject;
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
-public interface ProjectDependencyAnalyzer
-{
+public interface ProjectDependencyAnalyzer {
     /**
      * <p>analyze.</p>
      *
@@ -41,6 +39,5 @@ public interface ProjectDependencyAnalyzer
      * @return a {@link org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis} object
      * @throws org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException if any
      */
-    ProjectDependencyAnalysis analyze( MavenProject project )
-        throws ProjectDependencyAnalyzerException;
+    ProjectDependencyAnalysis analyze(MavenProject project) throws ProjectDependencyAnalyzerException;
 }

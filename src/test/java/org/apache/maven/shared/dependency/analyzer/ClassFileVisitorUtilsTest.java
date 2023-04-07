@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.analyzer;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,10 +16,7 @@ package org.apache.maven.shared.dependency.analyzer;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+package org.apache.maven.shared.dependency.analyzer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,156 +31,138 @@ import java.util.List;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.junit.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests <code>ClassFileVisitorUtils</code>.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @see ClassFileVisitorUtils
  */
-public class ClassFileVisitorUtilsTest
-{
+public class ClassFileVisitorUtilsTest {
     private TestVisitor visitor = new TestVisitor();
 
-    private static class TestVisitor implements ClassFileVisitor
-    {
+    private static class TestVisitor implements ClassFileVisitor {
         final List<String> classNames = new ArrayList<>();
         final List<String> data = new ArrayList<>();
 
         @Override
-        public void visitClass( String className, InputStream in )
-        {
-            classNames.add( className );
-            try
-            {
-                List<String> lines = IOUtils.readLines( in, StandardCharsets.UTF_8 );
-                data.addAll( lines );
-            }
-            catch ( IOException ex )
-            {
-                throw new RuntimeException( ex );
+        public void visitClass(String className, InputStream in) {
+            classNames.add(className);
+            try {
+                List<String> lines = IOUtils.readLines(in, StandardCharsets.UTF_8);
+                data.addAll(lines);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
         }
     }
 
     @Test
-    public void testAcceptJar() throws IOException
-    {
-        File file = File.createTempFile( "test", ".jar" );
+    public void testAcceptJar() throws IOException {
+        File file = File.createTempFile("test", ".jar");
         file.deleteOnExit();
 
-        try ( JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) ) )
-        {
-            addZipEntry( out, "a/b/c.class", "class a.b.c" );
-            addZipEntry( out, "x/y/z.class", "class x.y.z" );
+        try (JarOutputStream out = new JarOutputStream(new FileOutputStream(file))) {
+            addZipEntry(out, "a/b/c.class", "class a.b.c");
+            addZipEntry(out, "x/y/z.class", "class x.y.z");
         }
 
-        ClassFileVisitorUtils.accept( file.toURI().toURL(), visitor );
+        ClassFileVisitorUtils.accept(file.toURI().toURL(), visitor);
 
-        assertThat( visitor.classNames ).contains( "a.b.c" );
-        assertThat( visitor.classNames ).contains( "x.y.z" );
-        assertThat( visitor.data ).contains( "class a.b.c" );
-        assertThat( visitor.data ).contains( "class x.y.z" );
+        assertThat(visitor.classNames).contains("a.b.c");
+        assertThat(visitor.classNames).contains("x.y.z");
+        assertThat(visitor.data).contains("class a.b.c");
+        assertThat(visitor.data).contains("class x.y.z");
     }
 
     @Test
-    public void testAcceptJarWithNonClassEntry() throws IOException
-    {
-        File file = File.createTempFile( "test", ".jar" );
+    public void testAcceptJarWithNonClassEntry() throws IOException {
+        File file = File.createTempFile("test", ".jar");
         file.deleteOnExit();
 
-        try ( JarOutputStream out = new JarOutputStream( new FileOutputStream( file ) ) )
-        {
-            addZipEntry( out, "a/b/c.jpg", "jpeg a.b.c" );
+        try (JarOutputStream out = new JarOutputStream(new FileOutputStream(file))) {
+            addZipEntry(out, "a/b/c.jpg", "jpeg a.b.c");
         }
 
-        ClassFileVisitorUtils.accept( file.toURI().toURL(), visitor );
+        ClassFileVisitorUtils.accept(file.toURI().toURL(), visitor);
 
-        assertThat( visitor.classNames ).isEmpty();
+        assertThat(visitor.classNames).isEmpty();
     }
 
     @Test
-    public void testAcceptDir() throws IOException
-    {
-        Path dir = Files.createTempDirectory( "d-a-test" );
+    public void testAcceptDir() throws IOException {
+        Path dir = Files.createTempDirectory("d-a-test");
 
-        Path abDir = Files.createDirectories( dir.resolve( "a/b" ) );
-        writeToFile( abDir, "c.class", "class a.b.c" );
+        Path abDir = Files.createDirectories(dir.resolve("a/b"));
+        writeToFile(abDir, "c.class", "class a.b.c");
 
-        Path xyDir = Files.createDirectories( dir.resolve( "x/y" ) );
-        writeToFile( xyDir, "z.class", "class x.y.z" );
+        Path xyDir = Files.createDirectories(dir.resolve("x/y"));
+        writeToFile(xyDir, "z.class", "class x.y.z");
 
-        ClassFileVisitorUtils.accept( dir.toUri().toURL(), visitor );
+        ClassFileVisitorUtils.accept(dir.toUri().toURL(), visitor);
 
-        FileUtils.deleteDirectory( dir.toFile() );
+        FileUtils.deleteDirectory(dir.toFile());
 
-        assertThat( visitor.classNames ).contains( "a.b.c" );
-        assertThat( visitor.classNames ).contains( "x.y.z" );
-        assertThat( visitor.data ).contains( "class a.b.c" );
-        assertThat( visitor.data ).contains( "class x.y.z" );
+        assertThat(visitor.classNames).contains("a.b.c");
+        assertThat(visitor.classNames).contains("x.y.z");
+        assertThat(visitor.data).contains("class a.b.c");
+        assertThat(visitor.data).contains("class x.y.z");
     }
 
     @Test
-    public void testAcceptDirWithNonClassFile() throws IOException
-    {
-        Path dir = Files.createTempDirectory( "d-a-test" );
+    public void testAcceptDirWithNonClassFile() throws IOException {
+        Path dir = Files.createTempDirectory("d-a-test");
 
-        Path abDir = Files.createDirectories( dir.resolve( "a/b" ) );
-        writeToFile( abDir, "c.jpg", "jpeg a.b.c" );
+        Path abDir = Files.createDirectories(dir.resolve("a/b"));
+        writeToFile(abDir, "c.jpg", "jpeg a.b.c");
 
-        ClassFileVisitorUtils.accept( dir.toUri().toURL(), visitor );
+        ClassFileVisitorUtils.accept(dir.toUri().toURL(), visitor);
 
-        FileUtils.deleteDirectory( dir.toFile() );
+        FileUtils.deleteDirectory(dir.toFile());
 
-        assertThat( visitor.classNames ).isEmpty();
+        assertThat(visitor.classNames).isEmpty();
     }
 
     @Test
-    public void testAcceptWithFile() throws IOException
-    {
-        File file = File.createTempFile( "test", ".class" );
+    public void testAcceptWithFile() throws IOException {
+        File file = File.createTempFile("test", ".class");
         file.deleteOnExit();
 
         URL url = file.toURI().toURL();
 
-        try
-        {
-            ClassFileVisitorUtils.accept( url, visitor );
-            fail( "expected IllegalArgumentException" );
-        }
-        catch ( IllegalArgumentException exception )
-        {
-            assertThat( exception ).hasMessage( "Cannot accept visitor on URL: " + url );
+        try {
+            ClassFileVisitorUtils.accept(url, visitor);
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException exception) {
+            assertThat(exception).hasMessage("Cannot accept visitor on URL: " + url);
         }
     }
 
     @Test
-    public void testAcceptWithUnsupportedScheme() throws IOException
-    {
-        URL url = new URL( "http://localhost/" );
+    public void testAcceptWithUnsupportedScheme() throws IOException {
+        URL url = new URL("http://localhost/");
 
-        try
-        {
-            ClassFileVisitorUtils.accept( url, visitor );
-            fail( "expected IllegalArgumentException" );
-        }
-        catch ( IllegalArgumentException exception )
-        {
-            assertThat( exception ).hasMessage( "Cannot accept visitor on URL: " + url );
+        try {
+            ClassFileVisitorUtils.accept(url, visitor);
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException exception) {
+            assertThat(exception).hasMessage("Cannot accept visitor on URL: " + url);
         }
     }
 
-    private void writeToFile( Path parent, String file, String data ) throws IOException
-    {
-        Files.write( parent.resolve( file ), data.getBytes( StandardCharsets.UTF_8 ) );
+    private void writeToFile(Path parent, String file, String data) throws IOException {
+        Files.write(parent.resolve(file), data.getBytes(StandardCharsets.UTF_8));
     }
 
-    private void addZipEntry( JarOutputStream out, String fileName, String content ) throws IOException
-    {
-        out.putNextEntry( new ZipEntry( fileName ) );
-        byte[] bytes = content.getBytes( StandardCharsets.UTF_8 );
-        out.write( bytes, 0, bytes.length );
+    private void addZipEntry(JarOutputStream out, String fileName, String content) throws IOException {
+        out.putNextEntry(new ZipEntry(fileName));
+        byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+        out.write(bytes, 0, bytes.length);
     }
 }
