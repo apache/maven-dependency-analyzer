@@ -58,7 +58,7 @@
 
   <properties>
     <mavenVersion>3.2.5</mavenVersion>
-    <slf4jVersion>1.7.36</slf4jVersion>
+    <slf4jVersion>2.0.7</slf4jVersion>
     <javaVersion>8</javaVersion>
     <project.build.outputTimestamp>2023-04-12T18:06:23Z</project.build.outputTimestamp>
     <!-- TODO check with next parent -->
