@@ -94,7 +94,13 @@ public final class ClassFileVisitorUtils {
 
         for (Path path : classFiles) {
             try (InputStream in = Files.newInputStream(path)) {
-                visitClass(directory, path, in, visitor);
+                try {
+                    visitClass(directory, path, in, visitor);
+                } catch (RuntimeException e) {
+                    // visitClass throws RuntimeException
+                    throw new RuntimeException(
+                            String.format("%s from directory = %s, path = %s", e.getMessage(), directory, path), e);
+                }
             }
         }
     }
