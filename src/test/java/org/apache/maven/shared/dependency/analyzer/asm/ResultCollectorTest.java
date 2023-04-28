@@ -20,6 +20,9 @@ package org.apache.maven.shared.dependency.analyzer.asm;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.testcases.ArrayCases;
@@ -38,6 +41,17 @@ public class ResultCollectorTest {
             visitor.visitClass(className, is);
         }
         return visitor.getDependencies();
+    }
+
+    @Test
+    public void testJava11Invoke() throws IOException {
+        String className = "issue362.Bcel362";
+        Path path = Paths.get(
+                "src/test/resources/org/apache/maven/shared/dependency/analyzer/commons-bcel-issue362/Bcel362.class");
+        DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
+        try (InputStream is = Files.newInputStream(path)) {
+            visitor.visitClass(className, is);
+        }
     }
 
     @Test

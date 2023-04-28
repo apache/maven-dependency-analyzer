@@ -85,6 +85,9 @@ public class ConstantPoolParser {
     /** Constant <code>CONSTANT_METHOD_TYPE=16</code> */
     public static final byte CONSTANT_METHOD_TYPE = 16;
 
+    /** Constant <code>CONSTANT_INVOKE=17</code> */
+    public static final byte CONSTANT_INVOKE = 17;
+
     /** Constant <code>CONSTANT_INVOKE_DYNAMIC=18</code> */
     public static final byte CONSTANT_INVOKE_DYNAMIC = 18;
 
@@ -155,6 +158,9 @@ public class ConstantPoolParser {
                     break;
                 case CONSTANT_METHODHANDLE:
                     consumeMethodHandle(buf);
+                    break;
+                case CONSTANT_INVOKE:
+                    consumeDynamic(buf);
                     break;
                 case CONSTANT_INVOKE_DYNAMIC:
                     consumeInvokeDynamic(buf);
@@ -258,6 +264,11 @@ public class ConstantPoolParser {
     private static void consumeMethodHandle(ByteBuffer buf) {
         buf.get();
         buf.getChar();
+    }
+
+    private static void consumeDynamic(ByteBuffer buf) {
+        buf.getChar(); // u2 bootstrap_method_attr_index;
+        buf.getChar(); // u2 name_and_type_index;
     }
 
     private static void consumeInvokeDynamic(ByteBuffer buf) {
