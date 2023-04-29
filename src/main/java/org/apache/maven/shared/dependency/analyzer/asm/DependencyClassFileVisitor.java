@@ -75,6 +75,9 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
             // some bug inside ASM causes an IOB exception. Log it and move on?
             // this happens when the class isn't valid.
             logger.warn("Unable to process: " + className);
+        } catch (IllegalArgumentException e) {
+            // [MSHARED-1248] should log instead of failing when analyzing a corrupted jar file
+            logger.warn("Unable to process: " + className, e);
         }
     }
 
