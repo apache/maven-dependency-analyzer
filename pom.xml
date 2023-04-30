@@ -129,6 +129,16 @@
         <groupId>org.eclipse.sisu</groupId>
         <artifactId>sisu-maven-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes combine.children="append">
+            <!-- binary class for unit test -->
+            <exclude>**/*.classx</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
