@@ -29,7 +29,7 @@
   </parent>
 
   <artifactId>maven-dependency-analyzer</artifactId>
-  <version>1.13.2-SNAPSHOT</version>
+  <version>1.13.2</version>
   <packaging>jar</packaging>
 
   <name>Apache Maven Dependency Analyzer</name>
@@ -38,7 +38,7 @@
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-analyzer.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-analyzer.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>maven-dependency-analyzer-1.13.2</tag>
     <url>https://github.com/apache/maven-dependency-analyzer/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
@@ -60,7 +60,7 @@
     <mavenVersion>3.2.5</mavenVersion>
     <slf4jVersion>1.7.36</slf4jVersion>
     <javaVersion>8</javaVersion>
-    <project.build.outputTimestamp>2023-04-12T18:06:23Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2023-04-30T22:19:36Z</project.build.outputTimestamp>
     <!-- TODO check with next parent -->
     <maven.plugin.tools.version>3.8.1</maven.plugin.tools.version>
   </properties>
