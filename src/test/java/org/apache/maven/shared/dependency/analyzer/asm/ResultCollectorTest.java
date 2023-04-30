@@ -47,7 +47,7 @@ class ResultCollectorTest {
     void testJava11Invoke() throws IOException {
         String className = "issue362.Bcel362";
         Path path = Paths.get(
-                "src/test/resources/org/apache/maven/shared/dependency/analyzer/commons-bcel-issue362/Bcel362.class");
+                "src/test/resources/org/apache/maven/shared/dependency/analyzer/commons-bcel-issue362/Bcel362.classx");
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
         try (InputStream is = Files.newInputStream(path)) {
             visitor.visitClass(className, is);
