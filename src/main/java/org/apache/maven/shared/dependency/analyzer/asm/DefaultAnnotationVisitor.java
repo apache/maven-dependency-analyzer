@@ -42,6 +42,7 @@ public class DefaultAnnotationVisitor extends AnnotationVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visit(final String name, final Object value) {
         if (value instanceof Type) {
             resultCollector.addType((Type) value);
@@ -49,11 +50,13 @@ public class DefaultAnnotationVisitor extends AnnotationVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitEnum(final String name, final String desc, final String value) {
         resultCollector.addDesc(desc);
     }
 
     /** {@inheritDoc} */
+    @Override
     public AnnotationVisitor visitAnnotation(final String name, final String desc) {
         resultCollector.addDesc(desc);
 
@@ -61,6 +64,7 @@ public class DefaultAnnotationVisitor extends AnnotationVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public AnnotationVisitor visitArray(final String name) {
         return this;
     }

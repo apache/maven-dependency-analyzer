@@ -39,6 +39,7 @@ public class CollectorClassFileVisitor implements ClassFileVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitClass(String className, InputStream in) {
         // inner classes have equivalent compilation requirement as container class
         if (className.indexOf('$') < 0) {

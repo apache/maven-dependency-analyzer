@@ -60,6 +60,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
     private DependencyAnalyzer dependencyAnalyzer;
 
     /** {@inheritDoc} */
+    @Override
     public ProjectDependencyAnalysis analyze(MavenProject project) throws ProjectDependencyAnalyzerException {
         try {
             Map<Artifact, Set<String>> artifactClassMap = buildArtifactClassMap(project);
@@ -226,7 +227,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             if (artifact != null) {
                 Set<String> classesFromArtifact = usedArtifacts.get(artifact);
                 if (classesFromArtifact == null) {
-                    classesFromArtifact = new HashSet<String>();
+                    classesFromArtifact = new HashSet<>();
                     usedArtifacts.put(artifact, classesFromArtifact);
                 }
                 classesFromArtifact.add(className);

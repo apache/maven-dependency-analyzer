@@ -77,6 +77,7 @@ public class DefaultClassVisitor extends ClassVisitor {
      * @param superName a {@link java.lang.String} object.
      * @param interfaces an array of {@link java.lang.String} objects.
      */
+    @Override
     public void visit(
             final int version,
             final int access,
@@ -93,6 +94,7 @@ public class DefaultClassVisitor extends ClassVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
         resultCollector.addDesc(desc);
 
@@ -100,6 +102,7 @@ public class DefaultClassVisitor extends ClassVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public FieldVisitor visitField(
             final int access, final String name, final String desc, final String signature, final Object value) {
         if (signature == null) {
@@ -125,6 +128,7 @@ public class DefaultClassVisitor extends ClassVisitor {
      * @param exceptions an array of {@link java.lang.String} objects.
      * @return a {@link org.objectweb.asm.MethodVisitor} object.
      */
+    @Override
     public MethodVisitor visitMethod(
             final int access, final String name, final String desc, final String signature, final String[] exceptions) {
         if (signature == null) {
@@ -139,11 +143,13 @@ public class DefaultClassVisitor extends ClassVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitNestHost(final String nestHost) {
         resultCollector.addName(nestHost);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitNestMember(final String nestMember) {
         resultCollector.addName(nestMember);
     }

@@ -51,6 +51,7 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
     public DependencyClassFileVisitor() {}
 
     /** {@inheritDoc} */
+    @Override
     public void visitClass(String className, InputStream in) {
         try {
             byte[] byteCode = IOUtils.toByteArray(in);
