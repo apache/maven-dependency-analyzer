@@ -25,7 +25,7 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,9 +35,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @see ProjectDependencyAnalysis
  */
-public class ProjectDependencyAnalysisTest {
+class ProjectDependencyAnalysisTest {
     @Test
-    public void testConstructor() {
+    void testConstructor() {
         Set<Artifact> usedDeclaredArtifacts = new HashSet<>();
         Set<Artifact> usedUndeclaredArtifacts = new HashSet<>();
         Set<Artifact> unusedDeclaredArtifacts = new HashSet<>();
@@ -52,7 +52,7 @@ public class ProjectDependencyAnalysisTest {
     }
 
     @Test
-    public void ignoreNonCompileShouldFilterOnlyUnusedDeclare() {
+    void ignoreNonCompileShouldFilterOnlyUnusedDeclare() {
         Artifact artifactCompile = aTestArtifact("test1", Artifact.SCOPE_COMPILE);
         Artifact artifactProvided = aTestArtifact("test2", Artifact.SCOPE_PROVIDED);
         Artifact artifactTest = aTestArtifact("test3", Artifact.SCOPE_TEST);

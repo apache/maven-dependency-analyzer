@@ -29,7 +29,7 @@
   </parent>
 
   <artifactId>maven-dependency-analyzer</artifactId>
-  <version>1.13.2-SNAPSHOT</version>
+  <version>1.13.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Maven Dependency Analyzer</name>
@@ -60,7 +60,7 @@
     <mavenVersion>3.2.5</mavenVersion>
     <slf4jVersion>1.7.36</slf4jVersion>
     <javaVersion>8</javaVersion>
-    <project.build.outputTimestamp>2023-04-12T18:06:23Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2023-04-30T22:19:57Z</project.build.outputTimestamp>
     <!-- TODO check with next parent -->
     <maven.plugin.tools.version>3.8.1</maven.plugin.tools.version>
   </properties>
@@ -75,6 +75,11 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact</artifactId>
+      <version>${mavenVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model</artifactId>
       <version>${mavenVersion}</version>
     </dependency>
 
@@ -99,14 +104,14 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.11.0</version>
+      <version>2.13.0</version>
     </dependency>
 
     <!-- testing support -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.9.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -136,6 +141,8 @@
           <excludes combine.children="append">
             <!-- Corrupted class files -->
             <exclude>**/*.clazz</exclude>
+            <!-- binary class for unit test -->
+            <exclude>**/*.classx</exclude>
           </excludes>
         </configuration>
       </plugin>

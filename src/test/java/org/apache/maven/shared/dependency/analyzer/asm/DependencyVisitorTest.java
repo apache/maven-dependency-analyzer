@@ -18,9 +18,15 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.objectweb.asm.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Attribute;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureVisitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,13 +36,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
-public class DependencyVisitorTest {
+class DependencyVisitorTest {
     private final ResultCollector resultCollector = new ResultCollector();
     private DefaultClassVisitor visitor;
     private MethodVisitor mv;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor(resultCollector);
         SignatureVisitor signatureVisitor = new DefaultSignatureVisitor(resultCollector);
         FieldVisitor fieldVisitor = new DefaultFieldVisitor(annotationVisitor, resultCollector);
@@ -45,7 +51,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitWithDefaultSuperclass() {
+    void testVisitWithDefaultSuperclass() {
         // class a.b.c
         visitor.visit(50, 0, "a/b/c", null, "java/lang/Object", null);
 
@@ -53,7 +59,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitWithSuperclass() {
+    void testVisitWithSuperclass() {
         // class a.b.c
         visitor.visit(50, 0, "a/b/c", null, "x/y/z", null);
 
@@ -61,7 +67,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitWithInterface() {
+    void testVisitWithInterface() {
         // class a.b.c implements x.y.z
         visitor.visit(50, 0, "a/b/c", null, "java/lang/Object", new String[] {"x/y/z"});
 
@@ -69,7 +75,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitWithInterfaces() {
+    void testVisitWithInterfaces() {
         // class a.b.c implements p.q.r, x.y.z
         visitor.visit(50, 0, "a/b/c", null, "java/lang/Object", new String[] {"p/q/r", "x/y/z"});
 
@@ -77,7 +83,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitWithUnboundedClassTypeParameter() {
+    void testVisitWithUnboundedClassTypeParameter() {
         // class a.b.c<T>
         String signature = "<T:Ljava/lang/Object;>Ljava/lang/Object;";
 
@@ -87,7 +93,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitWithBoundedClassTypeParameter() {
+    void testVisitWithBoundedClassTypeParameter() {
         // class a.b.c<T extends x.y.z>
         String signature = "<T:Lx/y/z;>Ljava/lang/Object;";
 
@@ -97,7 +103,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitWithBoundedClassTypeParameters() {
+    void testVisitWithBoundedClassTypeParameters() {
         // class a.b.c<K extends p.q.r, V extends x.y.z>
         String signature = "<K:Lp/q/r;V:Lx/y/z;>Ljava/lang/Object;";
 
@@ -107,7 +113,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitWithGenericInterface() {
+    void testVisitWithGenericInterface() {
         // class a.b.c implements p.q.r<x.y.z>
         String signature = "Ljava/lang/Object;Lp/q/r<Lx/y/z;>;";
 
@@ -117,7 +123,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitWithInterfaceBound() {
+    void testVisitWithInterfaceBound() {
         // class a.b.c<T> implements x.y.z<T>
         String signature = "<T:Ljava/lang/Object;>Ljava/lang/Object;Lx/y/z<TT;>;";
 
@@ -129,7 +135,7 @@ public class DependencyVisitorTest {
     // visitSource tests ------------------------------------------------------
 
     @Test
-    public void testVisitSource() {
+    void testVisitSource() {
         visitor.visitSource(null, null);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -138,7 +144,7 @@ public class DependencyVisitorTest {
     // visitOuterClass tests --------------------------------------------------
 
     @Test
-    public void testVisitOuterClass() {
+    void testVisitOuterClass() {
         // class a.b.c
         // {
         //     class ...
@@ -151,7 +157,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitOuterClassInMethod() {
+    void testVisitOuterClassInMethod() {
         // class a.b.c
         // {
         //     x.y.z x(p.q.r p)
@@ -169,14 +175,14 @@ public class DependencyVisitorTest {
     // visitAnnotation tests --------------------------------------------------
 
     @Test
-    public void testVisitAnnotation() {
+    void testVisitAnnotation() {
         assertVisitor(visitor.visitAnnotation("La/b/c;", false));
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitAnnotationWithRuntimeVisibility() {
+    void testVisitAnnotationWithRuntimeVisibility() {
         assertVisitor(visitor.visitAnnotation("La/b/c;", true));
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
@@ -185,7 +191,7 @@ public class DependencyVisitorTest {
     // visitAttribute tests ---------------------------------------------------
 
     @Test
-    public void testVisitAttribute() {
+    void testVisitAttribute() {
         visitor.visitAttribute(new MockAttribute("a"));
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -194,7 +200,7 @@ public class DependencyVisitorTest {
     // visitInnerClass tests --------------------------------------------------
 
     @Test
-    public void testVisitInnerClass() {
+    void testVisitInnerClass() {
         // TODO: ensure innerName is correct
 
         // class a.b.c { class x.y.z { } }
@@ -204,7 +210,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitInnerClassAnonymous() {
+    void testVisitInnerClassAnonymous() {
         // class a.b.c { new class x.y.z { } }
         visitor.visitInnerClass("x/y/z$1", "a/b/c", null, 0);
 
@@ -214,7 +220,7 @@ public class DependencyVisitorTest {
     // visitField tests -------------------------------------------------------
 
     @Test
-    public void testVisitField() {
+    void testVisitField() {
         // a.b.c a
         assertVisitor(visitor.visitField(0, "a", "La/b/c;", null, null));
 
@@ -222,12 +228,12 @@ public class DependencyVisitorTest {
     }
 
     // TODO: determine actual use of default values
-    // public void testVisitFieldWithValue()
+    // void testVisitFieldWithValue()
     // {
     // }
 
     @Test
-    public void testVisitFieldArray() {
+    void testVisitFieldArray() {
         // a.b.c[] a
         assertVisitor(visitor.visitField(0, "a", "[La/b/c;", null, null));
 
@@ -235,7 +241,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitFieldGeneric() {
+    void testVisitFieldGeneric() {
         // a.b.c<x.y.z> a
         assertVisitor(visitor.visitField(0, "a", "La/b/c;", "La/b/c<Lx/y/z;>;", null));
 
@@ -245,7 +251,7 @@ public class DependencyVisitorTest {
     // visitMethod tests ------------------------------------------------------
 
     @Test
-    public void testVisitMethod() {
+    void testVisitMethod() {
         // void a()
         assertVisitor(visitor.visitMethod(0, "a", "()V", null, null));
 
@@ -253,7 +259,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithPrimitiveArgument() {
+    void testVisitMethodWithPrimitiveArgument() {
         // void a(int)
         assertVisitor(visitor.visitMethod(0, "a", "(I)V", null, null));
 
@@ -261,7 +267,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithPrimitiveArrayArgument() {
+    void testVisitMethodWithPrimitiveArrayArgument() {
         // void a(int[])
         assertVisitor(visitor.visitMethod(0, "a", "([I)V", null, null));
 
@@ -269,7 +275,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithObjectArgument() {
+    void testVisitMethodWithObjectArgument() {
         // void a(a.b.c)
         assertVisitor(visitor.visitMethod(0, "a", "(La/b/c;)V", null, null));
 
@@ -277,7 +283,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithObjectArguments() {
+    void testVisitMethodWithObjectArguments() {
         // void a(a.b.c, x.y.z)
         assertVisitor(visitor.visitMethod(0, "a", "(La/b/c;Lx/y/z;)V", null, null));
 
@@ -285,7 +291,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithObjectArrayArgument() {
+    void testVisitMethodWithObjectArrayArgument() {
         // void a(a.b.c[])
         assertVisitor(visitor.visitMethod(0, "a", "([La/b/c;)V", null, null));
 
@@ -293,7 +299,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithGenericArgument() {
+    void testVisitMethodWithGenericArgument() {
         // void a(a.b.c<x.y.z>)
         assertVisitor(visitor.visitMethod(0, "a", "(La/b/c;)V", "(La/b/c<Lx/y/z;>;)V", null));
 
@@ -301,7 +307,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithPrimitiveReturnType() {
+    void testVisitMethodWithPrimitiveReturnType() {
         // int a()
         assertVisitor(visitor.visitMethod(0, "a", "()I", null, null));
 
@@ -309,7 +315,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithPrimitiveArrayReturnType() {
+    void testVisitMethodWithPrimitiveArrayReturnType() {
         // int[] a()
         assertVisitor(visitor.visitMethod(0, "a", "()[I", null, null));
 
@@ -317,7 +323,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithObjectReturnType() {
+    void testVisitMethodWithObjectReturnType() {
         // a.b.c a()
         assertVisitor(visitor.visitMethod(0, "a", "()La/b/c;", null, null));
 
@@ -325,7 +331,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithObjectArrayReturnType() {
+    void testVisitMethodWithObjectArrayReturnType() {
         // a.b.c[] a()
         assertVisitor(visitor.visitMethod(0, "a", "()[La/b/c;", null, null));
 
@@ -333,7 +339,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithException() {
+    void testVisitMethodWithException() {
         // void a() throws a.b.c
         assertVisitor(visitor.visitMethod(0, "a", "()V", null, new String[] {"a/b/c"}));
 
@@ -341,7 +347,7 @@ public class DependencyVisitorTest {
     }
 
     @Test
-    public void testVisitMethodWithExceptions() {
+    void testVisitMethodWithExceptions() {
         // void a() throws a.b.c, x.y.z
         assertVisitor(visitor.visitMethod(0, "a", "()V", null, new String[] {"a/b/c", "x/y/z"}));
 
@@ -351,7 +357,7 @@ public class DependencyVisitorTest {
     // visitAnnotationDefault tests -------------------------------------------
 
     @Test
-    public void testVisitAnnotationDefault() {
+    void testVisitAnnotationDefault() {
         assertVisitor(mv.visitAnnotationDefault());
         assertThat(resultCollector.getDependencies()).isEmpty();
     }
@@ -359,7 +365,7 @@ public class DependencyVisitorTest {
     // visitParameterAnnotation tests -------------------------------------------
 
     @Test
-    public void testVisitParameterAnnotation() {
+    void testVisitParameterAnnotation() {
         // @a.b.c
         assertVisitor(mv.visitParameterAnnotation(0, "La/b/c;", false));
 
@@ -369,7 +375,7 @@ public class DependencyVisitorTest {
     // visitCode tests --------------------------------------------------------
 
     @Test
-    public void testVisitCode() {
+    void testVisitCode() {
         mv.visitCode();
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -378,7 +384,7 @@ public class DependencyVisitorTest {
     // visitFrame tests -------------------------------------------------------
 
     @Test
-    public void testVisitFrame() {
+    void testVisitFrame() {
         mv.visitFrame(Opcodes.F_NEW, 0, new Object[0], 0, new Object[0]);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -387,7 +393,7 @@ public class DependencyVisitorTest {
     // visitInsn tests --------------------------------------------------------
 
     @Test
-    public void testVisitInsn() {
+    void testVisitInsn() {
         mv.visitInsn(Opcodes.NOP);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -396,7 +402,7 @@ public class DependencyVisitorTest {
     // visitIntInsn tests -----------------------------------------------------
 
     @Test
-    public void testVisitIntInsn() {
+    void testVisitIntInsn() {
         mv.visitIntInsn(Opcodes.BIPUSH, 0);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -405,7 +411,7 @@ public class DependencyVisitorTest {
     // visitVarInsn tests -----------------------------------------------------
 
     @Test
-    public void testVisitVarInsn() {
+    void testVisitVarInsn() {
         mv.visitVarInsn(Opcodes.ILOAD, 0);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -414,7 +420,7 @@ public class DependencyVisitorTest {
     // visitTypeInsn tests ----------------------------------------------------
 
     @Test
-    public void testVisitTypeInsn() {
+    void testVisitTypeInsn() {
         mv.visitTypeInsn(Opcodes.NEW, "a/b/c");
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
@@ -423,14 +429,14 @@ public class DependencyVisitorTest {
     // visitFieldInsn tests ---------------------------------------------------
 
     @Test
-    public void testVisitFieldInsnWithPrimitive() {
+    void testVisitFieldInsnWithPrimitive() {
         mv.visitFieldInsn(Opcodes.GETFIELD, "a/b/c", "x", "I");
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitFieldInsnWithObject() {
+    void testVisitFieldInsnWithObject() {
         mv.visitFieldInsn(Opcodes.GETFIELD, "a/b/c", "x", "Lx/y/z;");
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
@@ -439,70 +445,70 @@ public class DependencyVisitorTest {
     // visitMethodInsn tests --------------------------------------------------
 
     @Test
-    public void testVisitMethodInsn() {
+    void testVisitMethodInsn() {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()V", false);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitMethodInsnWithPrimitiveArgument() {
+    void testVisitMethodInsnWithPrimitiveArgument() {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(I)V", false);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitMethodInsnWithPrimitiveArrayArgument() {
+    void testVisitMethodInsnWithPrimitiveArrayArgument() {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "([I)V", false);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitMethodInsnWithObjectArgument() {
+    void testVisitMethodInsnWithObjectArgument() {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(Lx/y/z;)V", false);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitMethodInsnWithObjectArguments() {
+    void testVisitMethodInsnWithObjectArguments() {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "(Lp/q/r;Lx/y/z;)V", false);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitMethodInsnWithObjectArrayArgument() {
+    void testVisitMethodInsnWithObjectArrayArgument() {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "([Lx/y/z;)V", false);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitMethodInsnWithPrimitiveReturnType() {
+    void testVisitMethodInsnWithPrimitiveReturnType() {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()I", false);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitMethodInsnWithPrimitiveArrayReturnType() {
+    void testVisitMethodInsnWithPrimitiveArrayReturnType() {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()[I", false);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitMethodInsnWithObjectReturnType() {
+    void testVisitMethodInsnWithObjectReturnType() {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()Lx/y/z;", false);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitMethodInsnWithObjectArrayReturnType() {
+    void testVisitMethodInsnWithObjectArrayReturnType() {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "a/b/c", "x", "()[Lx/y/z;", false);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
@@ -511,7 +517,7 @@ public class DependencyVisitorTest {
     // visitJumpInsn tests ----------------------------------------------------
 
     @Test
-    public void testVisitJumpInsn() {
+    void testVisitJumpInsn() {
         mv.visitJumpInsn(Opcodes.IFEQ, new Label());
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -520,7 +526,7 @@ public class DependencyVisitorTest {
     // visitLabel tests -------------------------------------------------------
 
     @Test
-    public void testVisitLabel() {
+    void testVisitLabel() {
         mv.visitLabel(new Label());
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -529,21 +535,21 @@ public class DependencyVisitorTest {
     // visitLdcInsn tests -----------------------------------------------------
 
     @Test
-    public void testVisitLdcInsnWithNonType() {
+    void testVisitLdcInsnWithNonType() {
         mv.visitLdcInsn("a");
 
         assertThat(resultCollector.getDependencies()).isEmpty();
     }
 
     @Test
-    public void testVisitLdcInsnWithPrimitiveType() {
+    void testVisitLdcInsnWithPrimitiveType() {
         mv.visitLdcInsn(Type.INT_TYPE);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
     }
 
     @Test
-    public void testVisitLdcInsnWithObjectType() {
+    void testVisitLdcInsnWithObjectType() {
         mv.visitLdcInsn(Type.getType("La/b/c;"));
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
@@ -552,7 +558,7 @@ public class DependencyVisitorTest {
     // visitIincInsn tests ----------------------------------------------------
 
     @Test
-    public void testVisitIincInsn() {
+    void testVisitIincInsn() {
         mv.visitIincInsn(0, 1);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -561,7 +567,7 @@ public class DependencyVisitorTest {
     // visitTableSwitchInsn tests ---------------------------------------------
 
     @Test
-    public void testVisitTableSwitchInsn() {
+    void testVisitTableSwitchInsn() {
         mv.visitTableSwitchInsn(0, 1, new Label(), new Label());
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -570,7 +576,7 @@ public class DependencyVisitorTest {
     // visitLookupSwitchInsn tests --------------------------------------------
 
     @Test
-    public void testVisitLookupSwitchInsn() {
+    void testVisitLookupSwitchInsn() {
         mv.visitLookupSwitchInsn(new Label(), new int[] {0}, new Label[] {new Label()});
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -579,14 +585,14 @@ public class DependencyVisitorTest {
     // visitMultiANewArrayInsn tests ------------------------------------------
 
     @Test
-    public void testVisitMultiANewArrayInsnWithPrimitive() {
+    void testVisitMultiANewArrayInsnWithPrimitive() {
         mv.visitMultiANewArrayInsn("I", 2);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
     }
 
     @Test
-    public void testVisitMultiANewArrayInsnWithObject() {
+    void testVisitMultiANewArrayInsnWithObject() {
         mv.visitMultiANewArrayInsn("La/b/c;", 2);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
@@ -595,14 +601,14 @@ public class DependencyVisitorTest {
     // visitTryCatchBlock tests -----------------------------------------------
 
     @Test
-    public void testVisitTryCatchBlock() {
+    void testVisitTryCatchBlock() {
         mv.visitTryCatchBlock(new Label(), new Label(), new Label(), "a/b/c");
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitTryCatchBlockForFinally() {
+    void testVisitTryCatchBlockForFinally() {
         mv.visitTryCatchBlock(new Label(), new Label(), new Label(), null);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -611,42 +617,42 @@ public class DependencyVisitorTest {
     // visitLocalVariable tests -----------------------------------------------
 
     @Test
-    public void testVisitLocalVariableWithPrimitive() {
+    void testVisitLocalVariableWithPrimitive() {
         mv.visitLocalVariable("a", "I", null, new Label(), new Label(), 0);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
     }
 
     @Test
-    public void testVisitLocalVariableWithPrimitiveArray() {
+    void testVisitLocalVariableWithPrimitiveArray() {
         mv.visitLocalVariable("a", "[I", null, new Label(), new Label(), 0);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
     }
 
     @Test
-    public void testVisitLocalVariableWithObject() {
+    void testVisitLocalVariableWithObject() {
         mv.visitLocalVariable("a", "La/b/c;", null, new Label(), new Label(), 0);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitLocalVariableWithObjectArray() {
+    void testVisitLocalVariableWithObjectArray() {
         mv.visitLocalVariable("a", "[La/b/c;", null, new Label(), new Label(), 0);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
     @Test
-    public void testVisitLocalVariableWithGenericObject() {
+    void testVisitLocalVariableWithGenericObject() {
         mv.visitLocalVariable("a", "La/b/c;", "La/b/c<Lx/y/z;>;", new Label(), new Label(), 0);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c", "x.y.z");
     }
 
     @Test
-    public void testVisitLocalVariableWithGenericObjectArray() {
+    void testVisitLocalVariableWithGenericObjectArray() {
         mv.visitLocalVariable("a", "La/b/c;", "[La/b/c<Lx/y/z;>;", new Label(), new Label(), 0);
 
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c", "x.y.z");
@@ -655,7 +661,7 @@ public class DependencyVisitorTest {
     // visitLineNumber tests --------------------------------------------------
 
     @Test
-    public void testVisitLineNumber() {
+    void testVisitLineNumber() {
         mv.visitLineNumber(0, new Label());
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -664,7 +670,7 @@ public class DependencyVisitorTest {
     // visitMaxs tests --------------------------------------------------------
 
     @Test
-    public void testVisitMaxs() {
+    void testVisitMaxs() {
         mv.visitMaxs(0, 0);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
@@ -680,7 +686,7 @@ public class DependencyVisitorTest {
      * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
      */
     static class MockAttribute extends Attribute {
-        public MockAttribute(String type) {
+        MockAttribute(String type) {
             super(type);
         }
     }
