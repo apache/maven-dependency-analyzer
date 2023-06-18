@@ -46,6 +46,7 @@ public class DefaultFieldVisitor extends FieldVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
         resultCollector.addDesc(desc);
 

@@ -218,6 +218,7 @@ public class ProjectDependencyAnalysis {
      *
      * @return an int
      */
+    @Override
     public int hashCode() {
         int hashCode = getUsedDeclaredArtifacts().hashCode();
         hashCode = (hashCode * 37) + getUsedUndeclaredArtifacts().hashCode();
@@ -228,6 +229,7 @@ public class ProjectDependencyAnalysis {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean equals(Object object) {
         if (object instanceof ProjectDependencyAnalysis) {
             ProjectDependencyAnalysis analysis = (ProjectDependencyAnalysis) object;
@@ -246,6 +248,7 @@ public class ProjectDependencyAnalysis {
      *
      * @return a {@link java.lang.String} object.
      */
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
 

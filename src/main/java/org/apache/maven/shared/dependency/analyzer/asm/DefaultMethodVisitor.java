@@ -56,6 +56,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
         resultCollector.addDesc(desc);
 
@@ -71,6 +72,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter, final String desc, final boolean visible) {
         resultCollector.addDesc(desc);
 
@@ -87,6 +89,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitTypeInsn(final int opcode, final String desc) {
         if (desc.charAt(0) == '[') {
             resultCollector.addDesc(desc);
@@ -96,6 +99,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
         resultCollector.addName(owner);
         /*
@@ -113,6 +117,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitLdcInsn(final Object cst) {
         if (cst instanceof Type) {
             resultCollector.addType((Type) cst);
@@ -120,16 +125,19 @@ public class DefaultMethodVisitor extends MethodVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitMultiANewArrayInsn(final String desc, final int dims) {
         resultCollector.addDesc(desc);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitTryCatchBlock(final Label start, final Label end, final Label handler, final String type) {
         resultCollector.addName(type);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitLocalVariable(
             final String name,
             final String desc,
