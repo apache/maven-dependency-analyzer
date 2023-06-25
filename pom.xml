@@ -139,6 +139,8 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes combine.children="append">
+            <!-- Corrupted class files -->
+            <exclude>**/*.clazz</exclude>
             <!-- binary class for unit test -->
             <exclude>**/*.classx</exclude>
           </excludes>
