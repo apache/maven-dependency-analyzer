@@ -21,6 +21,7 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Gets the set of classes referenced by a library given either as a jar file or an exploded directory.
@@ -36,5 +37,19 @@ public interface DependencyAnalyzer {
      * @return the set of class names referenced by the library
      * @throws IOException if an error occurs reading a JAR or .class file
      */
-    Set<String> analyze(URL url) throws IOException;
+    default Set<String> analyze(URL url) throws IOException {
+        return analyzeUsages(url).stream()
+                .map(DependencyUsage::getDependencyClass)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * <p>analyzeUsages.</p>
+     *
+     * @param url the JAR file or directory to analyze
+     * @return the set of class names referenced by the library, paired with the
+     * classes declaring those references.
+     * @throws IOException if an error occurs reading a JAR or .class file
+     */
+    Set<DependencyUsage> analyzeUsages(URL url) throws IOException;
 }

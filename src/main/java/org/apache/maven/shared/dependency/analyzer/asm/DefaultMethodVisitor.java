@@ -18,12 +18,7 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.TypePath;
+import org.objectweb.asm.*;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 
@@ -40,68 +35,86 @@ public class DefaultMethodVisitor extends MethodVisitor {
 
     private final ResultCollector resultCollector;
 
+    private final String usedByClass;
+
     /**
      * <p>Constructor for DefaultMethodVisitor.</p>
      *
      * @param annotationVisitor a {@link org.objectweb.asm.AnnotationVisitor} object.
-     * @param signatureVisitor a {@link org.objectweb.asm.signature.SignatureVisitor} object.
-     * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
+     * @param signatureVisitor  a {@link org.objectweb.asm.signature.SignatureVisitor} object.
+     * @param resultCollector   a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
      */
     public DefaultMethodVisitor(
-            AnnotationVisitor annotationVisitor, SignatureVisitor signatureVisitor, ResultCollector resultCollector) {
+            AnnotationVisitor annotationVisitor,
+            SignatureVisitor signatureVisitor,
+            ResultCollector resultCollector,
+            String usedByClass) {
         super(Opcodes.ASM9);
         this.annotationVisitor = annotationVisitor;
         this.signatureVisitor = signatureVisitor;
         this.resultCollector = resultCollector;
+        this.usedByClass = usedByClass;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc(usedByClass, desc);
 
         return annotationVisitor;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc(usedByClass, desc);
 
         return annotationVisitor;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter, final String desc, final boolean visible) {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc(usedByClass, desc);
 
         return annotationVisitor;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AnnotationVisitor visitLocalVariableAnnotation(
             int typeRef, TypePath typePath, Label[] start, Label[] end, int[] index, String desc, boolean visible) {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc(usedByClass, desc);
 
         return annotationVisitor;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void visitTypeInsn(final int opcode, final String desc) {
         if (desc.charAt(0) == '[') {
-            resultCollector.addDesc(desc);
+            resultCollector.addDesc(usedByClass, desc);
         } else {
-            resultCollector.addName(desc);
+            resultCollector.addName(usedByClass, desc);
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
-        resultCollector.addName(owner);
+        resultCollector.addName(usedByClass, owner);
         /*
          * NOTE: Merely accessing a field does not impose a direct dependency on its type. For example, the code line
          * <code>java.lang.Object var = bean.field;</code> does not directly depend on the type of the field. A direct
@@ -110,33 +123,43 @@ public class DefaultMethodVisitor extends MethodVisitor {
          */
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-        resultCollector.addName(owner);
+        resultCollector.addName(usedByClass, owner);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void visitLdcInsn(final Object cst) {
         if (cst instanceof Type) {
-            resultCollector.addType((Type) cst);
+            resultCollector.addType(usedByClass, (Type) cst);
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void visitMultiANewArrayInsn(final String desc, final int dims) {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc(usedByClass, desc);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void visitTryCatchBlock(final Label start, final Label end, final Label handler, final String type) {
-        resultCollector.addName(type);
+        resultCollector.addName(usedByClass, type);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void visitLocalVariable(
             final String name,
@@ -146,7 +169,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
             final Label end,
             final int index) {
         if (signature == null) {
-            resultCollector.addDesc(desc);
+            resultCollector.addDesc(usedByClass, desc);
         } else {
             addTypeSignature(signature);
         }

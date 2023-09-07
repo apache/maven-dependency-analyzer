@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitorUtils;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
+import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
 
 /**
  * ASMDependencyAnalyzer
@@ -36,13 +37,13 @@ import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 @Named
 @Singleton
 public class ASMDependencyAnalyzer implements DependencyAnalyzer {
-    /** {@inheritDoc} */
+
     @Override
-    public Set<String> analyze(URL url) throws IOException {
+    public Set<DependencyUsage> analyzeUsages(URL url) throws IOException {
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
 
         ClassFileVisitorUtils.accept(url, visitor);
 
-        return visitor.getDependencies();
+        return visitor.getDependencyUsages();
     }
 }
