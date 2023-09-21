@@ -28,6 +28,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
@@ -182,7 +183,10 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
     private static Set<DependencyUsage> buildTestOnlyDependencyClasses(
             Set<DependencyUsage> mainDependencyClasses, Set<DependencyUsage> testDependencyClasses) {
         Set<DependencyUsage> testOnlyDependencyClasses = new HashSet<>(testDependencyClasses);
-        testOnlyDependencyClasses.removeAll(mainDependencyClasses);
+        Set<String> mainDepClassNames = mainDependencyClasses.stream()
+                .map(DependencyUsage::getDependencyClass)
+                .collect(Collectors.toSet());
+        testOnlyDependencyClasses.removeIf(u -> mainDepClassNames.contains(u.getDependencyClass()));
         return testOnlyDependencyClasses;
     }
 
