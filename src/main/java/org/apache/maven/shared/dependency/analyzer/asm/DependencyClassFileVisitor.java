@@ -51,6 +51,7 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
     public DependencyClassFileVisitor() {}
 
     /** {@inheritDoc} */
+    @Override
     public void visitClass(String className, InputStream in) {
         try {
             byte[] byteCode = IOUtils.toByteArray(in);
@@ -74,7 +75,10 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
         } catch (IndexOutOfBoundsException e) {
             // some bug inside ASM causes an IOB exception. Log it and move on?
             // this happens when the class isn't valid.
-            logger.warn("Unable to process: " + className);
+            logger.warn("Unable to process: " + className, e);
+        } catch (IllegalArgumentException e) {
+            // [MSHARED-1248] should log instead of failing when analyzing a corrupted jar file
+            logger.warn("Byte code of '" + className + "' is corrupt", e);
         }
     }
 

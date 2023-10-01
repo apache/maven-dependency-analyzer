@@ -36,6 +36,7 @@ import java.util.zip.ZipException;
 public class DefaultClassAnalyzer implements ClassAnalyzer {
 
     /** {@inheritDoc} */
+    @Override
     public Set<String> analyze(URL url) throws IOException {
         CollectorClassFileVisitor visitor = new CollectorClassFileVisitor();
 

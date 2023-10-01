@@ -33,6 +33,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ResultCollectorTest {
+
+    private static String ROOT = "src/test/resources/org/apache/maven/shared/dependency/analyzer";
+
     Set<String> getDependencies(Class<?> inspectClass) throws IOException {
         String className = inspectClass.getName();
         String path = '/' + className.replace('.', '/') + ".class";
@@ -50,7 +53,61 @@ class ResultCollectorTest {
                 "src/test/resources/org/apache/maven/shared/dependency/analyzer/commons-bcel-issue362/Bcel362.classx");
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
         try (InputStream is = Files.newInputStream(path)) {
-            visitor.visitClass(className, is);
+            visitor.visitClass("issue362.Bcel362", is);
+        }
+    }
+
+    @Test
+    public void testOssFuzz51980() throws IOException {
+        // Add a non-"class" suffix so that surefire does not try to read the file and fail the build
+        visitClass(ROOT + "/ossfuzz/issue51980/Test.class.clazz");
+    }
+
+    @Test
+    public void testOssFuzz51989() throws IOException {
+        visitClass(ROOT + "/ossfuzz/issue51989/Test.class.clazz");
+    }
+
+    @Test
+    public void testOssFuzz52168() throws IOException {
+        visitClass(ROOT + "/ossfuzz/issue52168/Test.class.clazz");
+    }
+
+    @Test
+    public void testOssFuzz53543() throws IOException {
+        visitClass(ROOT + "/ossfuzz/issue53543/Test.class.clazz");
+    }
+
+    @Test
+    public void testOssFuzz53544a() throws IOException {
+        visitClass(ROOT + "/ossfuzz/issue53544a/Test.class.clazz");
+    }
+
+    @Test
+    public void testOssFuzz53620() throws IOException {
+        visitClass(ROOT + "/ossfuzz/issue53620/Test.class.clazz");
+    }
+
+    @Test
+    public void testOssFuzz53676() throws IOException {
+        visitClass(ROOT + "/ossfuzz/issue53676/Test.class.clazz");
+    }
+
+    @Test
+    public void testOssFuzz54199() throws IOException {
+        visitClass(ROOT + "/ossfuzz/issue54119/Test.class.clazz");
+    }
+
+    @Test
+    public void testOssFuzz54254() throws IOException {
+        visitClass(ROOT + "/ossfuzz/issue54254/Test.class.clazz");
+    }
+
+    private void visitClass(String location) throws IOException {
+        Path path = Paths.get(location);
+        DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
+        try (InputStream is = Files.newInputStream(path)) {
+            visitor.visitClass("Test", is);
         }
     }
 

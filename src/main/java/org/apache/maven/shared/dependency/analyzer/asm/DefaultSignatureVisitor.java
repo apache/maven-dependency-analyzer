@@ -41,11 +41,13 @@ public class DefaultSignatureVisitor extends SignatureVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitClassType(final String name) {
         resultCollector.addName(name);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visitInnerClassType(final String name) {
         resultCollector.addName(name);
     }

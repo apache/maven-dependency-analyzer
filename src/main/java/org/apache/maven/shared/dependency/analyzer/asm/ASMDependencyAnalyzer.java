@@ -37,6 +37,7 @@ import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 @Singleton
 public class ASMDependencyAnalyzer implements DependencyAnalyzer {
     /** {@inheritDoc} */
+    @Override
     public Set<String> analyze(URL url) throws IOException {
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
 

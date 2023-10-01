@@ -111,7 +111,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>5.9.3</version>
+      <version>5.10.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -139,6 +139,8 @@
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <excludes combine.children="append">
+            <!-- Corrupted class files -->
+            <exclude>**/*.clazz</exclude>
             <!-- binary class for unit test -->
             <exclude>**/*.classx</exclude>
           </excludes>
