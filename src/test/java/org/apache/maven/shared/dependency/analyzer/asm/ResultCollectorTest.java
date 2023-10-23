@@ -48,7 +48,6 @@ class ResultCollectorTest {
 
     @Test
     void testJava11Invoke() throws IOException {
-        String className = "issue362.Bcel362";
         Path path = Paths.get(
                 "src/test/resources/org/apache/maven/shared/dependency/analyzer/commons-bcel-issue362/Bcel362.classx");
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
