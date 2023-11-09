@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.apache.maven.shared</groupId>
     <artifactId>maven-shared-components</artifactId>
-    <version>39</version>
+    <version>40</version>
     <relativePath />
   </parent>
 
@@ -61,8 +61,6 @@
     <slf4jVersion>1.7.36</slf4jVersion>
     <javaVersion>8</javaVersion>
     <project.build.outputTimestamp>2023-04-30T22:19:57Z</project.build.outputTimestamp>
-    <!-- TODO check with next parent -->
-    <maven.plugin.tools.version>3.8.1</maven.plugin.tools.version>
   </properties>
 
   <dependencies>
@@ -157,8 +155,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
-            <!-- TODO check with next parent -->
-            <version>3.5.1</version>
             <configuration>
               <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
               <localRepositoryPath>target/local-repo</localRepositoryPath>
