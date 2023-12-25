@@ -18,7 +18,10 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
+import java.util.Arrays;
+
 import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -156,5 +159,15 @@ public class DefaultMethodVisitor extends MethodVisitor {
         if (signature != null) {
             new SignatureReader(signature).acceptType(signatureVisitor);
         }
+    }
+
+    @Override
+    public void visitInvokeDynamicInsn(
+            String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
+        Arrays.stream(bootstrapMethodArguments)
+                .filter(Type.class::isInstance)
+                .map(Type.class::cast)
+                .map(Type::getDescriptor)
+                .forEach(resultCollector::addMethodDesc);
     }
 }

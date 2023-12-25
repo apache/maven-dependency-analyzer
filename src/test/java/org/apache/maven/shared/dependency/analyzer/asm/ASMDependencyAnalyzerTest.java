@@ -18,7 +18,10 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
@@ -39,5 +42,13 @@ class ASMDependencyAnalyzerTest {
         Set<String> result = analyzer.analyze(new URL(fileUrl));
 
         assertThat(result).isNotEmpty();
+    }
+
+    @Test
+    void verify_implicit_class_reference_included_in_used_classes() throws IOException {
+        Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
+
+        Set<String> result = analyzer.analyze(file.toUri().toURL());
+        assertThat(result).contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest");
     }
 }
