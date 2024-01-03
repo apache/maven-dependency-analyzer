@@ -676,6 +676,14 @@ class DependencyVisitorTest {
         assertThat(resultCollector.getDependencies()).isEmpty();
     }
 
+    // visitInvokeDynamicInsn tests -------------------------------------------
+    @Test
+    void testVisitInvokeDynamic() {
+        Type type = Type.getType("(La/b/C;)V");
+        mv.visitInvokeDynamicInsn("a", "", null, type);
+        assertThat(resultCollector.getDependencies()).contains("a.b.C");
+    }
+
     private void assertVisitor(Object actualVisitor) {
         // assertEquals( visitor, actualVisitor );
     }
