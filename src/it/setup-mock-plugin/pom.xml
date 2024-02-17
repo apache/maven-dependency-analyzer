@@ -49,7 +49,7 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-tools-annotations</artifactId>
-      <version>@maven.plugin.tools.version@</version>
+      <version>@version.maven-plugin-tools@</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
