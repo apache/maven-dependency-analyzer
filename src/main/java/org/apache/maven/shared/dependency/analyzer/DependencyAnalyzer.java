@@ -32,9 +32,21 @@ public interface DependencyAnalyzer {
     /**
      * <p>analyze.</p>
      *
-     * @param url the JAR file or directory to analyze
+     * @param url            the JAR file or directory to analyze
      * @return the set of class names referenced by the library
      * @throws IOException if an error occurs reading a JAR or .class file
      */
-    Set<String> analyze(URL url) throws IOException;
+    default Set<String> analyze(URL url) throws IOException {
+        return analyze(url, new ClassesPatterns());
+    }
+
+    /**
+     * <p>analyze.</p>
+     *
+     * @param url            the JAR file or directory to analyze
+     * @param excludeClasses a class list to exclude
+     * @return the set of class names referenced by the library
+     * @throws IOException if an error occurs reading a JAR or .class file
+     */
+    Set<String> analyze(URL url, ClassesPatterns excludeClasses) throws IOException;
 }

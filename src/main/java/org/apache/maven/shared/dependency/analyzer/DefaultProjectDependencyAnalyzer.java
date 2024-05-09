@@ -25,6 +25,7 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -61,12 +62,14 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
     /** {@inheritDoc} */
     @Override
-    public ProjectDependencyAnalysis analyze(MavenProject project) throws ProjectDependencyAnalyzerException {
+    public ProjectDependencyAnalysis analyze(MavenProject project, Collection<String> excludedClasses)
+            throws ProjectDependencyAnalyzerException {
         try {
-            Map<Artifact, Set<String>> artifactClassMap = buildArtifactClassMap(project);
+            ClassesPatterns excludedClassesPatterns = new ClassesPatterns(excludedClasses);
+            Map<Artifact, Set<String>> artifactClassMap = buildArtifactClassMap(project, excludedClassesPatterns);
 
-            Set<String> mainDependencyClasses = buildMainDependencyClasses(project);
-            Set<String> testDependencyClasses = buildTestDependencyClasses(project);
+            Set<String> mainDependencyClasses = buildMainDependencyClasses(project, excludedClassesPatterns);
+            Set<String> testDependencyClasses = buildTestDependencyClasses(project, excludedClassesPatterns);
 
             Set<String> dependencyClasses = new HashSet<>();
             dependencyClasses.addAll(mainDependencyClasses);
@@ -146,7 +149,8 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return nonTestScopeArtifacts;
     }
 
-    private Map<Artifact, Set<String>> buildArtifactClassMap(MavenProject project) throws IOException {
+    private Map<Artifact, Set<String>> buildArtifactClassMap(MavenProject project, ClassesPatterns excludedClasses)
+            throws IOException {
         Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
 
         Set<Artifact> dependencyArtifacts = project.getArtifacts();
@@ -167,7 +171,9 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
                         if (entry.endsWith(".class")) {
                             String className = entry.replace('/', '.');
                             className = className.substring(0, className.length() - ".class".length());
-                            classes.add(className);
+                            if (!excludedClasses.isMatch(className)) {
+                                classes.add(className);
+                            }
                         }
                     }
 
@@ -175,7 +181,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
                 }
             } else if (file != null && file.isDirectory()) {
                 URL url = file.toURI().toURL();
-                Set<String> classes = classAnalyzer.analyze(url);
+                Set<String> classes = classAnalyzer.analyze(url, excludedClasses);
 
                 artifactClassMap.put(artifact, classes);
             }
@@ -191,20 +197,22 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return testOnlyDependencyClasses;
     }
 
-    private Set<String> buildMainDependencyClasses(MavenProject project) throws IOException {
+    private Set<String> buildMainDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
+            throws IOException {
         String outputDirectory = project.getBuild().getOutputDirectory();
-        return buildDependencyClasses(outputDirectory);
+        return buildDependencyClasses(outputDirectory, excludedClasses);
     }
 
-    private Set<String> buildTestDependencyClasses(MavenProject project) throws IOException {
+    private Set<String> buildTestDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
+            throws IOException {
         String testOutputDirectory = project.getBuild().getTestOutputDirectory();
-        return buildDependencyClasses(testOutputDirectory);
+        return buildDependencyClasses(testOutputDirectory, excludedClasses);
     }
 
-    private Set<String> buildDependencyClasses(String path) throws IOException {
+    private Set<String> buildDependencyClasses(String path, ClassesPatterns excludedClasses) throws IOException {
         URL url = new File(path).toURI().toURL();
 
-        return dependencyAnalyzer.analyze(url);
+        return dependencyAnalyzer.analyze(url, excludedClasses);
     }
 
     private static Set<Artifact> buildDeclaredArtifacts(MavenProject project) {

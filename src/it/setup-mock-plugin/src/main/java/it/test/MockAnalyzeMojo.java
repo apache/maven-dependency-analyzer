@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.util.Set;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -63,12 +64,15 @@ public class MockAnalyzeMojo extends AbstractMojo
     @Parameter( defaultValue = "${project.build.directory}/analysis.txt", readonly = true )
     private File output;
 
+    @Parameter
+    private Set<String> excludedClasses;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         try
         {
-            ProjectDependencyAnalysis analysis = analyzer.analyze( project );
+            ProjectDependencyAnalysis analysis = analyzer.analyze( project, excludedClasses );
 
             Files.createDirectories( output.toPath().getParent() );
             try ( PrintWriter printWriter = new UnixPrintWiter( output ) )

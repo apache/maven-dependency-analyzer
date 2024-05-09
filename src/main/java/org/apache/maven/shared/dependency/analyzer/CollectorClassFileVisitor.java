@@ -31,18 +31,25 @@ import java.util.Set;
 public class CollectorClassFileVisitor implements ClassFileVisitor {
     private final Set<String> classes;
 
+    private final ClassesPatterns excludedClasses;
+
     /**
      * <p>Constructor for CollectorClassFileVisitor.</p>
      */
     public CollectorClassFileVisitor() {
+        this(new ClassesPatterns());
+    }
+
+    public CollectorClassFileVisitor(ClassesPatterns excludedClasses) {
         classes = new HashSet<>();
+        this.excludedClasses = excludedClasses;
     }
 
     /** {@inheritDoc} */
     @Override
     public void visitClass(String className, InputStream in) {
         // inner classes have equivalent compilation requirement as container class
-        if (className.indexOf('$') < 0) {
+        if (className.indexOf('$') < 0 && !excludedClasses.isMatch(className)) {
             classes.add(className);
         }
     }
