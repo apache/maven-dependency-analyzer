@@ -18,34 +18,39 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
- * Gets the set of classes contained in a library given either as a jar file or an exploded directory.
- *
- * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
+ * Patterns for classes
  */
-public interface ClassAnalyzer {
+public class ClassesPatterns {
+
+    private final Collection<Pattern> patterns;
 
     /**
-     * <p>analyze.</p>
+     * Default constructor.
      *
-     * @param url the JAR file or directory to analyze
-     * @return a {@link java.util.Set} object
-     * @throws java.io.IOException if any
+     * @param patterns a patterns to mach
      */
-    default Set<String> analyze(URL url) throws IOException {
-        return analyze(url, new ClassesPatterns());
+    public ClassesPatterns(Collection<String> patterns) {
+        if (patterns == null) {
+            this.patterns = Collections.emptyList();
+        } else {
+            this.patterns = patterns.stream().map(Pattern::compile).collect(Collectors.toSet());
+        }
     }
 
-    /**
-     * <p>analyze.</p>
-     *
-     * @param url the JAR file or directory to analyze
-     * @return a {@link java.util.Set} object
-     * @throws java.io.IOException if any
-     */
-    Set<String> analyze(URL url, ClassesPatterns excludedClasses) throws IOException;
+    public ClassesPatterns() {
+        this.patterns = Collections.emptySet();
+    }
+
+    public boolean isMatch(String className) {
+        if (patterns.isEmpty()) {
+            return false;
+        }
+        return patterns.stream().anyMatch(pattern -> pattern.matcher(className).matches());
+    }
 }

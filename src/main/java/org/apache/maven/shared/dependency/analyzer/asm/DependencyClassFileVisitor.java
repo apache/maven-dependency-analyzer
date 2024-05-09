@@ -21,17 +21,17 @@ package org.apache.maven.shared.dependency.analyzer.asm;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
+import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.signature.SignatureVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Computes the set of classes referenced by visited class files, using
@@ -45,18 +45,33 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
 
     private final ResultCollector resultCollector = new ResultCollector();
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final ClassesPatterns excludedClasses;
 
     /**
      * <p>Constructor for DependencyClassFileVisitor.</p>
      */
-    public DependencyClassFileVisitor() {}
+    public DependencyClassFileVisitor(ClassesPatterns excludedClasses) {
+
+        this.excludedClasses = excludedClasses;
+    }
+
+    /**
+     * <p>Constructor for DependencyClassFileVisitor.</p>
+     */
+    public DependencyClassFileVisitor() {
+        this(new ClassesPatterns());
+    }
 
     /** {@inheritDoc} */
     @Override
     public void visitClass(String className, InputStream in) {
         try {
             byte[] byteCode = toByteArray(in);
+
+            if (excludedClasses.isMatch(className)) {
+                return;
+            }
+
             ClassReader reader = new ClassReader(byteCode);
 
             final Set<String> constantPoolClassRefs = ConstantPoolParser.getConstantPoolClassReferences(byteCode);
@@ -73,14 +88,13 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
 
             reader.accept(classVisitor, 0);
         } catch (IOException exception) {
-            exception.printStackTrace();
+            throw new UncheckedIOException(exception);
         } catch (IndexOutOfBoundsException e) {
-            // some bug inside ASM causes an IOB exception. Log it and move on?
+            // some bug inside ASM causes an IOB exception.
             // this happens when the class isn't valid.
-            logger.warn("Unable to process: " + className, e);
+            throw new VisitClassException("Unable to process: " + className, e);
         } catch (IllegalArgumentException e) {
-            // [MSHARED-1248] should log instead of failing when analyzing a corrupted jar file
-            logger.warn("Byte code of '" + className + "' is corrupt", e);
+            throw new VisitClassException("Byte code of '" + className + "' is corrupt", e);
         }
     }
 

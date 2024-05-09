@@ -18,6 +18,8 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
+import java.util.Collection;
+
 import org.apache.maven.project.MavenProject;
 
 /**
@@ -32,6 +34,7 @@ import org.apache.maven.project.MavenProject;
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
 public interface ProjectDependencyAnalyzer {
+
     /**
      * <p>analyze.</p>
      *
@@ -39,5 +42,18 @@ public interface ProjectDependencyAnalyzer {
      * @return a {@link org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis} object
      * @throws org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException if any
      */
-    ProjectDependencyAnalysis analyze(MavenProject project) throws ProjectDependencyAnalyzerException;
+    default ProjectDependencyAnalysis analyze(MavenProject project) throws ProjectDependencyAnalyzerException {
+        return analyze(project, null);
+    }
+
+    /**
+     * <p>analyze.</p>
+     *
+     * @param project a {@link org.apache.maven.project.MavenProject} object
+     * @param excludedClasses collection of regular expression of classes name to exclude
+     * @return a {@link org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis} object
+     * @throws org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException if any
+     */
+    ProjectDependencyAnalysis analyze(MavenProject project, Collection<String> excludedClasses)
+            throws ProjectDependencyAnalyzerException;
 }
