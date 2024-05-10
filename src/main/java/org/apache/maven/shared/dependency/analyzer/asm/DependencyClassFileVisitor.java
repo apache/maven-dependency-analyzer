@@ -18,11 +18,11 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
  * @see #getDependencies()
  */
 public class DependencyClassFileVisitor implements ClassFileVisitor {
+    private static final int BUF_SIZE = 8192;
+
     private final ResultCollector resultCollector = new ResultCollector();
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -54,7 +56,7 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
     @Override
     public void visitClass(String className, InputStream in) {
         try {
-            byte[] byteCode = IOUtils.toByteArray(in);
+            byte[] byteCode = toByteArray(in);
             ClassReader reader = new ClassReader(byteCode);
 
             final Set<String> constantPoolClassRefs = ConstantPoolParser.getConstantPoolClassReferences(byteCode);
@@ -80,6 +82,16 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
             // [MSHARED-1248] should log instead of failing when analyzing a corrupted jar file
             logger.warn("Byte code of '" + className + "' is corrupt", e);
         }
+    }
+
+    private byte[] toByteArray(InputStream in) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buffer = new byte[BUF_SIZE];
+        int i;
+        while ((i = in.read(buffer)) > 0) {
+            out.write(buffer, 0, i);
+        }
+        return out.toByteArray();
     }
 
     /**
