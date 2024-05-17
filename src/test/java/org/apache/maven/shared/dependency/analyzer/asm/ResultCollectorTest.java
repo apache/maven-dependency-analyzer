@@ -18,19 +18,19 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
-import org.apache.maven.shared.dependency.analyzer.testcases.ArrayCases;
-import org.apache.maven.shared.dependency.analyzer.testcases.InnerClassCase;
-import org.apache.maven.shared.dependency.analyzer.testcases.MethodHandleCases;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
+
+import org.apache.maven.shared.dependency.analyzer.testcases.ArrayCases;
+import org.apache.maven.shared.dependency.analyzer.testcases.InnerClassCase;
+import org.apache.maven.shared.dependency.analyzer.testcases.MethodHandleCases;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -72,15 +72,15 @@ class ResultCollectorTest {
     @ParameterizedTest
     @ValueSource(
             strings = {
-                    "issue51980",
-                    "issue51989",
-                    "issue52168",
-                    "issue53543",
-                    "issue53544a",
-                    "issue53620",
-                    "issue53676",
-                    "issue54119",
-                    "issue54254"
+                "issue51980",
+                "issue51989",
+                "issue52168",
+                "issue53543",
+                "issue53544a",
+                "issue53620",
+                "issue53676",
+                "issue54119",
+                "issue54254"
             })
     void testOssFuzz(String name) {
         // Add a non-"class" suffix so that surefire does not try to read the file and fail the build
