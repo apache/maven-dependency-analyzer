@@ -17,5 +17,6 @@
 
 package recordinvokedynamic;
 
+// javac --release 17 RecordInvokeDynamic.java
 public record RecordInvokeDynamic(String a) {
 }
