@@ -67,6 +67,7 @@ class ResultCollectorTest {
         try (InputStream is = Files.newInputStream(path)) {
             visitor.visitClass("recordinvokedynamic.RecordInvokeDynamic", is);
         }
+        assertThat(visitor.getDependencies()).contains("recordinvokedynamic.RecordInvokeDynamic");
     }
 
     @ParameterizedTest
