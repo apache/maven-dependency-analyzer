@@ -78,10 +78,13 @@ public class ResultCollector {
                 addType(t.getElementType());
                 break;
 
+            case Type.METHOD:
+                addMethodDesc(t.getDescriptor());
+                break;
+
             case Type.OBJECT:
                 addName(t.getClassName());
                 break;
-
             default:
         }
     }

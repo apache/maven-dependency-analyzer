@@ -59,6 +59,17 @@ class ResultCollectorTest {
         }
     }
 
+    @Test
+    void testJava17DynamicInvokeRecord() throws IOException {
+        Path path = Paths.get(
+                "src/test/resources/org/apache/maven/shared/dependency/analyzer/record-invokedynamic/RecordInvokeDynamic.classx");
+        DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
+        try (InputStream is = Files.newInputStream(path)) {
+            visitor.visitClass("recordinvokedynamic.RecordInvokeDynamic", is);
+        }
+        assertThat(visitor.getDependencies()).contains("recordinvokedynamic.RecordInvokeDynamic");
+    }
+
     @ParameterizedTest
     @ValueSource(
             strings = {
