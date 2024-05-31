@@ -16,19 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.analyzer.testcases.analyze;
 
-def analysis = new File( basedir, 'project2/target/analysis.txt' ).text
+import java.util.regex.Pattern;
 
-def expected = '''
-UsedDeclaredArtifacts:
- org.apache.maven.shared.dependency-analyzer.tests:jarWithCompileDependency1:jar:1.0:compile
- com.google.guava:guava:jar:32.0.0-android:compile
-
-UsedUndeclaredArtifactsWithClasses:
-
-UnusedDeclaredArtifacts:
-
-TestArtifactsWithNonTestScope:
-'''
-
-assert analysis == expected
+/**
+ * Class to be skipped during analyzed in unit test.
+ */
+public class ClassToExclude {
+    private void doNothing(final Pattern pattern) {}
+}

@@ -16,19 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.analyzer.testcases.analyze;
 
-def analysis = new File( basedir, 'project2/target/analysis.txt' ).text
+import org.apache.maven.shared.dependency.analyzer.testcases.prepare.Prepare;
 
-def expected = '''
-UsedDeclaredArtifacts:
- org.apache.maven.shared.dependency-analyzer.tests:jarWithCompileDependency1:jar:1.0:compile
- com.google.guava:guava:jar:32.0.0-android:compile
+/**
+ * Class to be analyzed in unit test.
+ * <p>
+ * The handler method in {@link Prepare} takes an implicit Consumer&lt;ArtifactResolutionRequest&gt; argument. Analyze
+ * this class to verify the implicit reference.
+ */
+public class AnalyzedClass {
 
-UsedUndeclaredArtifactsWithClasses:
+    public void useFirst() {
+        new Prepare().handler(this::doNothing);
+    }
 
-UnusedDeclaredArtifacts:
-
-TestArtifactsWithNonTestScope:
-'''
-
-assert analysis == expected
+    private void doNothing(final Object object) {}
+}

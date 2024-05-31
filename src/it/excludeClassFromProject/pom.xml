@@ -25,23 +25,11 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
-  <artifactId>jarWithCompileDependency2</artifactId>
-  <packaging>jar</packaging>
-  <version>1.0</version>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
-      <artifactId>jarWithCompileDependency1</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>32.0.0-android</version>
-    </dependency>
-  </dependencies>
+  <groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
+  <artifactId>jarWithXercesDependencies</artifactId>
+  <version>1.0</version>
+  <packaging>jar</packaging>
 
   <build>
     <plugins>
@@ -56,6 +44,11 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <excludedClasses>
+            <exclude>org.example.BadClass</exclude>
+          </excludedClasses>
+        </configuration>
       </plugin>
     </plugins>
   </build>

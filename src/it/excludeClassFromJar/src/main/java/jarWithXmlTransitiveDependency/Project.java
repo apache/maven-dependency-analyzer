@@ -1,3 +1,5 @@
+package jarWithXmlTransitiveDependency;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -7,7 +9,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,18 +19,24 @@
  * under the License.
  */
 
-def analysis = new File( basedir, 'project2/target/analysis.txt' ).text
+import org.dom4j.Text;
+import org.xml.sax.Parser;
 
-def expected = '''
-UsedDeclaredArtifacts:
- org.apache.maven.shared.dependency-analyzer.tests:jarWithCompileDependency1:jar:1.0:compile
- com.google.guava:guava:jar:32.0.0-android:compile
+/**
+ * Dependency on dom4j gives xml-apis transitive dependency, which contains SAX Parser class. But SAX Parser is available in
+ * JDK: no need to declare a direct dependency.
+ * 
+ */
+public class Project
+{
+    public Text text;
+    
+    public Parser parser;
 
-UsedUndeclaredArtifactsWithClasses:
+    // constructors -----------------------------------------------------------
 
-UnusedDeclaredArtifacts:
-
-TestArtifactsWithNonTestScope:
-'''
-
-assert analysis == expected
+    public Project()
+    {
+        // no op
+    }
+}

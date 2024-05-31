@@ -17,12 +17,10 @@
  * under the License.
  */
 
-def analysis = new File( basedir, 'project2/target/analysis.txt' ).text
+def analysis = new File( basedir, 'target/analysis.txt' ).text
 
 def expected = '''
 UsedDeclaredArtifacts:
- org.apache.maven.shared.dependency-analyzer.tests:jarWithCompileDependency1:jar:1.0:compile
- com.google.guava:guava:jar:32.0.0-android:compile
 
 UsedUndeclaredArtifactsWithClasses:
 

@@ -18,17 +18,17 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
+import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
 import org.objectweb.asm.*;
 import org.objectweb.asm.signature.SignatureVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Computes the set of classes referenced by visited class files, using
@@ -38,14 +38,26 @@ import org.slf4j.LoggerFactory;
  * @see #getDependencies()
  */
 public class DependencyClassFileVisitor implements ClassFileVisitor {
+    private static final int BUF_SIZE = 8192;
+
     private final ResultCollector resultCollector = new ResultCollector();
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final ClassesPatterns excludedClasses;
 
     /**
      * <p>Constructor for DependencyClassFileVisitor.</p>
      */
-    public DependencyClassFileVisitor() {}
+    public DependencyClassFileVisitor(ClassesPatterns excludedClasses) {
+
+        this.excludedClasses = excludedClasses;
+    }
+
+    /**
+     * <p>Constructor for DependencyClassFileVisitor.</p>
+     */
+    public DependencyClassFileVisitor() {
+        this(new ClassesPatterns());
+    }
 
     /**
      * {@inheritDoc}
@@ -53,7 +65,12 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
     @Override
     public void visitClass(String className, InputStream in) {
         try {
-            byte[] byteCode = IOUtils.toByteArray(in);
+            byte[] byteCode = toByteArray(in);
+
+            if (excludedClasses.isMatch(className)) {
+                return;
+            }
+
             ClassReader reader = new ClassReader(byteCode);
 
             final Set<String> constantPoolClassRefs = ConstantPoolParser.getConstantPoolClassReferences(byteCode);
@@ -71,15 +88,24 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
 
             reader.accept(classVisitor, 0);
         } catch (IOException exception) {
-            exception.printStackTrace();
+            throw new UncheckedIOException(exception);
         } catch (IndexOutOfBoundsException e) {
-            // some bug inside ASM causes an IOB exception. Log it and move on?
+            // some bug inside ASM causes an IOB exception.
             // this happens when the class isn't valid.
-            logger.warn("Unable to process: " + className, e);
+            throw new VisitClassException("Unable to process: " + className, e);
         } catch (IllegalArgumentException e) {
-            // [MSHARED-1248] should log instead of failing when analyzing a corrupted jar file
-            logger.warn("Byte code of '" + className + "' is corrupt", e);
+            throw new VisitClassException("Byte code of '" + className + "' is corrupt", e);
         }
+    }
+
+    private byte[] toByteArray(InputStream in) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buffer = new byte[BUF_SIZE];
+        int i;
+        while ((i = in.read(buffer)) > 0) {
+            out.write(buffer, 0, i);
+        }
+        return out.toByteArray();
     }
 
     /**

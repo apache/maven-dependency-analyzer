@@ -35,10 +35,9 @@ import java.util.zip.ZipException;
 @Singleton
 public class DefaultClassAnalyzer implements ClassAnalyzer {
 
-    /** {@inheritDoc} */
     @Override
-    public Set<String> analyze(URL url) throws IOException {
-        CollectorClassFileVisitor visitor = new CollectorClassFileVisitor();
+    public Set<String> analyze(URL url, ClassesPatterns excludedClasses) throws IOException {
+        CollectorClassFileVisitor visitor = new CollectorClassFileVisitor(excludedClasses);
 
         try {
             ClassFileVisitorUtils.accept(url, visitor);

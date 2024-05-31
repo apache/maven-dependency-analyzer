@@ -33,12 +33,24 @@ public interface DependencyAnalyzer {
     /**
      * <p>analyze.</p>
      *
-     * @param url the JAR file or directory to analyze
+     * @param url            the JAR file or directory to analyze
      * @return the set of class names referenced by the library
      * @throws IOException if an error occurs reading a JAR or .class file
      */
     default Set<String> analyze(URL url) throws IOException {
-        return analyzeUsages(url).stream()
+        return analyze(url, new ClassesPatterns());
+    }
+
+    /**
+     * <p>analyze.</p>
+     *
+     * @param url            the JAR file or directory to analyze
+     * @param excludeClasses a class list to exclude
+     * @return the set of class names referenced by the library
+     * @throws IOException if an error occurs reading a JAR or .class file
+     */
+    default Set<String> analyze(URL url, ClassesPatterns excludeClasses) throws IOException {
+        return analyzeUsages(url, excludeClasses).stream()
                 .map(DependencyUsage::getDependencyClass)
                 .collect(Collectors.toSet());
     }
@@ -51,5 +63,5 @@ public interface DependencyAnalyzer {
      * classes declaring those references.
      * @throws IOException if an error occurs reading a JAR or .class file
      */
-    Set<DependencyUsage> analyzeUsages(URL url) throws IOException;
+    Set<DependencyUsage> analyzeUsages(URL url, ClassesPatterns excludeClasses) throws IOException;
 }

@@ -16,19 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.analyzer.testcases.prepare;
 
-def analysis = new File( basedir, 'project2/target/analysis.txt' ).text
+import java.util.function.Consumer;
 
-def expected = '''
-UsedDeclaredArtifacts:
- org.apache.maven.shared.dependency-analyzer.tests:jarWithCompileDependency1:jar:1.0:compile
- com.google.guava:guava:jar:32.0.0-android:compile
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
+import org.apache.maven.artifact.resolver.ResolutionErrorHandler;
 
-UsedUndeclaredArtifactsWithClasses:
+/**
+ * Class to be used for verifying that analyzer picks up usage of classes with no import.
+ */
+public class Prepare {
 
-UnusedDeclaredArtifacts:
-
-TestArtifactsWithNonTestScope:
-'''
-
-assert analysis == expected
+    public void handler(Consumer<ArtifactResolutionRequest> consumer) {
+        ResolutionErrorHandler resolutionErrorHandler = (request, result) -> {
+            consumer.accept(request);
+        };
+    }
+}

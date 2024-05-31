@@ -29,8 +29,11 @@ import org.apache.maven.shared.dependency.analyzer.testcases.ArrayCases;
 import org.apache.maven.shared.dependency.analyzer.testcases.InnerClassCase;
 import org.apache.maven.shared.dependency.analyzer.testcases.MethodHandleCases;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class ResultCollectorTest {
 
@@ -48,7 +51,6 @@ class ResultCollectorTest {
 
     @Test
     void testJava11Invoke() throws IOException {
-        String className = "issue362.Bcel362";
         Path path = Paths.get(
                 "src/test/resources/org/apache/maven/shared/dependency/analyzer/commons-bcel-issue362/Bcel362.classx");
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
@@ -58,49 +60,33 @@ class ResultCollectorTest {
     }
 
     @Test
-    public void testOssFuzz51980() throws IOException {
+    void testJava17DynamicInvokeRecord() throws IOException {
+        Path path = Paths.get(
+                "src/test/resources/org/apache/maven/shared/dependency/analyzer/record-invokedynamic/RecordInvokeDynamic.classx");
+        DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
+        try (InputStream is = Files.newInputStream(path)) {
+            visitor.visitClass("recordinvokedynamic.RecordInvokeDynamic", is);
+        }
+        assertThat(visitor.getDependencies()).contains("recordinvokedynamic.RecordInvokeDynamic");
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "issue51980",
+                "issue51989",
+                "issue52168",
+                "issue53543",
+                "issue53544a",
+                "issue53620",
+                "issue53676",
+                "issue54119",
+                "issue54254"
+            })
+    void testOssFuzz(String name) {
         // Add a non-"class" suffix so that surefire does not try to read the file and fail the build
-        visitClass(ROOT + "/ossfuzz/issue51980/Test.class.clazz");
-    }
-
-    @Test
-    public void testOssFuzz51989() throws IOException {
-        visitClass(ROOT + "/ossfuzz/issue51989/Test.class.clazz");
-    }
-
-    @Test
-    public void testOssFuzz52168() throws IOException {
-        visitClass(ROOT + "/ossfuzz/issue52168/Test.class.clazz");
-    }
-
-    @Test
-    public void testOssFuzz53543() throws IOException {
-        visitClass(ROOT + "/ossfuzz/issue53543/Test.class.clazz");
-    }
-
-    @Test
-    public void testOssFuzz53544a() throws IOException {
-        visitClass(ROOT + "/ossfuzz/issue53544a/Test.class.clazz");
-    }
-
-    @Test
-    public void testOssFuzz53620() throws IOException {
-        visitClass(ROOT + "/ossfuzz/issue53620/Test.class.clazz");
-    }
-
-    @Test
-    public void testOssFuzz53676() throws IOException {
-        visitClass(ROOT + "/ossfuzz/issue53676/Test.class.clazz");
-    }
-
-    @Test
-    public void testOssFuzz54199() throws IOException {
-        visitClass(ROOT + "/ossfuzz/issue54119/Test.class.clazz");
-    }
-
-    @Test
-    public void testOssFuzz54254() throws IOException {
-        visitClass(ROOT + "/ossfuzz/issue54254/Test.class.clazz");
+        assertThatCode(() -> visitClass(ROOT + "/ossfuzz/" + name + "/Test.class.clazz"))
+                .isExactlyInstanceOf(VisitClassException.class);
     }
 
     private void visitClass(String location) throws IOException {

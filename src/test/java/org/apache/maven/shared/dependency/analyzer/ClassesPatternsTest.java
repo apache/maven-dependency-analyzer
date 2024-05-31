@@ -18,34 +18,34 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Set;
+import java.util.Arrays;
 
-/**
- * Gets the set of classes contained in a library given either as a jar file or an exploded directory.
- *
- * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
- */
-public interface ClassAnalyzer {
+import org.junit.jupiter.api.Test;
 
-    /**
-     * <p>analyze.</p>
-     *
-     * @param url the JAR file or directory to analyze
-     * @return a {@link java.util.Set} object
-     * @throws java.io.IOException if any
-     */
-    default Set<String> analyze(URL url) throws IOException {
-        return analyze(url, new ClassesPatterns());
+import static org.junit.jupiter.api.Assertions.*;
+
+class ClassesPatternsTest {
+
+    @Test
+    void classPatternsTest() {
+        ClassesPatterns classesPatterns = new ClassesPatterns(Arrays.asList("Test1.*", "io.example.test.Test2"));
+
+        assertTrue(classesPatterns.isMatch("Test1.Test2"));
+        assertFalse(classesPatterns.isMatch("Test2.Test2"));
+        assertTrue(classesPatterns.isMatch("io.example.test.Test2"));
     }
 
-    /**
-     * <p>analyze.</p>
-     *
-     * @param url the JAR file or directory to analyze
-     * @return a {@link java.util.Set} object
-     * @throws java.io.IOException if any
-     */
-    Set<String> analyze(URL url, ClassesPatterns excludedClasses) throws IOException;
+    @Test
+    void emptyClassPatternsTest() {
+        ClassesPatterns classesPatterns = new ClassesPatterns();
+
+        assertFalse(classesPatterns.isMatch("Test"));
+    }
+
+    @Test
+    void nullClassPatternsTest() {
+        ClassesPatterns classesPatterns = new ClassesPatterns(null);
+
+        assertFalse(classesPatterns.isMatch("Test"));
+    }
 }

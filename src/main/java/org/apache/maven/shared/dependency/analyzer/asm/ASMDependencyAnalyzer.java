@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitorUtils;
+import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
 
@@ -39,8 +40,8 @@ import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
 public class ASMDependencyAnalyzer implements DependencyAnalyzer {
 
     @Override
-    public Set<DependencyUsage> analyzeUsages(URL url) throws IOException {
-        DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
+    public Set<DependencyUsage> analyzeUsages(URL url, ClassesPatterns excludeClasses) throws IOException {
+        DependencyClassFileVisitor visitor = new DependencyClassFileVisitor(excludeClasses);
 
         ClassFileVisitorUtils.accept(url, visitor);
 

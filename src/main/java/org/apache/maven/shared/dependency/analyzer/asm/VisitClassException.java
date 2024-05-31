@@ -16,19 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.analyzer.asm;
 
-def analysis = new File( basedir, 'project2/target/analysis.txt' ).text
-
-def expected = '''
-UsedDeclaredArtifacts:
- org.apache.maven.shared.dependency-analyzer.tests:jarWithCompileDependency1:jar:1.0:compile
- com.google.guava:guava:jar:32.0.0-android:compile
-
-UsedUndeclaredArtifactsWithClasses:
-
-UnusedDeclaredArtifacts:
-
-TestArtifactsWithNonTestScope:
-'''
-
-assert analysis == expected
+/**
+ * Exception for processing class.
+ */
+public class VisitClassException extends RuntimeException {
+    /**
+     * A constructor
+     * @param message message
+     * @param cause cause of exception
+     */
+    public VisitClassException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
