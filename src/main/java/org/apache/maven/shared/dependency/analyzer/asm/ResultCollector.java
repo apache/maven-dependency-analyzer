@@ -18,12 +18,12 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
-import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
-import org.objectweb.asm.Type;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
+import org.objectweb.asm.Type;
 
 /**
  * <p>ResultCollector class.</p>

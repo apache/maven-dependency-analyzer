@@ -25,8 +25,8 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collection;
 import java.util.*;
+import java.util.Collection;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -208,7 +208,8 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return buildDependencyClasses(testOutputDirectory, excludedClasses);
     }
 
-    private Set<DependencyUsage> buildDependencyClasses(String path, ClassesPatterns excludedClasses) throws IOException {
+    private Set<DependencyUsage> buildDependencyClasses(String path, ClassesPatterns excludedClasses)
+            throws IOException {
         URL url = new File(path).toURI().toURL();
 
         return dependencyAnalyzer.analyzeUsages(url, excludedClasses);
