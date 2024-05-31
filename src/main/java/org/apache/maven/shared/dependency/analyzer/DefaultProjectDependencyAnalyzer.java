@@ -25,17 +25,11 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.*;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
@@ -60,7 +54,9 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
     @Inject
     private DependencyAnalyzer dependencyAnalyzer;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ProjectDependencyAnalysis analyze(MavenProject project, Collection<String> excludedClasses)
             throws ProjectDependencyAnalyzerException {
@@ -68,17 +64,17 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             ClassesPatterns excludedClassesPatterns = new ClassesPatterns(excludedClasses);
             Map<Artifact, Set<String>> artifactClassMap = buildArtifactClassMap(project, excludedClassesPatterns);
 
-            Set<String> mainDependencyClasses = buildMainDependencyClasses(project, excludedClassesPatterns);
-            Set<String> testDependencyClasses = buildTestDependencyClasses(project, excludedClassesPatterns);
+            Set<DependencyUsage> mainDependencyClasses = buildMainDependencyClasses(project, excludedClassesPatterns);
+            Set<DependencyUsage> testDependencyClasses = buildTestDependencyClasses(project, excludedClassesPatterns);
 
-            Set<String> dependencyClasses = new HashSet<>();
+            Set<DependencyUsage> dependencyClasses = new HashSet<>();
             dependencyClasses.addAll(mainDependencyClasses);
             dependencyClasses.addAll(testDependencyClasses);
 
-            Set<String> testOnlyDependencyClasses =
+            Set<DependencyUsage> testOnlyDependencyClasses =
                     buildTestOnlyDependencyClasses(mainDependencyClasses, testDependencyClasses);
 
-            Map<Artifact, Set<String>> usedArtifacts = buildUsedArtifacts(artifactClassMap, dependencyClasses);
+            Map<Artifact, Set<DependencyUsage>> usedArtifacts = buildUsedArtifacts(artifactClassMap, dependencyClasses);
             Set<Artifact> mainUsedArtifacts =
                     buildUsedArtifacts(artifactClassMap, mainDependencyClasses).keySet();
 
@@ -90,7 +86,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<>(declaredArtifacts);
             usedDeclaredArtifacts.retainAll(usedArtifacts.keySet());
 
-            Map<Artifact, Set<String>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>(usedArtifacts);
+            Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>(usedArtifacts);
             Set<Artifact> usedUndeclaredArtifacts =
                     removeAll(usedUndeclaredArtifactsWithClasses.keySet(), declaredArtifacts);
             usedUndeclaredArtifactsWithClasses.keySet().retainAll(usedUndeclaredArtifacts);
@@ -190,29 +186,33 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return artifactClassMap;
     }
 
-    private static Set<String> buildTestOnlyDependencyClasses(
-            Set<String> mainDependencyClasses, Set<String> testDependencyClasses) {
-        Set<String> testOnlyDependencyClasses = new HashSet<>(testDependencyClasses);
-        testOnlyDependencyClasses.removeAll(mainDependencyClasses);
+    private static Set<DependencyUsage> buildTestOnlyDependencyClasses(
+            Set<DependencyUsage> mainDependencyClasses, Set<DependencyUsage> testDependencyClasses) {
+        Set<DependencyUsage> testOnlyDependencyClasses = new HashSet<>(testDependencyClasses);
+        Set<String> mainDepClassNames = mainDependencyClasses.stream()
+                .map(DependencyUsage::getDependencyClass)
+                .collect(Collectors.toSet());
+        testOnlyDependencyClasses.removeIf(u -> mainDepClassNames.contains(u.getDependencyClass()));
         return testOnlyDependencyClasses;
     }
 
-    private Set<String> buildMainDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
+    private Set<DependencyUsage> buildMainDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
             throws IOException {
         String outputDirectory = project.getBuild().getOutputDirectory();
         return buildDependencyClasses(outputDirectory, excludedClasses);
     }
 
-    private Set<String> buildTestDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
+    private Set<DependencyUsage> buildTestDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
             throws IOException {
         String testOutputDirectory = project.getBuild().getTestOutputDirectory();
         return buildDependencyClasses(testOutputDirectory, excludedClasses);
     }
 
-    private Set<String> buildDependencyClasses(String path, ClassesPatterns excludedClasses) throws IOException {
+    private Set<DependencyUsage> buildDependencyClasses(String path, ClassesPatterns excludedClasses)
+            throws IOException {
         URL url = new File(path).toURI().toURL();
 
-        return dependencyAnalyzer.analyze(url, excludedClasses);
+        return dependencyAnalyzer.analyzeUsages(url, excludedClasses);
     }
 
     private static Set<Artifact> buildDeclaredArtifacts(MavenProject project) {
@@ -225,20 +225,20 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return declaredArtifacts;
     }
 
-    private static Map<Artifact, Set<String>> buildUsedArtifacts(
-            Map<Artifact, Set<String>> artifactClassMap, Set<String> dependencyClasses) {
-        Map<Artifact, Set<String>> usedArtifacts = new HashMap<>();
+    private static Map<Artifact, Set<DependencyUsage>> buildUsedArtifacts(
+            Map<Artifact, Set<String>> artifactClassMap, Set<DependencyUsage> dependencyClasses) {
+        Map<Artifact, Set<DependencyUsage>> usedArtifacts = new HashMap<>();
 
-        for (String className : dependencyClasses) {
-            Artifact artifact = findArtifactForClassName(artifactClassMap, className);
+        for (DependencyUsage classUsage : dependencyClasses) {
+            Artifact artifact = findArtifactForClassName(artifactClassMap, classUsage.getDependencyClass());
 
             if (artifact != null) {
-                Set<String> classesFromArtifact = usedArtifacts.get(artifact);
+                Set<DependencyUsage> classesFromArtifact = usedArtifacts.get(artifact);
                 if (classesFromArtifact == null) {
                     classesFromArtifact = new HashSet<>();
                     usedArtifacts.put(artifact, classesFromArtifact);
                 }
-                classesFromArtifact.add(className);
+                classesFromArtifact.add(classUsage);
             }
         }
 

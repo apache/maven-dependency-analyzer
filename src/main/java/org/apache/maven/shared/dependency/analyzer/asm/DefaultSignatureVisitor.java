@@ -29,26 +29,32 @@ import org.objectweb.asm.signature.SignatureVisitor;
  */
 public class DefaultSignatureVisitor extends SignatureVisitor {
     private final ResultCollector resultCollector;
+    private final String usedByClass;
 
     /**
      * <p>Constructor for DefaultSignatureVisitor.</p>
      *
      * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
      */
-    public DefaultSignatureVisitor(ResultCollector resultCollector) {
+    public DefaultSignatureVisitor(ResultCollector resultCollector, String usedByClass) {
         super(Opcodes.ASM9);
         this.resultCollector = resultCollector;
+        this.usedByClass = usedByClass;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void visitClassType(final String name) {
-        resultCollector.addName(name);
+        resultCollector.addName(usedByClass, name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void visitInnerClassType(final String name) {
-        resultCollector.addName(name);
+        resultCollector.addName(usedByClass, name);
     }
 }
