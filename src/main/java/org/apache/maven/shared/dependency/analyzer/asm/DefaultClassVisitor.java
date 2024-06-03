@@ -18,7 +18,12 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 
@@ -44,11 +49,11 @@ public class DefaultClassVisitor extends ClassVisitor {
     /**
      * <p>Constructor for DefaultClassVisitor.</p>
      *
-     * @param signatureVisitor  a {@link org.objectweb.asm.signature.SignatureVisitor} object.
+     * @param signatureVisitor a {@link org.objectweb.asm.signature.SignatureVisitor} object.
      * @param annotationVisitor a {@link org.objectweb.asm.AnnotationVisitor} object.
-     * @param fieldVisitor      a {@link org.objectweb.asm.FieldVisitor} object.
-     * @param methodVisitor     a {@link org.objectweb.asm.MethodVisitor} object.
-     * @param resultCollector   a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
+     * @param fieldVisitor a {@link org.objectweb.asm.FieldVisitor} object.
+     * @param methodVisitor a {@link org.objectweb.asm.MethodVisitor} object.
+     * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
      */
     public DefaultClassVisitor(
             SignatureVisitor signatureVisitor,
@@ -92,9 +97,7 @@ public class DefaultClassVisitor extends ClassVisitor {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
         resultCollector.addDesc(usedByClass, desc);
@@ -102,9 +105,7 @@ public class DefaultClassVisitor extends ClassVisitor {
         return annotationVisitor;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public FieldVisitor visitField(
             final int access, final String name, final String desc, final String signature, final Object value) {
@@ -124,10 +125,10 @@ public class DefaultClassVisitor extends ClassVisitor {
     /**
      * <p>visitMethod.</p>
      *
-     * @param access     a int.
-     * @param name       a {@link java.lang.String} object.
-     * @param desc       a {@link java.lang.String} object.
-     * @param signature  a {@link java.lang.String} object.
+     * @param access a int.
+     * @param name a {@link java.lang.String} object.
+     * @param desc a {@link java.lang.String} object.
+     * @param signature a {@link java.lang.String} object.
      * @param exceptions an array of {@link java.lang.String} objects.
      * @return a {@link org.objectweb.asm.MethodVisitor} object.
      */
@@ -145,17 +146,13 @@ public class DefaultClassVisitor extends ClassVisitor {
         return methodVisitor;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitNestHost(final String nestHost) {
         resultCollector.addName(usedByClass, nestHost);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitNestMember(final String nestMember) {
         resultCollector.addName(usedByClass, nestMember);

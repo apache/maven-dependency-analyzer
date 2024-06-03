@@ -42,17 +42,13 @@ public class DefaultSignatureVisitor extends SignatureVisitor {
         this.usedByClass = usedByClass;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitClassType(final String name) {
         resultCollector.addName(usedByClass, name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitInnerClassType(final String name) {
         resultCollector.addName(usedByClass, name);

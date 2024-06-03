@@ -49,8 +49,8 @@ public class DefaultMethodVisitor extends MethodVisitor {
      * <p>Constructor for DefaultMethodVisitor.</p>
      *
      * @param annotationVisitor a {@link org.objectweb.asm.AnnotationVisitor} object.
-     * @param signatureVisitor  a {@link org.objectweb.asm.signature.SignatureVisitor} object.
-     * @param resultCollector   a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
+     * @param signatureVisitor a {@link org.objectweb.asm.signature.SignatureVisitor} object.
+     * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
      */
     public DefaultMethodVisitor(
             AnnotationVisitor annotationVisitor,
@@ -64,9 +64,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
         this.usedByClass = usedByClass;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
         resultCollector.addDesc(usedByClass, desc);
@@ -74,9 +72,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
         return annotationVisitor;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
         resultCollector.addDesc(usedByClass, desc);
@@ -84,9 +80,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
         return annotationVisitor;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter, final String desc, final boolean visible) {
         resultCollector.addDesc(usedByClass, desc);
@@ -94,9 +88,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
         return annotationVisitor;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitLocalVariableAnnotation(
             int typeRef, TypePath typePath, Label[] start, Label[] end, int[] index, String desc, boolean visible) {
@@ -105,9 +97,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
         return annotationVisitor;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitTypeInsn(final int opcode, final String desc) {
         if (desc.charAt(0) == '[') {
@@ -117,9 +107,7 @@ public class DefaultMethodVisitor extends MethodVisitor {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
         resultCollector.addName(usedByClass, owner);
@@ -131,17 +119,13 @@ public class DefaultMethodVisitor extends MethodVisitor {
          */
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
         resultCollector.addName(usedByClass, owner);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitLdcInsn(final Object cst) {
         if (cst instanceof Type) {
@@ -149,17 +133,13 @@ public class DefaultMethodVisitor extends MethodVisitor {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitMultiANewArrayInsn(final String desc, final int dims) {
         resultCollector.addDesc(usedByClass, desc);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitTryCatchBlock(final Label start, final Label end, final Label handler, final String type) {
         resultCollector.addName(usedByClass, type);

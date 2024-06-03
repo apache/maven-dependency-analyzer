@@ -44,9 +44,7 @@ public class DefaultAnnotationVisitor extends AnnotationVisitor {
         this.usedByClass = usedByClass;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visit(final String name, final Object value) {
         if (value instanceof Type) {
@@ -54,17 +52,13 @@ public class DefaultAnnotationVisitor extends AnnotationVisitor {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitEnum(final String name, final String desc, final String value) {
         resultCollector.addDesc(usedByClass, desc);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitAnnotation(final String name, final String desc) {
         resultCollector.addDesc(usedByClass, desc);
@@ -72,9 +66,7 @@ public class DefaultAnnotationVisitor extends AnnotationVisitor {
         return this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitArray(final String name) {
         return this;

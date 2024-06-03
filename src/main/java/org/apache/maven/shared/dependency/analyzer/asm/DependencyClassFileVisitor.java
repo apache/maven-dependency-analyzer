@@ -27,7 +27,11 @@ import java.util.Set;
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
 import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.signature.SignatureVisitor;
 
 /**
@@ -59,9 +63,7 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
         this(new ClassesPatterns());
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void visitClass(String className, InputStream in) {
         try {

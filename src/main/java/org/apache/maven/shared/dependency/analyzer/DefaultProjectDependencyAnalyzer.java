@@ -61,9 +61,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
     @Inject
     private DependencyAnalyzer dependencyAnalyzer;
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public ProjectDependencyAnalysis analyze(MavenProject project, Collection<String> excludedClasses)
             throws ProjectDependencyAnalyzerException {
