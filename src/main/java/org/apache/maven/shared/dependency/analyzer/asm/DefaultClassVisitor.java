@@ -74,11 +74,11 @@ public class DefaultClassVisitor extends ClassVisitor {
     /**
      * <p>visit.</p>
      *
-     * @param version    a int.
-     * @param access     a int.
-     * @param name       a {@link java.lang.String} object.
-     * @param signature  a {@link java.lang.String} object.
-     * @param superName  a {@link java.lang.String} object.
+     * @param version a int.
+     * @param access a int.
+     * @param name a {@link java.lang.String} object.
+     * @param signature a {@link java.lang.String} object.
+     * @param superName a {@link java.lang.String} object.
      * @param interfaces an array of {@link java.lang.String} objects.
      */
     @Override

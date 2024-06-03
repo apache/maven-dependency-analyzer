@@ -56,7 +56,7 @@ public class ProjectDependencyAnalysis {
     /**
      * <p>Constructor for ProjectDependencyAnalysis to maintain compatibility with old API</p>
      *
-     * @param usedDeclaredArtifacts   artifacts both used and declared
+     * @param usedDeclaredArtifacts artifacts both used and declared
      * @param usedUndeclaredArtifacts artifacts used but not declared
      * @param unusedDeclaredArtifacts artifacts declared but not used
      */
@@ -70,9 +70,9 @@ public class ProjectDependencyAnalysis {
     /**
      * <p>Constructor for ProjectDependencyAnalysis.</p>
      *
-     * @param usedDeclaredArtifacts         artifacts both used and declared
-     * @param usedUndeclaredArtifacts       artifacts used but not declared
-     * @param unusedDeclaredArtifacts       artifacts declared but not used
+     * @param usedDeclaredArtifacts artifacts both used and declared
+     * @param usedUndeclaredArtifacts artifacts used but not declared
+     * @param unusedDeclaredArtifacts artifacts declared but not used
      * @param testArtifactsWithNonTestScope artifacts only used in tests but not declared with test scope
      */
     public ProjectDependencyAnalysis(
@@ -151,7 +151,7 @@ public class ProjectDependencyAnalysis {
     /**
      * Returns artifacts only used in tests but not declared with test scope.
      *
-     * @return artifacts only used in tests but not declared with test scope
+     * @return  artifacts only used in tests but not declared with test scope
      */
     public Set<Artifact> getTestArtifactsWithNonTestScope() {
         return safeCopy(testArtifactsWithNonTestScope);
@@ -243,9 +243,7 @@ public class ProjectDependencyAnalysis {
         return hashCode;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object object) {
         if (object instanceof ProjectDependencyAnalysis) {
