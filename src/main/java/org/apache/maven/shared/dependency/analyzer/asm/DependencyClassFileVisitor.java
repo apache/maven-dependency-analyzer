@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
 import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
+import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -76,15 +77,16 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
 
             final Set<String> constantPoolClassRefs = ConstantPoolParser.getConstantPoolClassReferences(byteCode);
             for (String string : constantPoolClassRefs) {
-                resultCollector.addName(string);
+                resultCollector.addName(className, string);
             }
 
-            AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor(resultCollector);
-            SignatureVisitor signatureVisitor = new DefaultSignatureVisitor(resultCollector);
-            FieldVisitor fieldVisitor = new DefaultFieldVisitor(annotationVisitor, resultCollector);
-            MethodVisitor mv = new DefaultMethodVisitor(annotationVisitor, signatureVisitor, resultCollector);
-            ClassVisitor classVisitor =
-                    new DefaultClassVisitor(signatureVisitor, annotationVisitor, fieldVisitor, mv, resultCollector);
+            AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor(resultCollector, className);
+            SignatureVisitor signatureVisitor = new DefaultSignatureVisitor(resultCollector, className);
+            FieldVisitor fieldVisitor = new DefaultFieldVisitor(annotationVisitor, resultCollector, className);
+            MethodVisitor mv =
+                    new DefaultMethodVisitor(annotationVisitor, signatureVisitor, resultCollector, className);
+            ClassVisitor classVisitor = new DefaultClassVisitor(
+                    signatureVisitor, annotationVisitor, fieldVisitor, mv, resultCollector, className);
 
             reader.accept(classVisitor, 0);
         } catch (IOException exception) {
@@ -115,5 +117,15 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
      */
     public Set<String> getDependencies() {
         return resultCollector.getDependencies();
+    }
+
+    /**
+     * <p>getDependencyUsages.</p>
+     *
+     * @return the set of classes referenced by visited class files, paired with
+     * classes declaring the references.
+     */
+    public Set<DependencyUsage> getDependencyUsages() {
+        return resultCollector.getDependencyUsages();
     }
 }

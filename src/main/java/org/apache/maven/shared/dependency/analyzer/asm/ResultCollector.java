@@ -20,7 +20,9 @@ package org.apache.maven.shared.dependency.analyzer.asm;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
 import org.objectweb.asm.Type;
 
 /**
@@ -30,7 +32,7 @@ import org.objectweb.asm.Type;
  */
 public class ResultCollector {
 
-    private final Set<String> classes = new HashSet<>();
+    private final Set<DependencyUsage> classUsages = new HashSet<>();
 
     /**
      * <p>getDependencies.</p>
@@ -38,7 +40,18 @@ public class ResultCollector {
      * @return a {@link java.util.Set} object.
      */
     public Set<String> getDependencies() {
-        return classes;
+        return getDependencyUsages().stream()
+                .map(DependencyUsage::getDependencyClass)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * <p>getDependencyUsages.</p>
+     *
+     * @return a {@link java.util.Set} object.
+     */
+    public Set<DependencyUsage> getDependencyUsages() {
+        return classUsages;
     }
 
     /**
@@ -46,7 +59,7 @@ public class ResultCollector {
      *
      * @param name a {@link java.lang.String} object.
      */
-    public void addName(String name) {
+    public void addName(final String usedByClass, String name) {
         if (name == null) {
             return;
         }
@@ -65,25 +78,25 @@ public class ResultCollector {
         }
 
         // decode internal representation
-        add(name.replace('/', '.'));
+        add(usedByClass, name.replace('/', '.'));
     }
 
-    void addDesc(final String desc) {
-        addType(Type.getType(desc));
+    void addDesc(final String usedByClass, final String desc) {
+        addType(usedByClass, Type.getType(desc));
     }
 
-    void addType(final Type t) {
+    void addType(final String usedByClass, final Type t) {
         switch (t.getSort()) {
             case Type.ARRAY:
-                addType(t.getElementType());
+                addType(usedByClass, t.getElementType());
                 break;
 
             case Type.METHOD:
-                addMethodDesc(t.getDescriptor());
+                addMethodDesc(usedByClass, t.getDescriptor());
                 break;
 
             case Type.OBJECT:
-                addName(t.getClassName());
+                addName(usedByClass, t.getClassName());
                 break;
             default:
         }
@@ -94,30 +107,30 @@ public class ResultCollector {
      *
      * @param name a {@link java.lang.String} object.
      */
-    public void add(String name) {
+    public void add(final String usedByClass, final String name) {
         // inner classes have equivalent compilation requirement as container class
         if (name.indexOf('$') < 0) {
-            classes.add(name);
+            classUsages.add(new DependencyUsage(name, usedByClass));
         }
     }
 
-    void addNames(final String[] names) {
+    void addNames(final String usedByClass, final String[] names) {
         if (names == null) {
             return;
         }
 
         for (String name : names) {
-            addName(name);
+            addName(usedByClass, name);
         }
     }
 
-    void addMethodDesc(final String desc) {
-        addType(Type.getReturnType(desc));
+    void addMethodDesc(final String usedByClass, final String desc) {
+        addType(usedByClass, Type.getReturnType(desc));
 
         Type[] types = Type.getArgumentTypes(desc);
 
         for (Type type : types) {
-            addType(type);
+            addType(usedByClass, type);
         }
     }
 }

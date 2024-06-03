@@ -31,34 +31,37 @@ import org.objectweb.asm.Type;
 public class DefaultAnnotationVisitor extends AnnotationVisitor {
     private final ResultCollector resultCollector;
 
+    private final String usedByClass;
+
     /**
      * <p>Constructor for DefaultAnnotationVisitor.</p>
      *
      * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
      */
-    public DefaultAnnotationVisitor(ResultCollector resultCollector) {
+    public DefaultAnnotationVisitor(ResultCollector resultCollector, String usedByClass) {
         super(Opcodes.ASM9);
         this.resultCollector = resultCollector;
+        this.usedByClass = usedByClass;
     }
 
     /** {@inheritDoc} */
     @Override
     public void visit(final String name, final Object value) {
         if (value instanceof Type) {
-            resultCollector.addType((Type) value);
+            resultCollector.addType(usedByClass, (Type) value);
         }
     }
 
     /** {@inheritDoc} */
     @Override
     public void visitEnum(final String name, final String desc, final String value) {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc(usedByClass, desc);
     }
 
     /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitAnnotation(final String name, final String desc) {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc(usedByClass, desc);
 
         return this;
     }

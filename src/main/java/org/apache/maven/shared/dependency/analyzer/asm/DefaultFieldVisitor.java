@@ -33,22 +33,26 @@ public class DefaultFieldVisitor extends FieldVisitor {
 
     private final ResultCollector resultCollector;
 
+    private final String usedByClass;
+
     /**
      * <p>Constructor for DefaultFieldVisitor.</p>
      *
      * @param annotationVisitor a {@link org.objectweb.asm.AnnotationVisitor} object.
      * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
      */
-    public DefaultFieldVisitor(AnnotationVisitor annotationVisitor, ResultCollector resultCollector) {
+    public DefaultFieldVisitor(
+            AnnotationVisitor annotationVisitor, ResultCollector resultCollector, String usedByClass) {
         super(Opcodes.ASM9);
         this.annotationVisitor = annotationVisitor;
         this.resultCollector = resultCollector;
+        this.usedByClass = usedByClass;
     }
 
     /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc(usedByClass, desc);
 
         return annotationVisitor;
     }

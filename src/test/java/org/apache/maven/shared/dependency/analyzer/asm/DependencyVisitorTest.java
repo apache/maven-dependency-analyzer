@@ -41,13 +41,16 @@ class DependencyVisitorTest {
     private DefaultClassVisitor visitor;
     private MethodVisitor mv;
 
+    private String usedByClass = "com.example.MyClass";
+
     @BeforeEach
     void setUp() {
-        AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor(resultCollector);
-        SignatureVisitor signatureVisitor = new DefaultSignatureVisitor(resultCollector);
-        FieldVisitor fieldVisitor = new DefaultFieldVisitor(annotationVisitor, resultCollector);
-        mv = new DefaultMethodVisitor(annotationVisitor, signatureVisitor, resultCollector);
-        visitor = new DefaultClassVisitor(signatureVisitor, annotationVisitor, fieldVisitor, mv, resultCollector);
+        AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor(resultCollector, usedByClass);
+        SignatureVisitor signatureVisitor = new DefaultSignatureVisitor(resultCollector, usedByClass);
+        FieldVisitor fieldVisitor = new DefaultFieldVisitor(annotationVisitor, resultCollector, usedByClass);
+        mv = new DefaultMethodVisitor(annotationVisitor, signatureVisitor, resultCollector, usedByClass);
+        visitor = new DefaultClassVisitor(
+                signatureVisitor, annotationVisitor, fieldVisitor, mv, resultCollector, usedByClass);
     }
 
     @Test

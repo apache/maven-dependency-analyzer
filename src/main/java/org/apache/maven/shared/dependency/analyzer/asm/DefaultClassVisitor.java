@@ -44,6 +44,8 @@ public class DefaultClassVisitor extends ClassVisitor {
 
     private final MethodVisitor methodVisitor;
 
+    private final String usedByClass;
+
     /**
      * <p>Constructor for DefaultClassVisitor.</p>
      *
@@ -58,13 +60,15 @@ public class DefaultClassVisitor extends ClassVisitor {
             AnnotationVisitor annotationVisitor,
             FieldVisitor fieldVisitor,
             MethodVisitor methodVisitor,
-            ResultCollector resultCollector) {
+            ResultCollector resultCollector,
+            String usedByClass) {
         super(Opcodes.ASM9);
         this.signatureVisitor = signatureVisitor;
         this.annotationVisitor = annotationVisitor;
         this.fieldVisitor = fieldVisitor;
         this.methodVisitor = methodVisitor;
         this.resultCollector = resultCollector;
+        this.usedByClass = usedByClass;
     }
 
     /**
@@ -86,8 +90,8 @@ public class DefaultClassVisitor extends ClassVisitor {
             final String superName,
             final String[] interfaces) {
         if (signature == null) {
-            resultCollector.addName(superName);
-            resultCollector.addNames(interfaces);
+            resultCollector.addName(usedByClass, superName);
+            resultCollector.addNames(usedByClass, interfaces);
         } else {
             addSignature(signature);
         }
@@ -96,7 +100,7 @@ public class DefaultClassVisitor extends ClassVisitor {
     /** {@inheritDoc} */
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
-        resultCollector.addDesc(desc);
+        resultCollector.addDesc(usedByClass, desc);
 
         return annotationVisitor;
     }
@@ -106,13 +110,13 @@ public class DefaultClassVisitor extends ClassVisitor {
     public FieldVisitor visitField(
             final int access, final String name, final String desc, final String signature, final Object value) {
         if (signature == null) {
-            resultCollector.addDesc(desc);
+            resultCollector.addDesc(usedByClass, desc);
         } else {
             addTypeSignature(signature);
         }
 
         if (value instanceof Type) {
-            resultCollector.addType((Type) value);
+            resultCollector.addType(usedByClass, (Type) value);
         }
 
         return fieldVisitor;
@@ -132,12 +136,12 @@ public class DefaultClassVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(
             final int access, final String name, final String desc, final String signature, final String[] exceptions) {
         if (signature == null) {
-            resultCollector.addMethodDesc(desc);
+            resultCollector.addMethodDesc(usedByClass, desc);
         } else {
             addSignature(signature);
         }
 
-        resultCollector.addNames(exceptions);
+        resultCollector.addNames(usedByClass, exceptions);
 
         return methodVisitor;
     }
@@ -145,13 +149,13 @@ public class DefaultClassVisitor extends ClassVisitor {
     /** {@inheritDoc} */
     @Override
     public void visitNestHost(final String nestHost) {
-        resultCollector.addName(nestHost);
+        resultCollector.addName(usedByClass, nestHost);
     }
 
     /** {@inheritDoc} */
     @Override
     public void visitNestMember(final String nestMember) {
-        resultCollector.addName(nestMember);
+        resultCollector.addName(usedByClass, nestMember);
     }
 
     private void addSignature(final String signature) {
