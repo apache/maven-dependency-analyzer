@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +39,7 @@ import org.apache.maven.artifact.Artifact;
 public class ProjectDependencyAnalysis {
     // fields -----------------------------------------------------------------
 
-    private final Set<Artifact> usedDeclaredArtifacts;
+    private final Map<Artifact, Set<DependencyUsage>> usedDeclaredArtifacts;
 
     private final Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifacts;
 
@@ -81,14 +82,14 @@ public class ProjectDependencyAnalysis {
             Set<Artifact> unusedDeclaredArtifacts,
             Set<Artifact> testArtifactsWithNonTestScope) {
         this(
-                usedDeclaredArtifacts,
+                mapWithKeys(usedDeclaredArtifacts),
                 mapWithKeys(usedUndeclaredArtifacts),
                 unusedDeclaredArtifacts,
                 testArtifactsWithNonTestScope);
     }
 
     public ProjectDependencyAnalysis(
-            Set<Artifact> usedDeclaredArtifacts,
+            Map<Artifact, Set<DependencyUsage>> usedDeclaredArtifacts,
             Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifacts,
             Set<Artifact> unusedDeclaredArtifacts,
             Set<Artifact> testArtifactsWithNonTestScope) {
@@ -104,6 +105,15 @@ public class ProjectDependencyAnalysis {
      * @return artifacts both used and declared
      */
     public Set<Artifact> getUsedDeclaredArtifacts() {
+        return safeCopy(usedDeclaredArtifacts.keySet());
+    }
+
+    /**
+     * Returns artifacts both used and declared.
+     *
+     * @return artifacts both used and declared
+     */
+    public Map<Artifact, Set<DependencyUsage>> getUsedDeclaredArtifactsWithUsages() {
         return safeCopy(usedDeclaredArtifacts);
     }
 
@@ -188,7 +198,7 @@ public class ProjectDependencyAnalysis {
         Set<String> forced = new HashSet<>(Arrays.asList(forceUsedDependencies));
 
         Set<Artifact> forcedUnusedDeclared = new HashSet<>(unusedDeclaredArtifacts);
-        Set<Artifact> forcedUsedDeclared = new HashSet<>(usedDeclaredArtifacts);
+        Set<Artifact> forcedUsedDeclared = new HashSet<>(usedDeclaredArtifacts.keySet());
 
         Iterator<Artifact> iter = forcedUnusedDeclared.iterator();
         while (iter.hasNext()) {
@@ -204,7 +214,7 @@ public class ProjectDependencyAnalysis {
         if (!forced.isEmpty()) {
             // trying to force dependencies as used-declared which were not declared or already detected as used
             Set<String> used = new HashSet<>();
-            for (Artifact artifact : usedDeclaredArtifacts) {
+            for (Artifact artifact : usedDeclaredArtifacts.keySet()) {
                 String id = artifact.getGroupId() + ':' + artifact.getArtifactId();
                 if (forced.remove(id)) {
                     used.add(id);
@@ -225,7 +235,10 @@ public class ProjectDependencyAnalysis {
         }
 
         return new ProjectDependencyAnalysis(
-                forcedUsedDeclared, usedUndeclaredArtifacts, forcedUnusedDeclared, testArtifactsWithNonTestScope);
+                mapWithKeys(forcedUsedDeclared),
+                usedUndeclaredArtifacts,
+                forcedUnusedDeclared,
+                testArtifactsWithNonTestScope);
     }
 
     /**
@@ -314,7 +327,7 @@ public class ProjectDependencyAnalysis {
             return Collections.emptyMap();
         }
 
-        Map<Artifact, Set<DependencyUsage>> map = new HashMap<>();
+        Map<Artifact, Set<DependencyUsage>> map = new LinkedHashMap<>();
 
         for (Map.Entry<Artifact, Set<DependencyUsage>> e : origMap.entrySet()) {
             map.put(e.getKey(), Collections.unmodifiableSet(new LinkedHashSet<>(e.getValue())));
@@ -328,7 +341,7 @@ public class ProjectDependencyAnalysis {
             return Collections.emptyMap();
         }
 
-        Map<Artifact, Set<DependencyUsage>> map = new HashMap<>();
+        Map<Artifact, Set<DependencyUsage>> map = new LinkedHashMap<>();
 
         for (Artifact k : keys) {
             map.put(k, Collections.<DependencyUsage>emptySet());

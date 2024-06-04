@@ -91,6 +91,11 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<>(declaredArtifacts);
             usedDeclaredArtifacts.retainAll(usedArtifacts.keySet());
 
+            Map<Artifact, Set<DependencyUsage>> usedDeclaredArtifactsWithClasses = new LinkedHashMap<>();
+            for (Artifact a : usedDeclaredArtifacts) {
+                usedDeclaredArtifactsWithClasses.put(a, usedArtifacts.get(a));
+            }
+
             Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>(usedArtifacts);
             Set<Artifact> usedUndeclaredArtifacts =
                     removeAll(usedUndeclaredArtifactsWithClasses.keySet(), declaredArtifacts);
@@ -102,7 +107,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             Set<Artifact> testArtifactsWithNonTestScope = getTestArtifactsWithNonTestScope(testOnlyArtifacts);
 
             return new ProjectDependencyAnalysis(
-                    usedDeclaredArtifacts, usedUndeclaredArtifactsWithClasses,
+                    usedDeclaredArtifactsWithClasses, usedUndeclaredArtifactsWithClasses,
                     unusedDeclaredArtifacts, testArtifactsWithNonTestScope);
         } catch (IOException exception) {
             throw new ProjectDependencyAnalyzerException("Cannot analyze dependencies", exception);
@@ -150,7 +155,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return nonTestScopeArtifacts;
     }
 
-    private Map<Artifact, Set<String>> buildArtifactClassMap(MavenProject project, ClassesPatterns excludedClasses)
+    protected Map<Artifact, Set<String>> buildArtifactClassMap(MavenProject project, ClassesPatterns excludedClasses)
             throws IOException {
         Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
 
