@@ -29,7 +29,7 @@
   </parent>
 
   <artifactId>maven-dependency-analyzer</artifactId>
-  <version>1.15.1-SNAPSHOT</version>
+  <version>1.15.1</version>
   <packaging>jar</packaging>
 
   <name>Apache Maven Dependency Analyzer</name>
@@ -38,7 +38,7 @@
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-analyzer.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-analyzer.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>maven-dependency-analyzer-1.15.1</tag>
     <url>https://github.com/apache/maven-dependency-analyzer/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
@@ -59,7 +59,7 @@
   <properties>
     <mavenVersion>3.9.9</mavenVersion>
     <javaVersion>8</javaVersion>
-    <project.build.outputTimestamp>2024-10-04T17:08:39Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2024-10-22T15:20:49Z</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
