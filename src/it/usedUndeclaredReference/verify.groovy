@@ -23,8 +23,6 @@ def expected = '''
 UsedDeclaredArtifacts:
 
 UsedUndeclaredArtifactsWithClasses:
- xml-apis:xml-apis:jar:1.0.b2:compile
-  org.apache.xmlcommons.Version
 
 UnusedDeclaredArtifacts:
  dom4j:dom4j:jar:1.6.1:compile

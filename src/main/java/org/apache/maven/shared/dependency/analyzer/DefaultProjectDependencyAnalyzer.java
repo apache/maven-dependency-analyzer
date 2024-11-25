@@ -99,6 +99,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>(usedArtifacts);
             Set<Artifact> usedUndeclaredArtifacts =
                     removeAll(usedUndeclaredArtifactsWithClasses.keySet(), declaredArtifacts);
+
             usedUndeclaredArtifactsWithClasses.keySet().retainAll(usedUndeclaredArtifacts);
 
             Set<Artifact> unusedDeclaredArtifacts = new LinkedHashSet<>(declaredArtifacts);
@@ -242,7 +243,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         for (DependencyUsage classUsage : dependencyClasses) {
             Artifact artifact = findArtifactForClassName(artifactClassMap, classUsage.getDependencyClass());
 
-            if (artifact != null) {
+            if (artifact != null && !includedInJDK(artifact)) {
                 Set<DependencyUsage> classesFromArtifact = usedArtifacts.get(artifact);
                 if (classesFromArtifact == null) {
                     classesFromArtifact = new HashSet<>();
@@ -253,6 +254,21 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         }
 
         return usedArtifacts;
+    }
+
+    // MSHARED-47 an uncommon case where a commonly used
+    // third party dependency was added to the JDK
+    private static boolean includedInJDK(Artifact artifact) {
+        if ("xml-apis".equals(artifact.getGroupId())) {
+            if ("xml-apis".equals(artifact.getArtifactId())) {
+                return true;
+            }
+        } else if ("xerces".equals(artifact.getGroupId())) {
+            if ("xmlParserAPIs".equals(artifact.getArtifactId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Artifact findArtifactForClassName(Map<Artifact, Set<String>> artifactClassMap, String className) {
