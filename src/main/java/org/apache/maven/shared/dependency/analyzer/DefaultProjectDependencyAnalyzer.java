@@ -245,7 +245,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
             // MSHARED-47 xml-apis:xml-apis is an uncommon case where a commonly used
             // third party dependency was added to the JDK
-            if (artifact != null && !"xml-apis".equals(artifact.getArtifactId())) {
+            if (artifact != null && !includedInJDK(artifact)) {
                 Set<DependencyUsage> classesFromArtifact = usedArtifacts.get(artifact);
                 if (classesFromArtifact == null) {
                     classesFromArtifact = new HashSet<>();
@@ -256,6 +256,19 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         }
 
         return usedArtifacts;
+    }
+
+    private static boolean includedInJDK(Artifact artifact) {
+        if ("xml-apis".equals(artifact.getGroupId())) {
+            if ("xml-apis".equals(artifact.getArtifactId())) {
+                return true;
+            }
+        } else if ("xerces".equals(artifact.getGroupId())) {
+            if ("xmlParserAPIs".equals(artifact.getArtifactId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Artifact findArtifactForClassName(Map<Artifact, Set<String>> artifactClassMap, String className) {
