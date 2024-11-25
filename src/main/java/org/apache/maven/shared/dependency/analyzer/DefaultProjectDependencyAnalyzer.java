@@ -243,8 +243,6 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         for (DependencyUsage classUsage : dependencyClasses) {
             Artifact artifact = findArtifactForClassName(artifactClassMap, classUsage.getDependencyClass());
 
-            // MSHARED-47 xml-apis:xml-apis is an uncommon case where a commonly used
-            // third party dependency was added to the JDK
             if (artifact != null && !includedInJDK(artifact)) {
                 Set<DependencyUsage> classesFromArtifact = usedArtifacts.get(artifact);
                 if (classesFromArtifact == null) {
@@ -258,6 +256,8 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return usedArtifacts;
     }
 
+    // MSHARED-47 an uncommon case where a commonly used
+    // third party dependency was added to the JDK
     private static boolean includedInJDK(Artifact artifact) {
         if ("xml-apis".equals(artifact.getGroupId())) {
             if ("xml-apis".equals(artifact.getArtifactId())) {
