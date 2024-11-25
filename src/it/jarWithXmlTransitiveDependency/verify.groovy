@@ -24,8 +24,6 @@ UsedDeclaredArtifacts:
  dom4j:dom4j:jar:1.6.1:compile
 
 UsedUndeclaredArtifactsWithClasses:
- xml-apis:xml-apis:jar:1.0.b2:compile
-  org.xml.sax.Parser
 
 UnusedDeclaredArtifacts:
 

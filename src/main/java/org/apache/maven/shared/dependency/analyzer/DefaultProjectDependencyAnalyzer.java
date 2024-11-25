@@ -99,6 +99,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>(usedArtifacts);
             Set<Artifact> usedUndeclaredArtifacts =
                     removeAll(usedUndeclaredArtifactsWithClasses.keySet(), declaredArtifacts);
+
             usedUndeclaredArtifactsWithClasses.keySet().retainAll(usedUndeclaredArtifacts);
 
             Set<Artifact> unusedDeclaredArtifacts = new LinkedHashSet<>(declaredArtifacts);
@@ -242,7 +243,9 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         for (DependencyUsage classUsage : dependencyClasses) {
             Artifact artifact = findArtifactForClassName(artifactClassMap, classUsage.getDependencyClass());
 
-            if (artifact != null) {
+            // MSHARED-47 xml-apis:xml-apis is an uncommon case where a commonly used
+            // third party dependency was added to the JDK
+            if (artifact != null && !"xml-apis".equals(artifact.getArtifactId())) {
                 Set<DependencyUsage> classesFromArtifact = usedArtifacts.get(artifact);
                 if (classesFromArtifact == null) {
                     classesFromArtifact = new HashSet<>();
