@@ -192,7 +192,6 @@ public class ProjectDependencyAnalysis {
      *                                            used
      * @since 1.3
      */
-    @SuppressWarnings("UnusedReturnValue")
     public ProjectDependencyAnalysis forceDeclaredDependenciesUsage(String[] forceUsedDependencies)
             throws ProjectDependencyAnalyzerException {
         Set<String> forced = new HashSet<>(Arrays.asList(forceUsedDependencies));
