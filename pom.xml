@@ -43,7 +43,7 @@
   </scm>
   <issueManagement>
     <system>jira</system>
-    <url>https://issues.apache.org/jira/issues/?jql=project%20%3D%20MSHARED%20AND%20component%20%3D%20maven-dependency-analyzer</url>
+    <url>https://github.com/apache/maven-dependency-analyzer/issues</url>
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
