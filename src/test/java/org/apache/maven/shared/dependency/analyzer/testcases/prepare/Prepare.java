@@ -28,6 +28,7 @@ import org.apache.maven.artifact.resolver.ResolutionErrorHandler;
  */
 public class Prepare {
 
+    @SuppressWarnings("checkstyle:UnusedLocalVariable")
     public void handler(Consumer<ArtifactResolutionRequest> consumer) {
         ResolutionErrorHandler resolutionErrorHandler = (request, result) -> {
             consumer.accept(request);

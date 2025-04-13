@@ -47,7 +47,7 @@ class ASMDependencyAnalyzerTest {
     }
 
     @Test
-    void verify_implicit_class_reference_included_in_used_classes() throws IOException {
+    void verifyImplicitClassReferenceIncludedInUsedClasses() throws IOException {
         Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
 
         Set<String> result = analyzer.analyze(file.toUri().toURL());
@@ -56,7 +56,7 @@ class ASMDependencyAnalyzerTest {
     }
 
     @Test
-    void verify_excluded_classes() throws IOException {
+    void verifyExcludedClasses() throws IOException {
         Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
 
         Set<String> result =
