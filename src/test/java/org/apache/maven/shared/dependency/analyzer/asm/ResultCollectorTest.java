@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 class ResultCollectorTest {
 
-    private static String ROOT = "src/test/resources/org/apache/maven/shared/dependency/analyzer";
+    private static final String ROOT = "src/test/resources/org/apache/maven/shared/dependency/analyzer";
 
     Set<String> getDependencies(Class<?> inspectClass) throws IOException {
         String className = inspectClass.getName();
