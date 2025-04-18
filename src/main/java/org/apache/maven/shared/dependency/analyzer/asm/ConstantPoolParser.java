@@ -208,7 +208,7 @@ public class ConstantPoolParser {
         // Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
         @SuppressWarnings("RedundantCast")
         int oldLimit = ((Buffer) buf).limit();
-        ((Buffer) buf).limit(buf.position() + size);
+        buf.limit(buf.position() + size);
         StringBuilder sb = new StringBuilder(size + (size >> 1) + 16);
         while (buf.hasRemaining()) {
             byte b = buf.get();
@@ -224,7 +224,7 @@ public class ConstantPoolParser {
                 }
             }
         }
-        ((Buffer) buf).limit(oldLimit);
+        buf.limit(oldLimit);
         return sb.toString();
     }
 
