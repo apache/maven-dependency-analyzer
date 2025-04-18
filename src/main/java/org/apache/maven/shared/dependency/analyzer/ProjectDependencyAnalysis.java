@@ -343,7 +343,7 @@ public class ProjectDependencyAnalysis {
         Map<Artifact, Set<DependencyUsage>> map = new LinkedHashMap<>();
 
         for (Artifact k : keys) {
-            map.put(k, CollectionsemptySet());
+            map.put(k, Collections.emptySet());
         }
 
         return map;
