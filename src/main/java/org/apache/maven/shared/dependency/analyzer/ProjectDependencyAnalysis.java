@@ -65,11 +65,11 @@ public class ProjectDependencyAnalysis {
             Set<Artifact> usedDeclaredArtifacts,
             Set<Artifact> usedUndeclaredArtifacts,
             Set<Artifact> unusedDeclaredArtifacts) {
-        this(usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts, Collections.<Artifact>emptySet());
+        this(usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts, Collections.emptySet());
     }
 
     /**
-     * <p>Constructor for ProjectDependencyAnalysis.</p>
+     * Constructor for ProjectDependencyAnalysis.
      *
      * @param usedDeclaredArtifacts artifacts both used and declared
      * @param usedUndeclaredArtifacts artifacts used but not declared
@@ -343,7 +343,7 @@ public class ProjectDependencyAnalysis {
         Map<Artifact, Set<DependencyUsage>> map = new LinkedHashMap<>();
 
         for (Artifact k : keys) {
-            map.put(k, Collections.<DependencyUsage>emptySet());
+            map.put(k, Collections.emptySet());
         }
 
         return map;
