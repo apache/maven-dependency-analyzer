@@ -33,7 +33,7 @@ import org.objectweb.asm.Type;
  * A small parser to read the constant pool directly, in case it contains references
  * ASM does not support.
  *
- * Adapted from http://stackoverflow.com/a/32278587/23691
+ * Adapted from <a href="https://stackoverflow.com/questions/32255023/how-would-i-go-about-parsing-the-java-class-file-constant-pool/32278587#32278587">Stack Overflow</a>
  *
  * Constant pool types:
  *
@@ -108,7 +108,7 @@ public class ConstantPoolParser {
         return parseConstantPoolClassReferences(ByteBuffer.wrap(b));
     }
 
-    static Set<String> parseConstantPoolClassReferences(ByteBuffer buf) {
+    private static Set<String> parseConstantPoolClassReferences(ByteBuffer buf) {
         if (buf.order(ByteOrder.BIG_ENDIAN).getInt() != HEAD) {
             return Collections.emptySet();
         }
@@ -203,12 +203,12 @@ public class ConstantPoolParser {
         }
     }
 
+    @SuppressWarnings("RedundantCast")
     private static String decodeString(ByteBuffer buf) {
         int size = buf.getChar();
+        int oldLimit = buf.limit();
         // Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
-        @SuppressWarnings("RedundantCast")
-        int oldLimit = ((Buffer) buf).limit();
-        buf.limit(buf.position() + size);
+        ((Buffer) buf).limit(buf.position() + size);
         StringBuilder sb = new StringBuilder(size + (size >> 1) + 16);
         while (buf.hasRemaining()) {
             byte b = buf.get();
@@ -224,7 +224,7 @@ public class ConstantPoolParser {
                 }
             }
         }
-        buf.limit(oldLimit);
+        ((Buffer) buf).limit(oldLimit);
         return sb.toString();
     }
 
