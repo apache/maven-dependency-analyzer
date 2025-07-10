@@ -120,8 +120,6 @@ public class ConstantPoolParser {
         for (int ix = 1, num = buf.getChar(); ix < num; ix++) {
             byte tag = buf.get();
             switch (tag) {
-                default:
-                    throw new RuntimeException("Unknown constant pool type '" + tag + "'");
                 case CONSTANT_UTF8:
                     stringConstants.put(ix, decodeString(buf));
                     break;
@@ -172,6 +170,8 @@ public class ConstantPoolParser {
                 case CONSTANT_PACKAGE:
                     consumePackage(buf);
                     break;
+                default:
+                    throw new RuntimeException("Unknown constant pool type '" + tag + "'");
             }
         }
 
