@@ -21,6 +21,7 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -31,6 +32,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.maven.shared.dependency.analyzer.asm.VisitClassException;
 
 /**
  * Utility to visit classes in a library given either as a jar file or an exploded directory.
@@ -44,9 +47,9 @@ public final class ClassFileVisitorUtils {
     }
 
     /**
-     * @param url     a {@link java.net.URL} object
+     * @param url the URL of the jar file or directory to visit
      * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object
-     * @throws java.io.IOException if any
+     * @throws java.io.IOException I/O error or corrupt class file
      */
     public static void accept(URL url, ClassFileVisitor visitor) throws IOException {
         if (url.getPath().endsWith(".jar")) {
@@ -85,38 +88,43 @@ public final class ClassFileVisitorUtils {
     }
 
     private static void acceptDirectory(File directory, ClassFileVisitor visitor) throws IOException {
-
-        List<Path> classFiles;
         try (Stream<Path> walk = Files.walk(directory.toPath())) {
-            classFiles = walk.filter(path -> path.getFileName().toString().endsWith(".class"))
+            List<Path> classFiles = walk.filter(
+                            path -> path.getFileName().toString().endsWith(".class"))
                     .collect(Collectors.toList());
-        }
-
-        for (Path path : classFiles) {
-            try (InputStream in = Files.newInputStream(path)) {
-                try {
-                    visitClass(directory, path, in, visitor);
-                } catch (RuntimeException e) {
-                    // visitClass throws RuntimeException
-                    throw new RuntimeException(
-                            String.format("%s from directory = %s, path = %s", e.getMessage(), directory, path), e);
+            for (Path path : classFiles) {
+                try (InputStream in = Files.newInputStream(path)) {
+                    try {
+                        visitClass(directory, path, in, visitor);
+                    } catch (IOException e) {
+                        throw new IOException(
+                                String.format("%s from directory = %s, path = %s", e.getMessage(), directory, path), e);
+                    }
                 }
             }
         }
     }
 
-    private static void visitClass(File baseDirectory, Path path, InputStream in, ClassFileVisitor visitor) {
+    private static void visitClass(File baseDirectory, Path path, InputStream in, ClassFileVisitor visitor)
+            throws IOException {
         // getPath() returns a String, not a java.nio.file.Path
         String stringPath =
                 path.toFile().getPath().substring(baseDirectory.getPath().length() + 1);
         visitClass(stringPath, in, visitor, File.separatorChar);
     }
 
-    private static void visitClass(String stringPath, InputStream in, ClassFileVisitor visitor, char separator) {
+    private static void visitClass(String stringPath, InputStream in, ClassFileVisitor visitor, char separator)
+            throws IOException {
         String className = stringPath.substring(0, stringPath.length() - 6);
 
         className = className.replace(separator, '.');
 
-        visitor.visitClass(className, in);
+        try {
+            visitor.visitClass(className, in);
+        } catch (UncheckedIOException e) {
+            throw e.getCause();
+        } catch (VisitClassException e) {
+            throw new IOException(e);
+        }
     }
 }
