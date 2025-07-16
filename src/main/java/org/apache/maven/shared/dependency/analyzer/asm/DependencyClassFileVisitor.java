@@ -95,7 +95,7 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
             // some bug inside ASM causes an IOB exception.
             // this happens when the class isn't valid.
             throw new VisitClassException("Unable to process: " + className, e);
-        } catch (IllegalArgumentException e) {
+        } catch (UnknownConstantPoolTypeException | IllegalArgumentException e) {
             throw new VisitClassException("Byte code of '" + className + "' is corrupt", e);
         }
     }
