@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.text.ParseException;
 import java.util.Set;
 
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitor;
@@ -95,7 +96,7 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
             // some bug inside ASM causes an IOB exception.
             // this happens when the class isn't valid.
             throw new VisitClassException("Unable to process: " + className, e);
-        } catch (IllegalArgumentException e) {
+        } catch (ParseException | IllegalArgumentException e) {
             throw new VisitClassException("Byte code of '" + className + "' is corrupt", e);
         }
     }
