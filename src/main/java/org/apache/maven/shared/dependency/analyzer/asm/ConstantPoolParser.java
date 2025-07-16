@@ -21,7 +21,6 @@ package org.apache.maven.shared.dependency.analyzer.asm;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -105,11 +104,12 @@ public class ConstantPoolParser {
 
     private static final int OX3F = 0x3F;
 
-    static Set<String> getConstantPoolClassReferences(byte[] b) throws ParseException {
+    static Set<String> getConstantPoolClassReferences(byte[] b) throws UnknownConstantPoolTypeException {
         return parseConstantPoolClassReferences(ByteBuffer.wrap(b));
     }
 
-    private static Set<String> parseConstantPoolClassReferences(ByteBuffer buf) throws ParseException {
+    private static Set<String> parseConstantPoolClassReferences(ByteBuffer buf)
+            throws UnknownConstantPoolTypeException {
         if (buf.order(ByteOrder.BIG_ENDIAN).getInt() != HEAD) {
             return Collections.emptySet();
         }
@@ -172,7 +172,7 @@ public class ConstantPoolParser {
                     consumePackage(buf);
                     break;
                 default:
-                    throw new ParseException("Unknown constant pool type '" + tag + "'", ix);
+                    throw new UnknownConstantPoolTypeException("Unknown constant pool type '" + tag + "'");
             }
         }
 
