@@ -52,7 +52,6 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
      * <p>Constructor for DependencyClassFileVisitor.</p>
      */
     public DependencyClassFileVisitor(ClassesPatterns excludedClasses) {
-
         this.excludedClasses = excludedClasses;
     }
 
@@ -63,7 +62,14 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
         this(new ClassesPatterns());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Visits a class.
+     *
+     * @param className the name of the class being visited
+     * @param in the {@link java.io.InputStream} to read the byte code from
+     * @throws VisitClassException if the .class file is corrupt
+     * @throws UncheckedIOException if an I/O error occurs while reading the class file
+     */
     @Override
     public void visitClass(String className, InputStream in) {
         try {
@@ -83,10 +89,10 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
             AnnotationVisitor annotationVisitor = new DefaultAnnotationVisitor(resultCollector, className);
             SignatureVisitor signatureVisitor = new DefaultSignatureVisitor(resultCollector, className);
             FieldVisitor fieldVisitor = new DefaultFieldVisitor(annotationVisitor, resultCollector, className);
-            MethodVisitor mv =
+            MethodVisitor methodVisitor =
                     new DefaultMethodVisitor(annotationVisitor, signatureVisitor, resultCollector, className);
             ClassVisitor classVisitor = new DefaultClassVisitor(
-                    signatureVisitor, annotationVisitor, fieldVisitor, mv, resultCollector, className);
+                    signatureVisitor, annotationVisitor, fieldVisitor, methodVisitor, resultCollector, className);
 
             reader.accept(classVisitor, 0);
         } catch (IOException exception) {
@@ -123,7 +129,7 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
      * <p>getDependencyUsages.</p>
      *
      * @return the set of classes referenced by visited class files, paired with
-     * classes declaring the references.
+     *     classes declaring the references
      */
     public Set<DependencyUsage> getDependencyUsages() {
         return resultCollector.getDependencyUsages();
