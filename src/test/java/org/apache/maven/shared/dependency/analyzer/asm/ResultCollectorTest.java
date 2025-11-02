@@ -50,7 +50,7 @@ class ResultCollectorTest {
     }
 
     @Test
-    void testJava11Invoke() throws IOException {
+    void java11Invoke() throws Exception {
         Path path = Paths.get(
                 "src/test/resources/org/apache/maven/shared/dependency/analyzer/commons-bcel-issue362/Bcel362.classx");
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
@@ -60,7 +60,7 @@ class ResultCollectorTest {
     }
 
     @Test
-    void testJava17DynamicInvokeRecord() throws IOException {
+    void java17DynamicInvokeRecord() throws Exception {
         Path path = Paths.get(
                 "src/test/resources/org/apache/maven/shared/dependency/analyzer/record-invokedynamic/RecordInvokeDynamic.classx");
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
@@ -83,7 +83,7 @@ class ResultCollectorTest {
                 "issue54119",
                 "issue54254"
             })
-    void testOssFuzz(String name) {
+    void ossFuzz(String name) {
         // Add a non-"class" suffix so that surefire does not try to read the file and fail the build
         assertThatCode(() -> visitClass(ROOT + "/ossfuzz/" + name + "/Test.class.clazz"))
                 .isExactlyInstanceOf(VisitClassException.class);
@@ -98,7 +98,7 @@ class ResultCollectorTest {
     }
 
     @Test
-    void testArrayCases() throws IOException {
+    void arrayCases() throws Exception {
         Set<String> dependencies = getDependencies(ArrayCases.class);
         assertThat(dependencies).doesNotContain("[I");
         assertThat(dependencies).allSatisfy(dependency -> assertThat(dependency).doesNotStartWith("["));
@@ -106,7 +106,7 @@ class ResultCollectorTest {
     }
 
     @Test
-    void testNoMethodHandle() throws IOException {
+    void noMethodHandle() throws Exception {
         Set<String> dependencies = getDependencies(MethodHandleCases.class);
         for (String dependency : dependencies) {
             assertThat(dependency).doesNotStartWith("(");
@@ -114,7 +114,7 @@ class ResultCollectorTest {
     }
 
     @Test
-    void testInnerClassAsContainer() throws IOException {
+    void innerClassAsContainer() throws Exception {
         Set<String> dependencies = getDependencies(InnerClassCase.class);
         for (String dependency : dependencies) {
             assertThat(dependency).doesNotContain("$");

@@ -64,7 +64,7 @@ class ClassFileVisitorUtilsTest {
     }
 
     @Test
-    void testAcceptJar() throws IOException {
+    void acceptJar() throws Exception {
         Path path = Files.createTempFile(tempDir, "test", ".jar");
 
         try (JarOutputStream out = new JarOutputStream(Files.newOutputStream(path))) {
@@ -81,7 +81,7 @@ class ClassFileVisitorUtilsTest {
     }
 
     @Test
-    void testAcceptJarWithNonClassEntry() throws IOException {
+    void acceptJarWithNonClassEntry() throws Exception {
         Path path = Files.createTempFile(tempDir, "test", ".jar");
 
         try (JarOutputStream out = new JarOutputStream(Files.newOutputStream(path))) {
@@ -94,7 +94,7 @@ class ClassFileVisitorUtilsTest {
     }
 
     @Test
-    void testAcceptDir() throws IOException {
+    void acceptDir() throws Exception {
         Path dir = Files.createTempDirectory(tempDir, "d-a-test");
 
         Path abDir = Files.createDirectories(dir.resolve("a/b"));
@@ -112,7 +112,7 @@ class ClassFileVisitorUtilsTest {
     }
 
     @Test
-    void testAcceptDirWithNonClassFile() throws IOException {
+    void acceptDirWithNonClassFile() throws Exception {
         Path dir = Files.createTempDirectory(tempDir, "d-a-test");
 
         Path abDir = Files.createDirectories(dir.resolve("a/b"));
@@ -124,7 +124,7 @@ class ClassFileVisitorUtilsTest {
     }
 
     @Test
-    void testAcceptWithFile() throws IOException {
+    void acceptWithFile() throws Exception {
         Path path = Files.createTempFile(tempDir, "test", ".class");
         URL url = path.toUri().toURL();
 
@@ -137,7 +137,7 @@ class ClassFileVisitorUtilsTest {
     }
 
     @Test
-    void testAcceptWithUnsupportedScheme() throws IOException {
+    void acceptWithUnsupportedScheme() throws Exception {
         URL url = new URL("http://localhost/");
 
         try {

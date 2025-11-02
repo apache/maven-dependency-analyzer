@@ -30,12 +30,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ProjectDependencyAnalyzerExceptionTest {
     @Test
-    void testConstructor() {
+    void constructor() {
         assertThat(new ProjectDependencyAnalyzerException("a")).hasMessage("a");
     }
 
     @Test
-    void testConstructorWithThrowable() {
+    void constructorWithThrowable() {
         Throwable throwable = new Exception();
         ProjectDependencyAnalyzerException exception = new ProjectDependencyAnalyzerException("a", throwable);
 

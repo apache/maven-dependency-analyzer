@@ -41,7 +41,7 @@ class CollectorClassFileVisitorTest {
     }
 
     @Test
-    void testVisitClass() {
+    void visitClass() {
         visitor.visitClass("a.b.c", null);
         visitor.visitClass("x.y.z", null);
 

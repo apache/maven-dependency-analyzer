@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ProjectDependencyAnalysisTest {
     @Test
-    void testConstructor() {
+    void constructor() {
         Set<Artifact> usedDeclaredArtifacts = new HashSet<>();
         Set<Artifact> usedUndeclaredArtifacts = new HashSet<>();
         Set<Artifact> unusedDeclaredArtifacts = new HashSet<>();

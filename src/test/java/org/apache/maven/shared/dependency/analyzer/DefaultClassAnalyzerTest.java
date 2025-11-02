@@ -60,7 +60,7 @@ class DefaultClassAnalyzerTest {
     }
 
     @Test
-    void testAnalyzeWithJar() throws IOException {
+    void analyzeWithJar() throws Exception {
         Set<String> expectedClasses = new HashSet<>();
         expectedClasses.add("a.b.c");
         expectedClasses.add("x.y.z");
@@ -72,7 +72,7 @@ class DefaultClassAnalyzerTest {
     }
 
     @Test
-    void testAnalyzeBadJar() throws IOException {
+    void analyzeBadJar() throws Exception {
         // to reproduce MDEP-143
         // corrupt the jar file by altering its contents
         ByteArrayOutputStream baos = new ByteArrayOutputStream(100);
