@@ -57,7 +57,6 @@
   </distributionManagement>
 
   <properties>
-    <version.maven-plugin-tools>3.15.2</version.maven-plugin-tools>
     <mavenVersion>3.9.12</mavenVersion>
     <javaVersion>8</javaVersion>
     <project.build.outputTimestamp>2025-04-14T16:19:51Z</project.build.outputTimestamp>
@@ -124,6 +123,30 @@
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>4.11.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>4.11.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.36</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- used in test runtime -->
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-xml</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -155,7 +178,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
-            <version>3.9.1</version>
             <configuration>
               <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
               <localRepositoryPath>target/local-repo</localRepositoryPath>

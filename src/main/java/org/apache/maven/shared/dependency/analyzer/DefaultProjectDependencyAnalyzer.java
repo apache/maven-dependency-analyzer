@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -55,11 +56,11 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
     @Inject
     private ClassAnalyzer classAnalyzer;
 
-    /**
-     * DependencyAnalyzer
-     */
     @Inject
-    private DependencyAnalyzer dependencyAnalyzer;
+    private List<MainDependencyClassesProvider> mainDependencyClassesProviders;
+
+    @Inject
+    private List<TestDependencyClassesProvider> testDependencyClassesProviders;
 
     /** {@inheritDoc} */
     @Override
@@ -69,8 +70,15 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             ClassesPatterns excludedClassesPatterns = new ClassesPatterns(excludedClasses);
             Map<Artifact, Set<String>> artifactClassMap = buildArtifactClassMap(project, excludedClassesPatterns);
 
-            Set<DependencyUsage> mainDependencyClasses = buildMainDependencyClasses(project, excludedClassesPatterns);
-            Set<DependencyUsage> testDependencyClasses = buildTestDependencyClasses(project, excludedClassesPatterns);
+            Set<DependencyUsage> mainDependencyClasses = new HashSet<>();
+            for (MainDependencyClassesProvider provider : mainDependencyClassesProviders) {
+                mainDependencyClasses.addAll(provider.getDependencyClasses(project, excludedClassesPatterns));
+            }
+
+            Set<DependencyUsage> testDependencyClasses = new HashSet<>();
+            for (TestDependencyClassesProvider provider : testDependencyClassesProviders) {
+                testDependencyClasses.addAll(provider.getDependencyClasses(project, excludedClassesPatterns));
+            }
 
             Set<DependencyUsage> dependencyClasses = new HashSet<>();
             dependencyClasses.addAll(mainDependencyClasses);
@@ -205,25 +213,6 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
                 .collect(Collectors.toSet());
         testOnlyDependencyClasses.removeIf(u -> mainDepClassNames.contains(u.getDependencyClass()));
         return testOnlyDependencyClasses;
-    }
-
-    private Set<DependencyUsage> buildMainDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
-            throws IOException {
-        String outputDirectory = project.getBuild().getOutputDirectory();
-        return buildDependencyClasses(outputDirectory, excludedClasses);
-    }
-
-    private Set<DependencyUsage> buildTestDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
-            throws IOException {
-        String testOutputDirectory = project.getBuild().getTestOutputDirectory();
-        return buildDependencyClasses(testOutputDirectory, excludedClasses);
-    }
-
-    private Set<DependencyUsage> buildDependencyClasses(String path, ClassesPatterns excludedClasses)
-            throws IOException {
-        URL url = new File(path).toURI().toURL();
-
-        return dependencyAnalyzer.analyzeUsages(url, excludedClasses);
     }
 
     private static Set<Artifact> buildDeclaredArtifacts(MavenProject project) {
