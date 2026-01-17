@@ -20,7 +20,13 @@ updates:
   directory: "/"
   schedule:
     interval: daily
-  open-pull-requests-limit: 10
+  ignore:
+    # Maven 3.x use slf4j 1.7.x
+    - dependency-name: "org.slf4j:*"
+      versions: ["[2.0.0, )"]
+    # Mockito 5.x requires Java 11+
+    - dependency-name: "org.mockito:*"
+      versions: ["[5.0.0, )"]
 
 - package-ecosystem: "github-actions"
   directory: "/"
