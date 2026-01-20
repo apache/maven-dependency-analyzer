@@ -117,6 +117,7 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
 
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        documentBuilderFactory.setNamespaceAware(true);
         documentBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -139,9 +140,9 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xpath = xPathFactory.newXPath();
         return new XPathExpression[] {
-            xpath.compile("//filter/filter-class"),
-            xpath.compile("//listener/listener-class"),
-            xpath.compile("//servlet/servlet-class")
+            xpath.compile("//*[local-name()='filter']/*[local-name()='filter-class']"),
+            xpath.compile("//*[local-name()='listener']/*[local-name()='listener-class']"),
+            xpath.compile("//*[local-name()='servlet']/*[local-name()='servlet-class']")
         };
     }
 
