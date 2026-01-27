@@ -96,12 +96,12 @@ class WarMainDependencyClassesProviderTest {
 
     @ParameterizedTest
     @MethodSource("examplesData")
-    void examples(String webXmlName, String[] expectedCLasses) throws Exception {
+    void examples(String webXmlName, String[] expectedClasses) throws Exception {
         setupProjectWithWebXml(webXmlName);
 
         Set<DependencyUsage> classes = provider.getDependencyClasses(project, new ClassesPatterns());
 
-        assertThat(classes).map(DependencyUsage::getDependencyClass).containsExactlyInAnyOrder(expectedCLasses);
+        assertThat(classes).map(DependencyUsage::getDependencyClass).containsExactlyInAnyOrder(expectedClasses);
     }
 
     private void setupProjectWithWebXml(String webXmlName) throws URISyntaxException {

@@ -33,6 +33,10 @@
     <listener-class>org.example.test.Listener</listener-class>
   </listener>
 
+  <listener>
+    <listener-class/>
+  </listener>
+
   <servlet>
     <servlet-name>test-servlet</servlet-name>
     <servlet-class>org.example.test.Servlet</servlet-class>

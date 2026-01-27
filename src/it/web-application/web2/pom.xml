@@ -27,7 +27,7 @@
 
   <parent>
     <groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
-    <artifactId>web-applicaiton</artifactId>
+    <artifactId>web-application</artifactId>
     <version>1.0</version>
   </parent>
 

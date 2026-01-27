@@ -33,7 +33,9 @@
 
   <filter>
     <filter-name>test-filter2</filter-name>
-    <filter-class>org.example.test.Filter2</filter-class>
+    <filter-class>
+      org.example.test.Filter2
+    </filter-class>
   </filter>
 
   <filter-mapping>
