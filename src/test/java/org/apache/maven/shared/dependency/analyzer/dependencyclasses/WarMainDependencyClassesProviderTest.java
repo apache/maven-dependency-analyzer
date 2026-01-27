@@ -81,14 +81,18 @@ class WarMainDependencyClassesProviderTest {
     public static Stream<Arguments> examplesData() {
         return Stream.of(
                 Arguments.of("empty-web.xml", new String[] {}),
-                Arguments.of("nons-web.xml", new String[] {
-                    "org.example.test.Filter", "org.example.test.Listener", "org.example.test.Servlet"
-                }),
-                Arguments.of("multi-web.xml", new String[] {
+                Arguments.of("nons-web.xml", new String[] {}),
+                Arguments.of("multi-web-2.5.xml", new String[] {
                     "org.example.test.Filter1",
                     "org.example.test.Filter2",
                     "org.example.test.Listener1",
                     "org.example.test.Listener2"
+                }),
+                Arguments.of("multi-web-3.1.xml", new String[] {
+                        "org.example.test.Filter1",
+                        "org.example.test.Filter2",
+                        "org.example.test.Listener1",
+                        "org.example.test.Listener2"
                 }),
                 Arguments.of("wrong-web.xml", new String[] {}),
                 Arguments.of("no-exists-web.xml", new String[] {}));

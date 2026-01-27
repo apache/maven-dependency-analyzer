@@ -28,6 +28,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -55,6 +56,12 @@ import org.xml.sax.SAXException;
 class WarMainDependencyClassesProvider implements MainDependencyClassesProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WarMainDependencyClassesProvider.class);
+
+    private static final List<String> WEB_XML_NAMESPACES = Arrays.asList(
+            "https://jakarta.ee/xml/ns/jakartaee", // Jakarta EE 9+
+            "http://xmlns.jcp.org/xml/ns/javaee", // Java EE 7–8
+            "http://java.sun.com/xml/ns/javaee" // Java EE 5–6
+    );
 
     @Override
     public Set<DependencyUsage> getDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
@@ -114,6 +121,7 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
         documentBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
         documentBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
         documentBuilderFactory.setExpandEntityReferences(false);
+        documentBuilderFactory.setNamespaceAware(true);
 
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 
@@ -132,13 +140,20 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
     }
 
     private void processClassesFromTags(Document doc, List<String> classes, String tagName) {
-        NodeList tags = doc.getElementsByTagName(tagName);
-        for (int i = 0; i < tags.getLength(); i++) {
-            Node node = tags.item(i);
-            Optional.ofNullable(node.getTextContent())
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .ifPresent(classes::add);
+        for (String namespace: WEB_XML_NAMESPACES) {
+            NodeList tags = doc.getElementsByTagNameNS(namespace, tagName);
+            for (int i = 0; i < tags.getLength(); i++) {
+                Node node = tags.item(i);
+                Optional.ofNullable(node.getTextContent())
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .ifPresent(classes::add);
+            }
+
+            if (tags.getLength() > 0) {
+                // if we found tags in this namespace, no need to check further namespaces
+                return;
+            }
         }
     }
 }
