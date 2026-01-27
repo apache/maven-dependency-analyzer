@@ -24,11 +24,6 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,9 +76,7 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
 
         try {
             return processWebXml(webXml, excludedClasses);
-        } catch (ParserConfigurationException | XPathExpressionException e) {
-            throw new IOException(e);
-        } catch (SAXException e) {
+        } catch (SAXException | ParserConfigurationException e) {
             LOGGER.warn("Error parsing web.xml file {}: {}", webXml, e.getMessage());
             return Collections.emptySet();
         }
@@ -113,7 +106,7 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
     }
 
     private Set<DependencyUsage> processWebXml(File webXml, ClassesPatterns excludedClasses)
-            throws IOException, SAXException, XPathExpressionException, ParserConfigurationException {
+            throws IOException, SAXException, ParserConfigurationException {
 
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -126,9 +119,9 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
 
         List<String> classes = new ArrayList<>();
 
-        for (XPathExpression expression : getXPathExpression()) {
-            classes.addAll(getItemsByExpression(expression, doc));
-        }
+        processClassesFromTags(doc, classes, "filter-class");
+        processClassesFromTags(doc, classes, "listener-class");
+        processClassesFromTags(doc, classes, "servlet-class");
 
         return classes.stream()
                 .filter(className -> !excludedClasses.isMatch(className))
@@ -136,26 +129,11 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
                 .collect(Collectors.toSet());
     }
 
-    private XPathExpression[] getXPathExpression() throws XPathExpressionException {
-        XPathFactory xPathFactory = XPathFactory.newInstance();
-        XPath xpath = xPathFactory.newXPath();
-        return new XPathExpression[] {
-            xpath.compile("//*[local-name()='filter']/*[local-name()='filter-class']"),
-            xpath.compile("//*[local-name()='listener']/*[local-name()='listener-class']"),
-            xpath.compile("//*[local-name()='servlet']/*[local-name()='servlet-class']")
-        };
-    }
-
-    private List<String> getItemsByExpression(XPathExpression expression, Document doc)
-            throws XPathExpressionException {
-        NodeList nodes = (NodeList) expression.evaluate(doc, XPathConstants.NODESET);
-
-        List<String> result = new ArrayList<>();
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Node node = nodes.item(i);
-            result.add(node.getTextContent());
+    private void processClassesFromTags(Document doc, List<String> classes, String tagName) {
+        NodeList tags = doc.getElementsByTagName(tagName);
+        for (int i = 0; i < tags.getLength(); i++) {
+            Node node = tags.item(i);
+            classes.add(node.getTextContent());
         }
-
-        return result;
     }
 }
