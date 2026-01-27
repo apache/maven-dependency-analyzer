@@ -61,7 +61,7 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
             "https://jakarta.ee/xml/ns/jakartaee", // Jakarta EE 9+
             "http://xmlns.jcp.org/xml/ns/javaee", // Java EE 7–8
             "http://java.sun.com/xml/ns/javaee" // Java EE 5–6
-    );
+            );
 
     @Override
     public Set<DependencyUsage> getDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
@@ -140,7 +140,7 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
     }
 
     private void processClassesFromTags(Document doc, List<String> classes, String tagName) {
-        for (String namespace: WEB_XML_NAMESPACES) {
+        for (String namespace : WEB_XML_NAMESPACES) {
             NodeList tags = doc.getElementsByTagNameNS(namespace, tagName);
             for (int i = 0; i < tags.getLength(); i++) {
                 Node node = tags.item(i);

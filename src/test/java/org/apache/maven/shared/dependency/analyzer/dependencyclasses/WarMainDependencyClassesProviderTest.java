@@ -89,10 +89,10 @@ class WarMainDependencyClassesProviderTest {
                     "org.example.test.Listener2"
                 }),
                 Arguments.of("multi-web-3.1.xml", new String[] {
-                        "org.example.test.Filter1",
-                        "org.example.test.Filter2",
-                        "org.example.test.Listener1",
-                        "org.example.test.Listener2"
+                    "org.example.test.Filter1",
+                    "org.example.test.Filter2",
+                    "org.example.test.Listener1",
+                    "org.example.test.Listener2"
                 }),
                 Arguments.of("wrong-web.xml", new String[] {}),
                 Arguments.of("no-exists-web.xml", new String[] {}));
