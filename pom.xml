@@ -106,6 +106,12 @@
       <artifactId>asm</artifactId>
       <version>9.9.1</version>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-xml</artifactId>
+      <!-- only exported by Maven Xpp3Dom class is used, so can be provided -->
+      <scope>provided</scope>
+    </dependency>
 
     <!-- testing support -->
     <dependency>
@@ -139,12 +145,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.36</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <!-- used in test runtime -->
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-xml</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
