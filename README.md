@@ -18,10 +18,14 @@ Contributing to [Apache Maven Dependency Analyzer](https://maven.apache.org/shar
 ======================
 
 [![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)][license]
-[![Maven Central](https://img.shields.io/maven-central/v/org.apache.maven.shared/maven-dependency-analyzer.svg?label=Maven%20Central)](https://search.maven.org/artifact/org.apache.maven.shared/maven-dependency-analyzer)
+[![Maven Central](https://img.shields.io/maven-central/v/org.apache.maven.shared/maven-dependency-analyzer.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/org.apache.maven.shared/maven-dependency-analyzer)
 [![Reproducible Builds](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jvm-repo-rebuild/reproducible-central/master/content/org/apache/maven/shared/maven-dependency-analyzer/badge.json)](https://github.com/jvm-repo-rebuild/reproducible-central/blob/master/content/org/apache/maven/shared/maven-dependency-analyzer/README.md)
-[![Jenkins Status](https://img.shields.io/jenkins/s/https/ci-maven.apache.org/job/Maven/job/maven-box/job/maven-dependency-analyzer/job/master.svg)][build]
-[![Jenkins tests](https://img.shields.io/jenkins/t/https/ci-maven.apache.org/job/Maven/job/maven-box/job/maven-dependency-analyzer/job/master.svg)][test-results]
+[![Jenkins Build](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fci-maven.apache.org%2Fjob%2FMaven%2Fjob%2Fmaven-box%2Fjob%2Fmaven-dependency-analyzer%2Fjob%2Fmaster%2F)
+][build]
+[![Jenkins Tests](https://img.shields.io/jenkins/tests?jobUrl=https%3A%2F%2Fci-maven.apache.org%2Fjob%2FMaven%2Fjob%2Fmaven-box%2Fjob%2Fmaven-dependency-analyzer%2Fjob%2Fmaster%2F)
+][test-results]
+[![Java CI](https://github.com/apache/maven-dependency-analyzer/actions/workflows/maven-verify.yml/badge.svg)][gh-build]
+
 
 
 You have found a bug, or you have an idea for a cool new feature? Contributing
@@ -82,3 +86,4 @@ Additional Resources
 [maven-wiki]: https://cwiki.apache.org/confluence/display/MAVEN/Index
 [test-results]: https://ci-maven.apache.org/job/Maven/job/maven-box/job/maven-dependency-analyzer/job/master/lastCompletedBuild/testReport/
 [build]: https://ci-maven.apache.org/job/Maven/job/maven-box/job/maven-dependency-analyzer/job/master/
+[gh-build]: https://github.com/apache/maven-dependency-analyzer/actions/workflows/maven-verify.yml?query=branch%3Amaster
