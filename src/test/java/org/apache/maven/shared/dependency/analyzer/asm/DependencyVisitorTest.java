@@ -150,9 +150,9 @@ class DependencyVisitorTest {
     void testVisitOuterClass() {
         // class a.b.c
         // {
-        //     class ...
-        //     {
-        //     }
+        // class ...
+        // {
+        // }
         // }
         visitor.visitOuterClass("a/b/c", null, null);
 
@@ -163,12 +163,12 @@ class DependencyVisitorTest {
     void testVisitOuterClassInMethod() {
         // class a.b.c
         // {
-        //     x.y.z x(p.q.r p)
-        //     {
-        //         class ...
-        //         {
-        //         }
-        //     }
+        // x.y.z x(p.q.r p)
+        // {
+        // class ...
+        // {
+        // }
+        // }
         // }
         visitor.visitOuterClass("a/b/c", "x", "(Lp/q/r;)Lx/y/z;");
 
@@ -204,10 +204,8 @@ class DependencyVisitorTest {
 
     @Test
     void testVisitInnerClass() {
-        // TODO: ensure innerName is correct
-
-        // class a.b.c { class x.y.z { } }
-        visitor.visitInnerClass("x/y/z", "a/b/c", "z", 0);
+        // class a.b.c { class x { } }
+        visitor.visitInnerClass("a/b/c$x", "a/b/c", "x", 0);
 
         assertThat(resultCollector.getDependencies()).isEmpty();
     }
@@ -230,10 +228,13 @@ class DependencyVisitorTest {
         assertThat(resultCollector.getDependencies()).containsOnly("a.b.c");
     }
 
-    // TODO: determine actual use of default values
-    // void testVisitFieldWithValue()
-    // {
-    // }
+    @Test
+    void testVisitFieldWithValue() {
+        // a.b.c a = x.y.z.class
+        assertVisitor(visitor.visitField(0, "a", "La/b/c;", null, Type.getType("Lx/y/z;")));
+
+        assertThat(resultCollector.getDependencies()).containsOnly("a.b.c", "x.y.z");
+    }
 
     @Test
     void testVisitFieldArray() {
