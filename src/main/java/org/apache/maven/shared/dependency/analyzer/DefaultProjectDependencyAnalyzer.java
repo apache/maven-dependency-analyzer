@@ -265,7 +265,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         for (Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet()) {
             Artifact artifact = entry.getKey();
             for (String className : entry.getValue()) {
-                classToArtifactMap.put(className, artifact);
+                classToArtifactMap.putIfAbsent(className, artifact);
             }
         }
 
