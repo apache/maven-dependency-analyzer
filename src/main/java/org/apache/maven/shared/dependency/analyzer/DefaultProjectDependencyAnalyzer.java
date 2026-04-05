@@ -43,9 +43,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 
 /**
- * <p>
- * DefaultProjectDependencyAnalyzer class.
- * </p>
+ * <p>DefaultProjectDependencyAnalyzer class.</p>
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
@@ -87,12 +85,13 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             dependencyClasses.addAll(mainDependencyClasses);
             dependencyClasses.addAll(testDependencyClasses);
 
-            Set<DependencyUsage> testOnlyDependencyClasses = buildTestOnlyDependencyClasses(mainDependencyClasses,
-                    testDependencyClasses);
+            Set<DependencyUsage> testOnlyDependencyClasses =
+                    buildTestOnlyDependencyClasses(mainDependencyClasses, testDependencyClasses);
 
-            Map<Artifact, Set<DependencyUsage>> usedArtifacts = buildUsedArtifacts(classToArtifactMap,
-                    dependencyClasses);
-            Set<Artifact> mainUsedArtifacts = buildUsedArtifacts(classToArtifactMap, mainDependencyClasses).keySet();
+            Map<Artifact, Set<DependencyUsage>> usedArtifacts =
+                    buildUsedArtifacts(classToArtifactMap, dependencyClasses);
+            Set<Artifact> mainUsedArtifacts = buildUsedArtifacts(classToArtifactMap, mainDependencyClasses)
+                    .keySet();
 
             Set<Artifact> testArtifacts = buildUsedArtifacts(classToArtifactMap, testOnlyDependencyClasses)
                     .keySet();
@@ -108,8 +107,8 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             }
 
             Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>(usedArtifacts);
-            Set<Artifact> usedUndeclaredArtifacts = removeAll(usedUndeclaredArtifactsWithClasses.keySet(),
-                    declaredArtifacts);
+            Set<Artifact> usedUndeclaredArtifacts =
+                    removeAll(usedUndeclaredArtifactsWithClasses.keySet(), declaredArtifacts);
 
             usedUndeclaredArtifactsWithClasses.keySet().retainAll(usedUndeclaredArtifacts);
 
@@ -229,7 +228,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return declaredArtifacts;
     }
 
-    private static Map<Artifact, Set<DependencyUsage>> buildUsedArtifacts(
+    static Map<Artifact, Set<DependencyUsage>> buildUsedArtifacts(
             Map<String, Artifact> classToArtifactMap, Set<DependencyUsage> dependencyClasses) {
         Map<Artifact, Set<DependencyUsage>> usedArtifacts = new HashMap<>();
 
@@ -246,7 +245,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
     // MSHARED-47 an uncommon case where a commonly used
     // third party dependency was added to the JDK
-    private static boolean includedInJDK(Artifact artifact) {
+    static boolean includedInJDK(Artifact artifact) {
         if ("xml-apis".equals(artifact.getGroupId())) {
             if ("xml-apis".equals(artifact.getArtifactId())) {
                 return true;
@@ -259,7 +258,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return false;
     }
 
-    private static Map<String, Artifact> buildClassToArtifactMap(Map<Artifact, Set<String>> artifactClassMap) {
+    static Map<String, Artifact> buildClassToArtifactMap(Map<Artifact, Set<String>> artifactClassMap) {
         Map<String, Artifact> classToArtifactMap = new HashMap<>();
 
         for (Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet()) {
