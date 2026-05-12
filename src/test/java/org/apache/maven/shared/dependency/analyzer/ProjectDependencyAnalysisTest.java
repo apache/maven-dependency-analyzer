@@ -68,8 +68,9 @@ class ProjectDependencyAnalysisTest {
         assertThat(compileOnlyAnalysis.getUsedDeclaredArtifacts()).hasSize(3);
         assertThat(compileOnlyAnalysis.getUsedUndeclaredArtifacts()).hasSize(3);
 
-        assertThat(compileOnlyAnalysis.getUnusedDeclaredArtifacts()).hasSize(1).allSatisfy(a -> assertThat(a.getScope())
-                .isEqualTo(Artifact.SCOPE_COMPILE));
+        assertThat(compileOnlyAnalysis.getUnusedDeclaredArtifacts())
+                .hasSize(1)
+                .allSatisfy(a -> assertThat(a.getScope()).isEqualTo(Artifact.SCOPE_COMPILE));
 
         assertThat(compileOnlyAnalysis.getTestArtifactsWithNonTestScope()).hasSize(3);
     }
