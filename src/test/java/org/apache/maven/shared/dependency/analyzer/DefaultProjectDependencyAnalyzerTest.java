@@ -18,12 +18,12 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
@@ -91,7 +91,8 @@ class DefaultProjectDependencyAnalyzerTest {
         Map<String, Artifact> classToArtifactMap = Collections.singletonMap("class1", artifact1);
         Set<DependencyUsage> dependencyClasses = Collections.singleton(new DependencyUsage("class1", "main"));
 
-        Map<Artifact, Set<DependencyUsage>> result = DefaultProjectDependencyAnalyzer.buildUsedArtifacts(classToArtifactMap, dependencyClasses);
+        Map<Artifact, Set<DependencyUsage>> result =
+                DefaultProjectDependencyAnalyzer.buildUsedArtifacts(classToArtifactMap, dependencyClasses);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(artifact1)).hasSize(1);
@@ -102,12 +103,11 @@ class DefaultProjectDependencyAnalyzerTest {
     void testBuildUsedArtifactsWithMultipleClasses() {
         Artifact artifact1 = aTestArtifact("artifact1");
         Map<String, Artifact> classToArtifactMap = Collections.singletonMap("class1", artifact1);
-        Set<DependencyUsage> dependencyClasses = new HashSet<>(Arrays.asList(
-                new DependencyUsage("class1", "main"),
-                new DependencyUsage("class1", "test")
-        ));
+        Set<DependencyUsage> dependencyClasses = new HashSet<>(
+                Arrays.asList(new DependencyUsage("class1", "main"), new DependencyUsage("class1", "test")));
 
-        Map<Artifact, Set<DependencyUsage>> result = DefaultProjectDependencyAnalyzer.buildUsedArtifacts(classToArtifactMap, dependencyClasses);
+        Map<Artifact, Set<DependencyUsage>> result =
+                DefaultProjectDependencyAnalyzer.buildUsedArtifacts(classToArtifactMap, dependencyClasses);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(artifact1)).hasSize(2);
@@ -119,7 +119,8 @@ class DefaultProjectDependencyAnalyzerTest {
         Map<String, Artifact> classToArtifactMap = Collections.singletonMap("class1", artifact1);
         Set<DependencyUsage> dependencyClasses = Collections.singleton(new DependencyUsage("class1", "main"));
 
-        Map<Artifact, Set<DependencyUsage>> result = DefaultProjectDependencyAnalyzer.buildUsedArtifacts(classToArtifactMap, dependencyClasses);
+        Map<Artifact, Set<DependencyUsage>> result =
+                DefaultProjectDependencyAnalyzer.buildUsedArtifacts(classToArtifactMap, dependencyClasses);
 
         // Being in JDK, it should be excluded from used artifacts
         assertThat(result).isEmpty();
@@ -127,9 +128,12 @@ class DefaultProjectDependencyAnalyzerTest {
 
     @Test
     void testIncludedInJDK() {
-        assertThat(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("xml-apis", "xml-apis"))).isTrue();
-        assertThat(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("xerces", "xmlParserAPIs"))).isTrue();
-        assertThat(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("groupId", "artifactId"))).isFalse();
+        assertThat(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("xml-apis", "xml-apis")))
+                .isTrue();
+        assertThat(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("xerces", "xmlParserAPIs")))
+                .isTrue();
+        assertThat(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("groupId", "artifactId")))
+                .isFalse();
     }
 
     private Artifact aTestArtifact(String artifactId) {
