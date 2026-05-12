@@ -69,6 +69,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         try {
             ClassesPatterns excludedClassesPatterns = new ClassesPatterns(excludedClasses);
             Map<Artifact, Set<String>> artifactClassMap = buildArtifactClassMap(project, excludedClassesPatterns);
+            Map<String, Artifact> classToArtifactMap = buildClassToArtifactMap(artifactClassMap);
 
             Set<DependencyUsage> mainDependencyClasses = new HashSet<>();
             for (MainDependencyClassesProvider provider : mainDependencyClassesProviders) {
@@ -87,11 +88,12 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             Set<DependencyUsage> testOnlyDependencyClasses =
                     buildTestOnlyDependencyClasses(mainDependencyClasses, testDependencyClasses);
 
-            Map<Artifact, Set<DependencyUsage>> usedArtifacts = buildUsedArtifacts(artifactClassMap, dependencyClasses);
-            Set<Artifact> mainUsedArtifacts =
-                    buildUsedArtifacts(artifactClassMap, mainDependencyClasses).keySet();
+            Map<Artifact, Set<DependencyUsage>> usedArtifacts =
+                    buildUsedArtifacts(classToArtifactMap, dependencyClasses);
+            Set<Artifact> mainUsedArtifacts = buildUsedArtifacts(classToArtifactMap, mainDependencyClasses)
+                    .keySet();
 
-            Set<Artifact> testArtifacts = buildUsedArtifacts(artifactClassMap, testOnlyDependencyClasses)
+            Set<Artifact> testArtifacts = buildUsedArtifacts(classToArtifactMap, testOnlyDependencyClasses)
                     .keySet();
             Set<Artifact> testOnlyArtifacts = removeAll(testArtifacts, mainUsedArtifacts);
 
@@ -124,7 +126,8 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
     }
 
     /**
-     * This method defines a new way to remove the artifacts by using the conflict id. We don't care about the version
+     * This method defines a new way to remove the artifacts by using the conflict
+     * id. We don't care about the version
      * here because there can be only 1 for a given artifact anyway.
      *
      * @param start  initial set
@@ -156,7 +159,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         Set<Artifact> nonTestScopeArtifacts = new LinkedHashSet<>();
 
         for (Artifact artifact : testOnlyArtifacts) {
-            if (artifact.getScope().equals("compile")) {
+            if (Artifact.SCOPE_COMPILE.equals(artifact.getScope())) {
                 nonTestScopeArtifacts.add(artifact);
             }
         }
@@ -225,20 +228,15 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return declaredArtifacts;
     }
 
-    private static Map<Artifact, Set<DependencyUsage>> buildUsedArtifacts(
-            Map<Artifact, Set<String>> artifactClassMap, Set<DependencyUsage> dependencyClasses) {
+    static Map<Artifact, Set<DependencyUsage>> buildUsedArtifacts(
+            Map<String, Artifact> classToArtifactMap, Set<DependencyUsage> dependencyClasses) {
         Map<Artifact, Set<DependencyUsage>> usedArtifacts = new HashMap<>();
 
         for (DependencyUsage classUsage : dependencyClasses) {
-            Artifact artifact = findArtifactForClassName(artifactClassMap, classUsage.getDependencyClass());
+            Artifact artifact = classToArtifactMap.get(classUsage.getDependencyClass());
 
             if (artifact != null && !includedInJDK(artifact)) {
-                Set<DependencyUsage> classesFromArtifact = usedArtifacts.get(artifact);
-                if (classesFromArtifact == null) {
-                    classesFromArtifact = new HashSet<>();
-                    usedArtifacts.put(artifact, classesFromArtifact);
-                }
-                classesFromArtifact.add(classUsage);
+                usedArtifacts.computeIfAbsent(artifact, k -> new HashSet<>()).add(classUsage);
             }
         }
 
@@ -247,7 +245,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
     // MSHARED-47 an uncommon case where a commonly used
     // third party dependency was added to the JDK
-    private static boolean includedInJDK(Artifact artifact) {
+    static boolean includedInJDK(Artifact artifact) {
         if ("xml-apis".equals(artifact.getGroupId())) {
             if ("xml-apis".equals(artifact.getArtifactId())) {
                 return true;
@@ -260,13 +258,16 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return false;
     }
 
-    private static Artifact findArtifactForClassName(Map<Artifact, Set<String>> artifactClassMap, String className) {
+    static Map<String, Artifact> buildClassToArtifactMap(Map<Artifact, Set<String>> artifactClassMap) {
+        Map<String, Artifact> classToArtifactMap = new HashMap<>();
+
         for (Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet()) {
-            if (entry.getValue().contains(className)) {
-                return entry.getKey();
+            Artifact artifact = entry.getKey();
+            for (String className : entry.getValue()) {
+                classToArtifactMap.putIfAbsent(className, artifact);
             }
         }
 
-        return null;
+        return classToArtifactMap;
     }
 }
