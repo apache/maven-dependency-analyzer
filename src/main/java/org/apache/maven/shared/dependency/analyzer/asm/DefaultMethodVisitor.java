@@ -172,9 +172,16 @@ public class DefaultMethodVisitor extends MethodVisitor {
     @Override
     public void visitInvokeDynamicInsn(
             String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
+        if (bootstrapMethodHandle != null) {
+            resultCollector.addName(usedByClass, bootstrapMethodHandle.getOwner());
+        }
         Arrays.stream(bootstrapMethodArguments)
                 .filter(Type.class::isInstance)
                 .map(Type.class::cast)
                 .forEach(t -> resultCollector.addType(usedByClass, t));
+        Arrays.stream(bootstrapMethodArguments)
+                .filter(Handle.class::isInstance)
+                .map(Handle.class::cast)
+                .forEach(h -> resultCollector.addName(usedByClass, h.getOwner()));
     }
 }

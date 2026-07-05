@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -686,6 +687,26 @@ class DependencyVisitorTest {
         Type type = Type.getType("(La/b/C;)V");
         mv.visitInvokeDynamicInsn("a", "", null, type);
         assertThat(resultCollector.getDependencies()).contains("a.b.C");
+    }
+
+    @Test
+    void testVisitInvokeDynamicWithHandle() {
+        Handle handle = new Handle(Opcodes.H_INVOKESTATIC, "x/y/z", "method", "()V", false);
+        mv.visitInvokeDynamicInsn("a", "()V", handle);
+        assertThat(resultCollector.getDependencies()).contains("x.y.z");
+    }
+
+    @Test
+    void testVisitInvokeDynamicWithMethodHandleInBootstrapArgs() {
+        Handle bootstrapHandle = new Handle(
+                Opcodes.H_INVOKESTATIC,
+                "java/lang/invoke/LambdaMetafactory",
+                "metafactory",
+                "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;)Ljava/lang/invoke/CallSite;",
+                false);
+        Handle targetHandle = new Handle(Opcodes.H_INVOKESTATIC, "x/y/z", "method", "(Ljava/lang/String;)V", false);
+        mv.visitInvokeDynamicInsn("a", "(Ljava/lang/String;)V", bootstrapHandle, targetHandle);
+        assertThat(resultCollector.getDependencies()).contains("x.y.z");
     }
 
     private void assertVisitor(Object actualVisitor) {
