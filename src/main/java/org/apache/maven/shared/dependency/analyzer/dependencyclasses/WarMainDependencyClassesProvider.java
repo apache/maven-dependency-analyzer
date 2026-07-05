@@ -155,5 +155,15 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
                 return;
             }
         }
+
+        // Fallback for namespace-less web.xml (e.g. Servlet 2.4 and earlier)
+        NodeList tags = doc.getElementsByTagName(tagName);
+        for (int i = 0; i < tags.getLength(); i++) {
+            Node node = tags.item(i);
+            Optional.ofNullable(node.getTextContent())
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .ifPresent(classes::add);
+        }
     }
 }
