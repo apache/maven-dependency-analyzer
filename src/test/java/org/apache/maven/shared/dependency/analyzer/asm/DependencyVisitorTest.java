@@ -126,6 +126,20 @@ class DependencyVisitorTest {
     }
 
     @Test
+    void testVisitWithGenericInnerClassInterface() {
+        // class a.b.c implements p.q.r<x.y.z$Inner<a.b.c>>
+        // The generic signature uses . for inner class: x.y.z.Inner
+        // visitInnerClassType("Inner") must NOT record just "Inner" as a dependency
+        // Inner class deps are handled via outer class (ResultCollector filters $ names)
+        String signature = "Ljava/lang/Object;Lp/q/r<Lx/y/z.Inner<La/b/c;>;>;";
+
+        visitor.visit(50, 0, "a/b/c", signature, "java/lang/Object", new String[] {"p.q.r"});
+
+        assertThat(resultCollector.getDependencies()).contains("x.y.z");
+        assertThat(resultCollector.getDependencies()).doesNotContain("Inner");
+    }
+
+    @Test
     void testVisitWithInterfaceBound() {
         // class a.b.c<T> implements x.y.z<T>
         String signature = "<T:Ljava/lang/Object;>Ljava/lang/Object;Lx/y/z<TT;>;";

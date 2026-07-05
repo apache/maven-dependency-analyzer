@@ -18,6 +18,9 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.signature.SignatureVisitor;
 
@@ -30,6 +33,7 @@ import org.objectweb.asm.signature.SignatureVisitor;
 public class DefaultSignatureVisitor extends SignatureVisitor {
     private final ResultCollector resultCollector;
     private final String usedByClass;
+    private final Deque<String> outerClasses = new ArrayDeque<>();
 
     /**
      * <p>Constructor for DefaultSignatureVisitor.</p>
@@ -45,12 +49,14 @@ public class DefaultSignatureVisitor extends SignatureVisitor {
     /** {@inheritDoc} */
     @Override
     public void visitClassType(final String name) {
+        outerClasses.push(name);
         resultCollector.addName(usedByClass, name);
     }
 
     /** {@inheritDoc} */
     @Override
     public void visitInnerClassType(final String name) {
-        resultCollector.addName(usedByClass, name);
+        String outer = outerClasses.peek();
+        resultCollector.addName(usedByClass, outer + '$' + name);
     }
 }
