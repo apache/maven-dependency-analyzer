@@ -48,9 +48,4 @@ public class DefaultSignatureVisitor extends SignatureVisitor {
         resultCollector.addName(usedByClass, name);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void visitInnerClassType(final String name) {
-        resultCollector.addName(usedByClass, name);
-    }
 }
