@@ -135,6 +135,23 @@ class DependencyVisitorTest {
         assertThat(resultCollector.getDependencies()).containsOnly("java.lang.Object", "x.y.z");
     }
 
+    @Test
+    void testVisitWithInnerClassInGenericInterface() {
+        // class a.b.c implements p.q.r<Outer<String>.Inner>
+        // javac emits '.' when the outer class has type parameters:
+        //   Lp/q/r<Ltest/Outer<Ljava/lang/String;>.Inner;>;
+        // ASM fires visitClassType("test/Outer") then visitInnerClassType("Inner")
+        // The old code recorded bare "Inner" as a bogus dependency.
+        String signature =
+                "Ljava/lang/Object;Lp/q/r<Ltest/Outer<Ljava/lang/String;>.Inner;>;";
+
+        visitor.visit(50, 0, "a/b/c", signature, "java/lang/Object", new String[] {"p.q.r"});
+
+        assertThat(resultCollector.getDependencies())
+                .contains("test.Outer", "java.lang.String");
+        assertThat(resultCollector.getDependencies()).doesNotContain("Inner");
+    }
+
     // visitSource tests ------------------------------------------------------
 
     @Test
