@@ -22,15 +22,35 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.DependencyResolutionException;
+import org.apache.maven.project.DependencyResolutionRequest;
+import org.apache.maven.project.DependencyResolutionResult;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectDependenciesResolver;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.graph.DefaultDependencyNode;
+import org.eclipse.aether.graph.DependencyNode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests <code>DefaultProjectDependencyAnalyzer</code>.
@@ -38,6 +58,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @see DefaultProjectDependencyAnalyzer
  */
 class DefaultProjectDependencyAnalyzerTest {
+    private ProjectDependenciesResolver projectDependenciesResolver;
+
+    private DefaultProjectDependencyAnalyzer analyzer;
+
+    @BeforeEach
+    void setUp() {
+        projectDependenciesResolver = mock(ProjectDependenciesResolver.class);
+        analyzer = new DefaultProjectDependencyAnalyzer(projectDependenciesResolver);
+    }
 
     @Test
     void testBuildClassToArtifactMap() {
@@ -136,12 +165,106 @@ class DefaultProjectDependencyAnalyzerTest {
                 .isFalse();
     }
 
+    @Test
+    void testRetainsTestOnlyCompileDependencyWithoutRepositorySession() {
+        Artifact candidate = aTestArtifact("candidate");
+
+        assertThat(analyzer.getTestArtifactsWithNonTestScope(new MavenProject(), Collections.singleton(candidate)))
+                .containsExactly(candidate);
+        verifyNoInteractions(projectDependenciesResolver);
+    }
+
+    @Test
+    void testRetainsTestOnlyCompileDependencyWhenRuntimeGraphCollectionFails() throws Exception {
+        Artifact candidate = aTestArtifact("candidate");
+        MavenProject project = projectWithRepositorySession(candidate);
+        DependencyResolutionResult failedResult = mock(DependencyResolutionResult.class);
+        when(failedResult.getUnresolvedDependencies()).thenReturn(Collections.emptyList());
+        when(failedResult.getCollectionErrors()).thenReturn(Collections.emptyList());
+        DependencyResolutionException failure =
+                new DependencyResolutionException(failedResult, "collection failed", new Exception("failure"));
+        DependencyResolutionResult compileResult = dependencyGraph("candidate", "2.0");
+        when(projectDependenciesResolver.resolve(any(DependencyResolutionRequest.class)))
+                .thenReturn(compileResult)
+                .thenThrow(failure);
+
+        assertThat(analyzer.getTestArtifactsWithNonTestScope(project, Collections.singleton(candidate)))
+                .containsExactly(candidate);
+    }
+
+    @Test
+    void testRemovesDependenciesReachableFromCompileOrRuntimeGraph() throws Exception {
+        Artifact compileCandidate = aTestArtifact("compile-candidate");
+        Artifact runtimeCandidate = aTestArtifact("runtime-candidate");
+        Artifact compile = aTestArtifactWithScope("compile", Artifact.SCOPE_COMPILE);
+        Artifact provided = aTestArtifactWithScope("provided", Artifact.SCOPE_PROVIDED);
+        Artifact system = aTestArtifactWithScope("system", Artifact.SCOPE_SYSTEM);
+        Artifact runtime = aTestArtifactWithScope("runtime", Artifact.SCOPE_RUNTIME);
+        Artifact test = aTestArtifactWithScope("test", Artifact.SCOPE_TEST);
+        MavenProject project = projectWithRepositorySession(
+                compileCandidate, runtimeCandidate, compile, provided, system, runtime, test);
+
+        DependencyResolutionResult compileResult = dependencyGraph("compile-candidate", "2.0");
+        DependencyResolutionResult runtimeResult = dependencyGraph("runtime-candidate", "2.0");
+        when(projectDependenciesResolver.resolve(any(DependencyResolutionRequest.class)))
+                .thenReturn(compileResult, runtimeResult);
+
+        Set<Artifact> candidates = new LinkedHashSet<>(Arrays.asList(compileCandidate, runtimeCandidate));
+        assertThat(analyzer.getTestArtifactsWithNonTestScope(project, candidates))
+                .isEmpty();
+
+        ArgumentCaptor<DependencyResolutionRequest> requestCaptor =
+                ArgumentCaptor.forClass(DependencyResolutionRequest.class);
+        verify(projectDependenciesResolver, times(2)).resolve(requestCaptor.capture());
+        List<DependencyResolutionRequest> requests = requestCaptor.getAllValues();
+        assertThat(artifactIds(requests.get(0).getMavenProject()))
+                .containsExactlyInAnyOrder("compile", "provided", "system");
+        assertThat(artifactIds(requests.get(1).getMavenProject())).containsExactlyInAnyOrder("compile", "runtime");
+        DependencyNode dependencyNode = new DefaultDependencyNode(
+                new org.eclipse.aether.artifact.DefaultArtifact("groupId", "artifactId", "jar", "1.0"));
+        assertThat(requests).allSatisfy(request -> {
+            assertThat(request.getResolutionFilter()).isNotNull();
+            assertThat(request.getResolutionFilter().accept(dependencyNode, Collections.emptyList()))
+                    .isFalse();
+        });
+    }
+
+    private MavenProject projectWithRepositorySession(Artifact... dependencyArtifacts) {
+        MavenProject project = new MavenProject();
+        project.setDependencyArtifacts(new LinkedHashSet<>(Arrays.asList(dependencyArtifacts)));
+        RepositorySystemSession repositorySession = mock(RepositorySystemSession.class);
+        project.setProjectBuildingRequest(new DefaultProjectBuildingRequest().setRepositorySession(repositorySession));
+        return project;
+    }
+
+    private DependencyResolutionResult dependencyGraph(String artifactId, String version) {
+        DependencyNode root = new DefaultDependencyNode((org.eclipse.aether.graph.Dependency) null);
+        root.setChildren(Collections.singletonList(new DefaultDependencyNode(
+                new org.eclipse.aether.artifact.DefaultArtifact("groupId", artifactId, "jar", version))));
+        DependencyResolutionResult result = mock(DependencyResolutionResult.class);
+        when(result.getDependencyGraph()).thenReturn(root);
+        return result;
+    }
+
+    private Set<String> artifactIds(MavenProject project) {
+        return project.getDependencyArtifacts().stream()
+                .map(Artifact::getArtifactId)
+                .collect(Collectors.toSet());
+    }
+
     private Artifact aTestArtifact(String artifactId) {
         return aTestArtifact("groupId", artifactId);
     }
 
     private Artifact aTestArtifact(String groupId, String artifactId) {
-        return new DefaultArtifact(
-                groupId, artifactId, VersionRange.createFromVersion("1.0"), "compile", "jar", "", null);
+        return aTestArtifact(groupId, artifactId, Artifact.SCOPE_COMPILE);
+    }
+
+    private Artifact aTestArtifactWithScope(String artifactId, String scope) {
+        return aTestArtifact("groupId", artifactId, scope);
+    }
+
+    private Artifact aTestArtifact(String groupId, String artifactId, String scope) {
+        return new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion("1.0"), scope, "jar", "", null);
     }
 }

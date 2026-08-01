@@ -25,11 +25,15 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,7 +44,22 @@ import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.project.DefaultDependencyResolutionRequest;
+import org.apache.maven.project.DependencyResolutionException;
+import org.apache.maven.project.DependencyResolutionRequest;
+import org.apache.maven.project.DependencyResolutionResult;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.project.ProjectDependenciesResolver;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.ArtifactType;
+import org.eclipse.aether.artifact.ArtifactTypeRegistry;
+import org.eclipse.aether.graph.DependencyFilter;
+import org.eclipse.aether.graph.DependencyNode;
+import org.eclipse.aether.util.artifact.ArtifactIdUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>DefaultProjectDependencyAnalyzer class.</p>
@@ -50,6 +69,10 @@ import org.apache.maven.project.MavenProject;
 @Named
 @Singleton
 public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyzer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultProjectDependencyAnalyzer.class);
+
+    private static final DependencyFilter NO_ARTIFACT_RESOLUTION = (node, parents) -> false;
+
     /**
      * ClassAnalyzer
      */
@@ -61,6 +84,16 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
     @Inject
     private List<TestDependencyClassesProvider> testDependencyClassesProviders;
+
+    @Inject
+    private ProjectDependenciesResolver projectDependenciesResolver;
+
+    /** Constructor used by Sisu. */
+    public DefaultProjectDependencyAnalyzer() {}
+
+    DefaultProjectDependencyAnalyzer(ProjectDependenciesResolver projectDependenciesResolver) {
+        this.projectDependenciesResolver = projectDependenciesResolver;
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -115,7 +148,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             Set<Artifact> unusedDeclaredArtifacts = new LinkedHashSet<>(declaredArtifacts);
             unusedDeclaredArtifacts = removeAll(unusedDeclaredArtifacts, usedArtifacts.keySet());
 
-            Set<Artifact> testArtifactsWithNonTestScope = getTestArtifactsWithNonTestScope(testOnlyArtifacts);
+            Set<Artifact> testArtifactsWithNonTestScope = getTestArtifactsWithNonTestScope(project, testOnlyArtifacts);
 
             return new ProjectDependencyAnalysis(
                     usedDeclaredArtifactsWithClasses, usedUndeclaredArtifactsWithClasses,
@@ -155,7 +188,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return results;
     }
 
-    private static Set<Artifact> getTestArtifactsWithNonTestScope(Set<Artifact> testOnlyArtifacts) {
+    Set<Artifact> getTestArtifactsWithNonTestScope(MavenProject project, Set<Artifact> testOnlyArtifacts) {
         Set<Artifact> nonTestScopeArtifacts = new LinkedHashSet<>();
 
         for (Artifact artifact : testOnlyArtifacts) {
@@ -164,7 +197,142 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             }
         }
 
+        if (nonTestScopeArtifacts.isEmpty()) {
+            return nonTestScopeArtifacts;
+        }
+
+        ProjectBuildingRequest projectBuildingRequest = project.getProjectBuildingRequest();
+        RepositorySystemSession repositorySession =
+                projectBuildingRequest != null ? projectBuildingRequest.getRepositorySession() : null;
+        if (repositorySession == null) {
+            LOGGER.debug("Cannot refine test-only dependency scopes without a repository session");
+            return nonTestScopeArtifacts;
+        }
+
+        try {
+            // Resolve each non-test classpath independently and without the candidates as direct roots. Otherwise a
+            // direct declaration can hide the same artifact reached transitively with a different scope.
+            Set<String> nonTestDependencyIds = collectDependencyIds(
+                    createDependencyGraphProject(
+                            project, nonTestScopeArtifacts, NonTestClasspath.COMPILE, repositorySession),
+                    repositorySession);
+            nonTestDependencyIds.addAll(collectDependencyIds(
+                    createDependencyGraphProject(
+                            project, nonTestScopeArtifacts, NonTestClasspath.RUNTIME, repositorySession),
+                    repositorySession));
+
+            nonTestScopeArtifacts.removeIf(artifact -> nonTestDependencyIds.contains(toVersionlessId(artifact)));
+        } catch (DependencyResolutionException exception) {
+            LOGGER.debug("Cannot refine test-only dependency scopes using the non-test dependency graphs", exception);
+        }
+
         return nonTestScopeArtifacts;
+    }
+
+    private Set<String> collectDependencyIds(MavenProject project, RepositorySystemSession repositorySession)
+            throws DependencyResolutionException {
+        DependencyResolutionRequest request = new DefaultDependencyResolutionRequest(project, repositorySession);
+        request.setResolutionFilter(NO_ARTIFACT_RESOLUTION);
+        DependencyResolutionResult result = projectDependenciesResolver.resolve(request);
+
+        Set<String> dependencyIds = new HashSet<>();
+        DependencyNode root = result.getDependencyGraph();
+        if (root == null) {
+            return dependencyIds;
+        }
+
+        Deque<DependencyNode> remaining = new ArrayDeque<>(root.getChildren());
+        Set<DependencyNode> visited = Collections.newSetFromMap(new IdentityHashMap<DependencyNode, Boolean>());
+        while (!remaining.isEmpty()) {
+            DependencyNode node = remaining.removeFirst();
+            if (visited.add(node)) {
+                if (node.getArtifact() != null) {
+                    dependencyIds.add(ArtifactIdUtils.toVersionlessId(node.getArtifact()));
+                }
+                remaining.addAll(node.getChildren());
+            }
+        }
+        return dependencyIds;
+    }
+
+    private static MavenProject createDependencyGraphProject(
+            MavenProject project,
+            Set<Artifact> candidates,
+            NonTestClasspath classpath,
+            RepositorySystemSession repositorySession) {
+        MavenProject graphProject = new MavenProject(project);
+        Set<String> candidateIds =
+                candidates.stream().map(Artifact::getDependencyConflictId).collect(Collectors.toSet());
+
+        Set<Artifact> dependencyArtifacts = project.getDependencyArtifacts();
+        if (dependencyArtifacts == null) {
+            ArtifactTypeRegistry stereotypes = repositorySession.getArtifactTypeRegistry();
+            List<Dependency> dependencies = project.getDependencies().stream()
+                    .filter(dependency -> classpath.includes(dependency.getScope()))
+                    .filter(dependency -> !candidateIds.contains(toDependencyConflictId(dependency, stereotypes)))
+                    .collect(Collectors.toList());
+            graphProject.setDependencies(dependencies);
+            graphProject.setDependencyArtifacts(null);
+        } else {
+            Set<Artifact> selectedArtifacts = dependencyArtifacts.stream()
+                    .filter(artifact -> classpath.includes(artifact.getScope()))
+                    .filter(artifact -> !candidateIds.contains(artifact.getDependencyConflictId()))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            Set<String> selectedIds = selectedArtifacts.stream()
+                    .map(Artifact::getDependencyConflictId)
+                    .collect(Collectors.toSet());
+            ArtifactTypeRegistry stereotypes = repositorySession.getArtifactTypeRegistry();
+            List<Dependency> selectedDependencies = project.getDependencies().stream()
+                    .filter(dependency -> selectedIds.contains(toDependencyConflictId(dependency, stereotypes)))
+                    .collect(Collectors.toCollection(ArrayList::new));
+            graphProject.setDependencies(selectedDependencies);
+            graphProject.setDependencyArtifacts(selectedArtifacts);
+        }
+        return graphProject;
+    }
+
+    private static String toDependencyConflictId(Dependency dependency, ArtifactTypeRegistry stereotypes) {
+        String classifier = dependency.getClassifier();
+        if (classifier == null && stereotypes != null) {
+            ArtifactType type = stereotypes.get(dependency.getType());
+            if (type != null) {
+                classifier = type.getClassifier();
+            }
+        }
+        return ArtifactIdUtils.toVersionlessId(
+                dependency.getGroupId(), dependency.getArtifactId(), dependency.getType(), classifier);
+    }
+
+    private static String toVersionlessId(Artifact artifact) {
+        String extension = artifact.getArtifactHandler() != null
+                ? artifact.getArtifactHandler().getExtension()
+                : artifact.getType();
+        return ArtifactIdUtils.toVersionlessId(
+                artifact.getGroupId(), artifact.getArtifactId(), extension, artifact.getClassifier());
+    }
+
+    private enum NonTestClasspath {
+        COMPILE {
+            @Override
+            boolean includes(String scope) {
+                return scope == null
+                        || scope.isEmpty()
+                        || Artifact.SCOPE_COMPILE.equals(scope)
+                        || Artifact.SCOPE_PROVIDED.equals(scope)
+                        || Artifact.SCOPE_SYSTEM.equals(scope);
+            }
+        },
+        RUNTIME {
+            @Override
+            boolean includes(String scope) {
+                return scope == null
+                        || scope.isEmpty()
+                        || Artifact.SCOPE_COMPILE.equals(scope)
+                        || Artifact.SCOPE_RUNTIME.equals(scope);
+            }
+        };
+
+        abstract boolean includes(String scope);
     }
 
     protected Map<Artifact, Set<String>> buildArtifactClassMap(MavenProject project, ClassesPatterns excludedClasses)
