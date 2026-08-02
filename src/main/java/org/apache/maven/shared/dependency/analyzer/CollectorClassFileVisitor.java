@@ -49,8 +49,10 @@ public class CollectorClassFileVisitor implements ClassFileVisitor {
     @Override
     public void visitClass(String className, InputStream in) {
         // inner classes have equivalent compilation requirement as container class
-        if (className.indexOf('$') < 0 && !excludedClasses.isMatch(className)) {
-            classes.add(className);
+        int innerClassSeparator = className.indexOf('$');
+        String containerClass = innerClassSeparator < 0 ? className : className.substring(0, innerClassSeparator);
+        if (!excludedClasses.isMatch(containerClass)) {
+            classes.add(containerClass);
         }
     }
 

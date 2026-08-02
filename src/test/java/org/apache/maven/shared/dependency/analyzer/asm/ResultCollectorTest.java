@@ -18,6 +18,7 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -31,6 +32,9 @@ import org.apache.maven.shared.dependency.analyzer.testcases.MethodHandleCases;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -120,5 +124,27 @@ class ResultCollectorTest {
             assertThat(dependency).doesNotContain("$");
         }
         assertThat(dependencies).contains("java.lang.System");
+    }
+
+    @Test
+    void testInnerClassWithoutContainerClassInConstantPool() {
+        ClassWriter writer = new ClassWriter(0);
+        writer.visit(Opcodes.V17, Opcodes.ACC_PUBLIC, "consumer/Example", null, "java/lang/Object", null);
+
+        MethodVisitor method = writer.visitMethod(Opcodes.ACC_PUBLIC, "use", "()V", null, null);
+        method.visitCode();
+        method.visitTypeInsn(Opcodes.NEW, "dependency/Outer$Inner");
+        method.visitInsn(Opcodes.DUP);
+        method.visitMethodInsn(Opcodes.INVOKESPECIAL, "dependency/Outer$Inner", "<init>", "()V", false);
+        method.visitInsn(Opcodes.POP);
+        method.visitInsn(Opcodes.RETURN);
+        method.visitMaxs(2, 1);
+        method.visitEnd();
+        writer.visitEnd();
+
+        DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
+        visitor.visitClass("consumer.Example", new ByteArrayInputStream(writer.toByteArray()));
+
+        assertThat(visitor.getDependencies()).contains("dependency.Outer").doesNotContain("dependency.Outer$Inner");
     }
 }

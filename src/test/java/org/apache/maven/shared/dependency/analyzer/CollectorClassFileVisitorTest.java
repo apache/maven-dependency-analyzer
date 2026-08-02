@@ -51,4 +51,12 @@ class CollectorClassFileVisitorTest {
 
         assertThat(visitor.getClasses()).isEqualTo(expected);
     }
+
+    @Test
+    void testVisitInnerClassAsContainer() {
+        visitor.visitClass("a.b.Outer$Inner", null);
+        visitor.visitClass("x.y.Outer$Inner$Nested", null);
+
+        assertThat(visitor.getClasses()).containsExactlyInAnyOrder("a.b.Outer", "x.y.Outer");
+    }
 }

@@ -109,9 +109,9 @@ public class ResultCollector {
      */
     public void add(final String usedByClass, final String name) {
         // inner classes have equivalent compilation requirement as container class
-        if (name.indexOf('$') < 0) {
-            classUsages.add(new DependencyUsage(name, usedByClass));
-        }
+        int innerClassSeparator = name.indexOf('$');
+        String containerClass = innerClassSeparator < 0 ? name : name.substring(0, innerClassSeparator);
+        classUsages.add(new DependencyUsage(containerClass, usedByClass));
     }
 
     void addNames(final String usedByClass, final String[] names) {
