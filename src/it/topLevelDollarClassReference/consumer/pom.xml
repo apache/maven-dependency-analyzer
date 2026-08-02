@@ -26,64 +26,22 @@
 
   <parent>
     <groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
-    <artifactId>kotlin-inner-class-reference</artifactId>
+    <artifactId>top-level-dollar-class-reference</artifactId>
     <version>1.0</version>
   </parent>
 
-  <artifactId>kotlin-consumer</artifactId>
-
-  <properties>
-    <kotlin.version>2.4.10</kotlin.version>
-    <kotlin.compiler.daemon>false</kotlin.compiler.daemon>
-  </properties>
+  <artifactId>dollar-class-consumer</artifactId>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
-      <artifactId>nested-class-library</artifactId>
+      <artifactId>dollar-class-library</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib</artifactId>
-      <version>${kotlin.version}</version>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.jetbrains.kotlin</groupId>
-        <artifactId>kotlin-maven-plugin</artifactId>
-        <version>${kotlin.version}</version>
-        <executions>
-          <execution>
-            <id>compile</id>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.3.0</version>
-        <executions>
-          <execution>
-            <id>kotlin-sources</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>src/main/kotlin</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.shared.dependency-analyzer.tests</groupId>
         <artifactId>maven-mock-plugin</artifactId>

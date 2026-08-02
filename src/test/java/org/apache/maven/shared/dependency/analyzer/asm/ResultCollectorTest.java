@@ -118,12 +118,9 @@ class ResultCollectorTest {
     }
 
     @Test
-    void testInnerClassAsContainer() throws IOException {
+    void testInnerClassNamePreserved() throws IOException {
         Set<String> dependencies = getDependencies(InnerClassCase.class);
-        for (String dependency : dependencies) {
-            assertThat(dependency).doesNotContain("$");
-        }
-        assertThat(dependencies).contains("java.lang.System");
+        assertThat(dependencies).contains("java.lang.System", "java.lang.invoke.MethodHandles$Lookup");
     }
 
     @Test
@@ -145,6 +142,6 @@ class ResultCollectorTest {
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
         visitor.visitClass("consumer.Example", new ByteArrayInputStream(writer.toByteArray()));
 
-        assertThat(visitor.getDependencies()).contains("dependency.Outer").doesNotContain("dependency.Outer$Inner");
+        assertThat(visitor.getDependencies()).contains("dependency.Outer$Inner").doesNotContain("dependency.Outer");
     }
 }

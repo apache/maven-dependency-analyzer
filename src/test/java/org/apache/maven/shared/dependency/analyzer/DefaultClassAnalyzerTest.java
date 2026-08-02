@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.JarOutputStream;
@@ -89,6 +90,20 @@ class DefaultClassAnalyzerTest {
         } catch (ZipException e) {
             assertThat(e).hasMessageStartingWith("Cannot process Jar entry on URL:");
         }
+    }
+
+    @Test
+    void testAnalyzeDirectoryPreservesDollarClassNames() throws IOException {
+        Path directory = Files.createDirectories(tempDir.resolve("classes/library"));
+        Files.write(directory.resolve("Dollar$Class.class"), new byte[0]);
+        Files.write(directory.resolve("Outer$Inner.class"), new byte[0]);
+
+        DefaultClassAnalyzer analyzer = new DefaultClassAnalyzer();
+        Set<String> actualClasses = analyzer.analyze(
+                tempDir.resolve("classes").toUri().toURL(),
+                new ClassesPatterns(Collections.singleton("library\\.Outer\\$Inner")));
+
+        assertThat(actualClasses).containsExactly("library.Dollar$Class");
     }
 
     private void addZipEntry(JarOutputStream out, String fileName, String content) throws IOException {

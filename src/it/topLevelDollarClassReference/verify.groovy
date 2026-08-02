@@ -21,8 +21,7 @@ def analysis = new File( basedir, 'consumer/target/analysis.txt' ).text
 
 def expected = '''
 UsedDeclaredArtifacts:
- org.apache.maven.shared.dependency-analyzer.tests:nested-class-library:jar:1.0:compile
- org.jetbrains.kotlin:kotlin-stdlib:jar:2.4.10:compile
+ org.apache.maven.shared.dependency-analyzer.tests:dollar-class-library:jar:1.0:compile
 
 UsedUndeclaredArtifactsWithClasses:
 
