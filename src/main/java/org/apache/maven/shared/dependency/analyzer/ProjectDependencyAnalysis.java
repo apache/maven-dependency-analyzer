@@ -88,6 +88,14 @@ public class ProjectDependencyAnalysis {
                 testArtifactsWithNonTestScope);
     }
 
+    /**
+     * Creates an analysis result with usage details.
+     *
+     * @param usedDeclaredArtifacts artifacts both used and declared
+     * @param usedUndeclaredArtifacts artifacts used but not declared
+     * @param unusedDeclaredArtifacts artifacts declared but not used
+     * @param testArtifactsWithNonTestScope artifacts only used in tests but not declared with test scope
+     */
     public ProjectDependencyAnalysis(
             Map<Artifact, Set<DependencyUsage>> usedDeclaredArtifacts,
             Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifacts,
@@ -145,6 +153,11 @@ public class ProjectDependencyAnalysis {
         return usedUndeclaredArtifactsWithClasses;
     }
 
+    /**
+     * Returns artifacts used but not declared with their usages.
+     *
+     * @return artifacts used but not declared with their usages
+     */
     public Map<Artifact, Set<DependencyUsage>> getUsedUndeclaredArtifactsWithUsages() {
         return safeCopy(usedUndeclaredArtifacts);
     }

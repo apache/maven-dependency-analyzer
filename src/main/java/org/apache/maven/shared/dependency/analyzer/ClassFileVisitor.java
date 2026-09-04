@@ -27,5 +27,11 @@ import java.io.InputStream;
  */
 public interface ClassFileVisitor {
 
+    /**
+     * Visits a class file.
+     *
+     * @param className class name
+     * @param in class file contents
+     */
     void visitClass(String className, InputStream in);
 }

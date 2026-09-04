@@ -40,6 +40,7 @@ public class DefaultFieldVisitor extends FieldVisitor {
      *
      * @param annotationVisitor a {@link org.objectweb.asm.AnnotationVisitor} object.
      * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
+     * @param usedByClass class containing the reference
      */
     public DefaultFieldVisitor(
             AnnotationVisitor annotationVisitor, ResultCollector resultCollector, String usedByClass) {

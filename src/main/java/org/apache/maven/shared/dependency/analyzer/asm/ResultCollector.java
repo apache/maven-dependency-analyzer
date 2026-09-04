@@ -57,6 +57,7 @@ public class ResultCollector {
     /**
      * <p>addName.</p>
      *
+     * @param usedByClass class containing the reference
      * @param name a {@link java.lang.String} object.
      */
     public void addName(final String usedByClass, String name) {
@@ -105,6 +106,7 @@ public class ResultCollector {
     /**
      * <p>add.</p>
      *
+     * @param usedByClass class containing the reference
      * @param name a {@link java.lang.String} object.
      */
     public void add(final String usedByClass, final String name) {

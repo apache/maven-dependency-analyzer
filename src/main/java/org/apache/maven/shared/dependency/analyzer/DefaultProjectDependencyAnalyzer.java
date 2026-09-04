@@ -326,6 +326,14 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         abstract boolean includes(String scope);
     }
 
+    /**
+     * Maps dependency artifacts to their classes.
+     *
+     * @param project Maven project
+     * @param excludedClasses patterns of classes to exclude
+     * @return dependency artifacts and their classes
+     * @throws IOException if a dependency cannot be read
+     */
     protected Map<Artifact, Set<String>> buildArtifactClassMap(MavenProject project, ClassesPatterns excludedClasses)
             throws IOException {
         Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();

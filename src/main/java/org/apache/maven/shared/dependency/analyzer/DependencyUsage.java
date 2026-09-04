@@ -29,6 +29,12 @@ public class DependencyUsage {
 
     private final String usedBy;
 
+    /**
+     * Creates a dependency usage.
+     *
+     * @param dependencyClass referenced dependency class
+     * @param usedBy class containing the reference
+     */
     public DependencyUsage(String dependencyClass, String usedBy) {
         this.dependencyClass = dependencyClass;
         this.usedBy = usedBy;

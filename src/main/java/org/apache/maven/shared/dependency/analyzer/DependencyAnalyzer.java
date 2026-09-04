@@ -59,6 +59,7 @@ public interface DependencyAnalyzer {
      * <p>analyzeUsages.</p>
      *
      * @param url the JAR file or directory to analyze
+     * @param excludeClasses patterns of classes to exclude
      * @return the set of class names referenced by the library, paired with the
      * classes declaring those references.
      * @throws IOException if an error occurs reading a JAR or .class file

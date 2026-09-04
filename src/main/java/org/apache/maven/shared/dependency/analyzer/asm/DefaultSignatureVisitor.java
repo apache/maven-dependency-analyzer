@@ -35,6 +35,7 @@ public class DefaultSignatureVisitor extends SignatureVisitor {
      * <p>Constructor for DefaultSignatureVisitor.</p>
      *
      * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
+     * @param usedByClass class containing the reference
      */
     public DefaultSignatureVisitor(ResultCollector resultCollector, String usedByClass) {
         super(Opcodes.ASM9);

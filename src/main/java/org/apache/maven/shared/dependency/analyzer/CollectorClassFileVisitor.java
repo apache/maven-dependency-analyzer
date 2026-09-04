@@ -40,6 +40,11 @@ public class CollectorClassFileVisitor implements ClassFileVisitor {
         this(new ClassesPatterns());
     }
 
+    /**
+     * Creates a visitor with excluded class patterns.
+     *
+     * @param excludedClasses patterns of classes to exclude
+     */
     public CollectorClassFileVisitor(ClassesPatterns excludedClasses) {
         classes = new HashSet<>();
         this.excludedClasses = excludedClasses;

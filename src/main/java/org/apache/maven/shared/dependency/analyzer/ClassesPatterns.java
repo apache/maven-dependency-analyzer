@@ -43,10 +43,17 @@ public class ClassesPatterns {
         }
     }
 
+    /** Creates an empty set of patterns. */
     public ClassesPatterns() {
         this.patterns = Collections.emptySet();
     }
 
+    /**
+     * Checks whether a class name matches a pattern.
+     *
+     * @param className class name to check
+     * @return whether the class name matches
+     */
     public boolean isMatch(String className) {
         if (patterns.isEmpty()) {
             return false;

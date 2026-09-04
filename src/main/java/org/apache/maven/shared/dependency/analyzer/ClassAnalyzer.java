@@ -44,6 +44,7 @@ public interface ClassAnalyzer {
      * <p>analyze.</p>
      *
      * @param url the JAR file or directory to analyze
+     * @param excludedClasses patterns of classes to exclude
      * @return a {@link java.util.Set} object
      * @throws java.io.IOException if any
      */

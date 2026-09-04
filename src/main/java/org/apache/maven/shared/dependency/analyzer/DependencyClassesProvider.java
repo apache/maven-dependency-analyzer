@@ -34,6 +34,7 @@ public interface DependencyClassesProvider {
      * @param project         the Maven project
      * @param excludedClasses patterns of classes to exclude
      * @return the set of dependency usages
+     * @throws IOException if dependency classes cannot be read
      */
     Set<DependencyUsage> getDependencyClasses(MavenProject project, ClassesPatterns excludedClasses) throws IOException;
 }

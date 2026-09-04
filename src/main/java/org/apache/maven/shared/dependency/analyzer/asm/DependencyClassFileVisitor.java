@@ -50,6 +50,8 @@ public class DependencyClassFileVisitor implements ClassFileVisitor {
 
     /**
      * <p>Constructor for DependencyClassFileVisitor.</p>
+     *
+     * @param excludedClasses patterns of classes to exclude
      */
     public DependencyClassFileVisitor(ClassesPatterns excludedClasses) {
         this.excludedClasses = excludedClasses;

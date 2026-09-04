@@ -37,6 +37,7 @@ public class DefaultAnnotationVisitor extends AnnotationVisitor {
      * <p>Constructor for DefaultAnnotationVisitor.</p>
      *
      * @param resultCollector a {@link org.apache.maven.shared.dependency.analyzer.asm.ResultCollector} object.
+     * @param usedByClass class containing the reference
      */
     public DefaultAnnotationVisitor(ResultCollector resultCollector, String usedByClass) {
         super(Opcodes.ASM9);
