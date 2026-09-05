@@ -29,7 +29,7 @@
   </parent>
 
   <artifactId>maven-dependency-analyzer</artifactId>
-  <version>1.17.2</version>
+  <version>1.17.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Maven Dependency Analyzer</name>
@@ -60,7 +60,7 @@
     <mavenVersion>3.9.16</mavenVersion>
     <resolverVersion>1.9.27</resolverVersion>
     <javaVersion>8</javaVersion>
-    <project.build.outputTimestamp>2026-09-05T18:05:43Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-09-05T18:06:14Z</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
