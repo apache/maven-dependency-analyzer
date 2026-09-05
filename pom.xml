@@ -163,6 +163,19 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.cyclonedx</groupId>
+          <artifactId>cyclonedx-maven-plugin</artifactId>
+          <configuration>
+            <outputName>${project.artifactId}-${project.version}-cyclonedx</outputName>
+            <outputFormat>json</outputFormat>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
         <groupId>org.eclipse.sisu</groupId>
@@ -213,6 +226,52 @@
                   <goal>integration-test</goal>
                   <goal>verify</goal>
                 </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>push-to-atr</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>eu.maveniverse.maven.plugins</groupId>
+            <artifactId>checksum-plugin3</artifactId>
+            <version>0.2.2</version>
+            <executions>
+              <execution>
+                <id>sbom-checksum</id>
+                <goals>
+                  <goal>project</goal>
+                </goals>
+                <phase>post-integration-test</phase>
+                <configuration>
+                  <alg>SHA-512</alg>
+                  <includedClassifiers>
+                    <includedClassifier>cyclonedx</includedClassifier>
+                  </includedClassifiers>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.tooling</groupId>
+            <artifactId>atr-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sbom-upload-to-atr</id>
+                <goals>
+                  <goal>upload</goal>
+                </goals>
+                <configuration>
+                  <files>
+                    <file>${project.build.directory}/${project.artifactId}-${project.version}-cyclonedx.json</file>
+                    <file>${project.build.directory}/${project.artifactId}-${project.version}-cyclonedx.json.asc</file>
+                    <file>${project.build.directory}/${project.artifactId}-${project.version}-cyclonedx.json.sha512</file>
+                  </files>
+                </configuration>
               </execution>
             </executions>
           </plugin>
