@@ -422,8 +422,15 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         @Override
         @SuppressWarnings("deprecation")
         public Set<Artifact> getDependencyArtifacts() {
-            // Make ProjectDependenciesResolver collect the filtered model dependencies while retaining all other
-            // decorator-visible state copied by MavenProject(MavenProject).
+            // Make ProjectDependenciesResolver collect the filtered model dependencies rather than reusing the
+            // copied resolved state.
+            return null;
+        }
+
+        @Override
+        public Set<Artifact> getArtifacts() {
+            // ProjectDependenciesResolver otherwise reads the source project's copied resolved artifacts, including
+            // the candidates that this graph intentionally excludes.
             return null;
         }
     }
