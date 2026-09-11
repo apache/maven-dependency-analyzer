@@ -314,7 +314,7 @@ class DefaultProjectDependencyAnalyzerTest {
                     .noneMatch(dependency -> dependency.getArtifactId().endsWith("candidate"));
             assertThat(graphProject.getOriginalModel()).isSameAs(originalModel);
             assertThat(graphProject.getActiveProfiles()).containsExactly(activeProfile);
-            assertThat(graphProject.getArtifacts()).containsExactly(resolvedState);
+            assertThat(graphProject.getArtifacts()).isNull();
             assertThat(graphProject.getManagedVersionMap()).isSameAs(managedVersionMap);
             assertThat(graphProject.isExecutionRoot()).isTrue();
         });
