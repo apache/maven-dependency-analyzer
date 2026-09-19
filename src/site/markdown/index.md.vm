@@ -22,9 +22,10 @@ under the License.
 Analyzes the dependencies of a project for undeclared or unused artifacts.
 
 **Warning**: Because analysis is done on the bytecode rather than the source,
-some cases are not detected including constants, annotations with source-only retention,
+some cases are not detected, including annotations with source-only retention
 and links in Javadoc. This can lead to incorrect results when these are the only uses
-of a dependency.
+of a dependency. Inlined constants are detected: javac and ecj record the constant's
+declaring class in the constant pool, which the analyzer reads.
 
 The main component is `ProjectDependencyAnalyzer`
 ([javadoc](./apidocs/org/apache/maven/shared/dependency/analyzer/ProjectDependencyAnalyzer.html)), which uses
