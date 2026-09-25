@@ -163,22 +163,26 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <configuration>
+            <inputExcludes combine.children="append">
+              <!-- Corrupted class files -->
+              <exclude>**/*.clazz</exclude>
+              <!-- binary class for unit test -->
+              <exclude>**/*.classx</exclude>
+            </inputExcludes>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.eclipse.sisu</groupId>
         <artifactId>sisu-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <configuration>
-          <excludes combine.children="append">
-            <!-- Corrupted class files -->
-            <exclude>**/*.clazz</exclude>
-            <!-- binary class for unit test -->
-            <exclude>**/*.classx</exclude>
-          </excludes>
-        </configuration>
       </plugin>
     </plugins>
   </build>
