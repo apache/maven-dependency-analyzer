@@ -22,12 +22,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.api.Dependency;
+import org.apache.maven.api.DependencyScope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests <code>ProjectDependencyAnalysis</code>.
@@ -38,10 +39,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProjectDependencyAnalysisTest {
     @Test
     void testConstructor() {
-        Set<Artifact> usedDeclaredArtifacts = new HashSet<>();
-        Set<Artifact> usedUndeclaredArtifacts = new HashSet<>();
-        Set<Artifact> unusedDeclaredArtifacts = new HashSet<>();
-        Set<Artifact> testArtifactsWithNonTestScope = new HashSet<>();
+        Set<Dependency> usedDeclaredArtifacts = new HashSet<>();
+        Set<Dependency> usedUndeclaredArtifacts = new HashSet<>();
+        Set<Dependency> unusedDeclaredArtifacts = new HashSet<>();
+        Set<Dependency> testArtifactsWithNonTestScope = new HashSet<>();
 
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
                 usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts, testArtifactsWithNonTestScope);
@@ -53,9 +54,9 @@ class ProjectDependencyAnalysisTest {
 
     @Test
     void ignoreNonCompileShouldFilterOnlyUnusedDeclare() {
-        Artifact artifactCompile = aTestArtifact("test1", Artifact.SCOPE_COMPILE);
-        Artifact artifactProvided = aTestArtifact("test2", Artifact.SCOPE_PROVIDED);
-        Artifact artifactTest = aTestArtifact("test3", Artifact.SCOPE_TEST);
+        Dependency artifactCompile = aTestArtifact("test1", DependencyScope.COMPILE);
+        Dependency artifactProvided = aTestArtifact("test2", DependencyScope.PROVIDED);
+        Dependency artifactTest = aTestArtifact("test3", DependencyScope.TEST);
 
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
                 asSet(artifactCompile, artifactProvided, artifactTest),
@@ -70,7 +71,7 @@ class ProjectDependencyAnalysisTest {
 
         assertThat(compileOnlyAnalysis.getUnusedDeclaredArtifacts())
                 .hasSize(1)
-                .allSatisfy(a -> assertThat(a.getScope()).isEqualTo(Artifact.SCOPE_COMPILE));
+                .allSatisfy(a -> assertThat(a.getScope()).isEqualTo(DependencyScope.COMPILE));
 
         assertThat(compileOnlyAnalysis.getTestArtifactsWithNonTestScope()).hasSize(3);
     }
@@ -79,8 +80,11 @@ class ProjectDependencyAnalysisTest {
         return new HashSet<>(Arrays.asList(items));
     }
 
-    private Artifact aTestArtifact(String artifactId, String scope) {
-        return new DefaultArtifact(
-                "groupId", artifactId, VersionRange.createFromVersion("1.0"), scope, "jar", "", null);
+    private Dependency aTestArtifact(String artifactId, DependencyScope scope) {
+        Dependency dependency = mock(Dependency.class);
+        when(dependency.getGroupId()).thenReturn("groupId");
+        when(dependency.getArtifactId()).thenReturn(artifactId);
+        when(dependency.getScope()).thenReturn(scope);
+        return dependency;
     }
 }

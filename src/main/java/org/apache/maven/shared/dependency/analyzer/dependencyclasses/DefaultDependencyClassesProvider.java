@@ -18,14 +18,13 @@
  */
 package org.apache.maven.shared.dependency.analyzer.dependencyclasses;
 
-import javax.inject.Inject;
-
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Set;
 
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.di.Inject;
 import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.apache.maven.shared.dependency.analyzer.DependencyClassesProvider;
@@ -44,13 +43,12 @@ abstract class DefaultDependencyClassesProvider implements DependencyClassesProv
     }
 
     @Override
-    public Set<DependencyUsage> getDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
+    public Set<DependencyUsage> getDependencyClasses(Project project, ClassesPatterns excludedClasses)
             throws IOException {
-        String classesDirectory = getOutputClassesDirectory(project);
-        URL url = new File(classesDirectory).toURI().toURL();
+        URL url = getOutputClassesDirectory(project).toUri().toURL();
 
         return dependencyAnalyzer.analyzeUsages(url, excludedClasses);
     }
 
-    protected abstract String getOutputClassesDirectory(MavenProject project);
+    protected abstract Path getOutputClassesDirectory(Project project);
 }

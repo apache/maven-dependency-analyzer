@@ -18,12 +18,13 @@
  */
 package org.apache.maven.shared.dependency.analyzer.dependencyclasses;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 
-import org.apache.maven.model.Build;
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.ProjectScope;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
 import org.junit.jupiter.api.Test;
@@ -48,15 +49,14 @@ class DefaultMainDependencyClassesProviderTest {
 
     @Test
     void mainOutputIsUsed() throws IOException {
-        MavenProject project = Mockito.mock(MavenProject.class);
-        Build build = Mockito.mock(Build.class);
-        when(project.getBuild()).thenReturn(build);
-        when(build.getOutputDirectory()).thenReturn("target/classes");
+        Project project = Mockito.mock(Project.class);
+        Path outputDirectory = Paths.get("target/classes");
+        when(project.getOutputDirectory(ProjectScope.MAIN)).thenReturn(outputDirectory);
 
         Set<DependencyUsage> dependencyUsages = provider.getDependencyClasses(project, null);
 
         assertThat(dependencyUsages).isNotNull();
 
-        verify(analyzer).analyzeUsages(new File("target/classes").toURI().toURL(), null);
+        verify(analyzer).analyzeUsages(outputDirectory.toUri().toURL(), null);
     }
 }

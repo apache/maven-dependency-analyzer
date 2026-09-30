@@ -18,13 +18,13 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
 import java.util.zip.ZipException;
+
+import org.apache.maven.api.di.Named;
+import org.apache.maven.api.di.Singleton;
 
 /**
  * <p>DefaultClassAnalyzer class.</p>

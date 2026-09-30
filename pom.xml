@@ -29,7 +29,7 @@
   </parent>
 
   <artifactId>maven-dependency-analyzer</artifactId>
-  <version>1.17.3-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Maven Dependency Analyzer</name>
@@ -57,9 +57,10 @@
   </distributionManagement>
 
   <properties>
-    <mavenVersion>3.10.0</mavenVersion>
-    <resolverVersion>1.9.27</resolverVersion>
-    <javaVersion>8</javaVersion>
+    <mavenVersion>4.0.0-rc-7</mavenVersion>
+    <javaVersion>17</javaVersion>
+    <!-- used to build the Maven 4 API mock plugin of the integration tests -->
+    <mavenPluginToolsVersion>4.0.0-beta-1</mavenPluginToolsVersion>
     <project.build.outputTimestamp>2026-09-05T18:06:14Z</project.build.outputTimestamp>
   </properties>
 
@@ -78,39 +79,32 @@
 
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
+      <artifactId>maven-api-core</artifactId>
       <version>${mavenVersion}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-artifact</artifactId>
+      <artifactId>maven-api-model</artifactId>
       <version>${mavenVersion}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-model</artifactId>
+      <artifactId>maven-api-xml</artifactId>
       <version>${mavenVersion}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-api</artifactId>
-      <version>${resolverVersion}</version>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-api-di</artifactId>
+      <version>${mavenVersion}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-util</artifactId>
-      <version>${resolverVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-      <version>1</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.19</version>
       <scope>provided</scope>
     </dependency>
 
@@ -118,12 +112,6 @@
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
       <version>9.10.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-xml</artifactId>
-      <!-- only exported by Maven Xpp3Dom class is used, so can be provided -->
-      <scope>provided</scope>
     </dependency>
 
     <!-- testing support -->
@@ -157,7 +145,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.36</version>
+      <version>2.0.19</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -179,12 +167,6 @@
         </plugin>
       </plugins>
     </pluginManagement>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.sisu</groupId>
-        <artifactId>sisu-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
   </build>
 
   <profiles>
