@@ -32,19 +32,22 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
+import org.apache.maven.artifact.repository.MavenArtifactRepository;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Profile;
-import org.apache.maven.project.DependencyResolutionException;
-import org.apache.maven.project.DependencyResolutionRequest;
-import org.apache.maven.project.DependencyResolutionResult;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectDependenciesResolver;
+import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.collection.CollectResult;
+import org.eclipse.aether.collection.DependencyCollectionException;
 import org.eclipse.aether.graph.DefaultDependencyNode;
 import org.eclipse.aether.graph.DependencyNode;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.util.artifact.DefaultArtifactTypeRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -52,6 +55,7 @@ import org.mockito.ArgumentCaptor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -64,7 +68,7 @@ import static org.mockito.Mockito.when;
  * @see DefaultProjectDependencyAnalyzer
  */
 class DefaultProjectDependencyAnalyzerTest {
-    private ProjectDependenciesResolver projectDependenciesResolver;
+    private RepositorySystem repositorySystem;
 
     private MavenSession mavenSession;
 
@@ -74,12 +78,12 @@ class DefaultProjectDependencyAnalyzerTest {
 
     @BeforeEach
     void setUp() {
-        projectDependenciesResolver = mock(ProjectDependenciesResolver.class);
+        repositorySystem = mock(RepositorySystem.class);
         mavenSession = mock(MavenSession.class);
         artifactHandlerManager = mock(ArtifactHandlerManager.class);
         when(artifactHandlerManager.getArtifactHandler(anyString())).thenReturn(mock(ArtifactHandler.class));
         analyzer = new DefaultProjectDependencyAnalyzer(
-                projectDependenciesResolver, () -> mavenSession, artifactHandlerManager);
+                repositorySystem, Collections.emptyList(), () -> mavenSession, artifactHandlerManager);
     }
 
     @Test
@@ -243,22 +247,17 @@ class DefaultProjectDependencyAnalyzerTest {
 
         assertThat(analyzer.getTestArtifactsWithNonTestScope(new MavenProject(), Collections.singleton(candidate)))
                 .containsExactly(candidate);
-        verifyNoInteractions(projectDependenciesResolver);
+        verifyNoInteractions(repositorySystem);
     }
 
     @Test
     void testRetainsTestOnlyCompileDependencyWhenRuntimeGraphCollectionFails() throws Exception {
         Artifact candidate = aTestArtifact("candidate");
         MavenProject project = projectWithRepositorySession(candidate);
-        DependencyResolutionResult failedResult = mock(DependencyResolutionResult.class);
-        when(failedResult.getUnresolvedDependencies()).thenReturn(Collections.emptyList());
-        when(failedResult.getCollectionErrors()).thenReturn(Collections.emptyList());
-        DependencyResolutionException failure =
-                new DependencyResolutionException(failedResult, "collection failed", new Exception("failure"));
-        DependencyResolutionResult compileResult = dependencyGraph("candidate", "2.0");
-        when(projectDependenciesResolver.resolve(any(DependencyResolutionRequest.class)))
-                .thenReturn(compileResult)
-                .thenThrow(failure);
+        CollectRequest failedRequest = new CollectRequest();
+        when(repositorySystem.collectDependencies(any(RepositorySystemSession.class), any(CollectRequest.class)))
+                .thenReturn(dependencyGraph("candidate", "2.0"))
+                .thenThrow(new DependencyCollectionException(new CollectResult(failedRequest)));
 
         assertThat(analyzer.getTestArtifactsWithNonTestScope(project, Collections.singleton(candidate)))
                 .containsExactly(candidate);
@@ -275,49 +274,54 @@ class DefaultProjectDependencyAnalyzerTest {
         Artifact test = aTestArtifactWithScope("test", Artifact.SCOPE_TEST);
         MavenProject project = projectWithRepositorySession(
                 compileCandidate, runtimeCandidate, compile, provided, system, runtime, test);
-        Model originalModel = new Model();
-        Profile activeProfile = new Profile();
-        activeProfile.setId("active");
-        Artifact resolvedState = aTestArtifact("resolved-state");
-        Map<String, Artifact> managedVersionMap = Collections.singletonMap("managed", aTestArtifact("managed"));
-        project.setOriginalModel(originalModel);
-        project.setActiveProfiles(Collections.singletonList(activeProfile));
-        project.setArtifacts(Collections.singleton(resolvedState));
-        project.setManagedVersionMap(managedVersionMap);
-        project.setExecutionRoot(true);
+        Dependency managed = toDependency(aTestArtifact("managed"));
+        DependencyManagement dependencyManagement = new DependencyManagement();
+        dependencyManagement.addDependency(managed);
+        project.getModel().setDependencyManagement(dependencyManagement);
+        project.setRemoteArtifactRepositories(Collections.singletonList(new MavenArtifactRepository(
+                "central", "https://repo.example.org", new DefaultRepositoryLayout(), null, null)));
+        List<RemoteRepository> remoteRepositories = project.getRemoteProjectRepositories();
+        assertThat(remoteRepositories).hasSize(1);
 
-        DependencyResolutionResult compileResult = dependencyGraph("compile-candidate", "2.0");
-        DependencyResolutionResult runtimeResult = dependencyGraph("runtime-candidate", "2.0");
-        when(projectDependenciesResolver.resolve(any(DependencyResolutionRequest.class)))
-                .thenReturn(compileResult, runtimeResult);
+        when(repositorySystem.collectDependencies(any(RepositorySystemSession.class), any(CollectRequest.class)))
+                .thenReturn(dependencyGraph("compile-candidate", "2.0"), dependencyGraph("runtime-candidate", "2.0"));
 
         Set<Artifact> candidates = new LinkedHashSet<>(Arrays.asList(compileCandidate, runtimeCandidate));
         assertThat(analyzer.getTestArtifactsWithNonTestScope(project, candidates))
                 .isEmpty();
 
-        ArgumentCaptor<DependencyResolutionRequest> requestCaptor =
-                ArgumentCaptor.forClass(DependencyResolutionRequest.class);
-        verify(projectDependenciesResolver, times(2)).resolve(requestCaptor.capture());
-        List<DependencyResolutionRequest> requests = requestCaptor.getAllValues();
-        assertThat(artifactIds(requests.get(0).getMavenProject()))
-                .containsExactlyInAnyOrder("compile", "provided", "system");
-        assertThat(artifactIds(requests.get(1).getMavenProject())).containsExactlyInAnyOrder("compile", "runtime");
-        DependencyNode dependencyNode = new DefaultDependencyNode(
-                new org.eclipse.aether.artifact.DefaultArtifact("groupId", "artifactId", "jar", "1.0"));
+        ArgumentCaptor<CollectRequest> requestCaptor = ArgumentCaptor.forClass(CollectRequest.class);
+        verify(repositorySystem, times(2))
+                .collectDependencies(eq(mavenSession.getRepositorySession()), requestCaptor.capture());
+        List<CollectRequest> requests = requestCaptor.getAllValues();
+        assertThat(artifactIds(requests.get(0))).containsExactlyInAnyOrder("compile", "provided", "system");
+        assertThat(artifactIds(requests.get(1))).containsExactlyInAnyOrder("compile", "runtime");
         assertThat(requests).allSatisfy(request -> {
-            MavenProject graphProject = request.getMavenProject();
-            assertThat(request.getRepositorySession()).isSameAs(mavenSession.getRepositorySession());
-            assertThat(request.getResolutionFilter()).isNotNull();
-            assertThat(request.getResolutionFilter().accept(dependencyNode, Collections.emptyList()))
-                    .isFalse();
-            assertThat(graphProject.getDependencies())
-                    .noneMatch(dependency -> dependency.getArtifactId().endsWith("candidate"));
-            assertThat(graphProject.getOriginalModel()).isSameAs(originalModel);
-            assertThat(graphProject.getActiveProfiles()).containsExactly(activeProfile);
-            assertThat(graphProject.getArtifacts()).containsExactly(resolvedState);
-            assertThat(graphProject.getManagedVersionMap()).isSameAs(managedVersionMap);
-            assertThat(graphProject.isExecutionRoot()).isTrue();
+            assertThat(request.getRequestContext()).isEqualTo("project");
+            assertThat(request.getRepositories()).isEqualTo(remoteRepositories);
+            assertThat(request.getManagedDependencies())
+                    .extracting(d -> d.getArtifact().getArtifactId())
+                    .containsExactly("managed");
         });
+    }
+
+    @Test
+    void testAppliesRepositorySessionDecorators() throws Exception {
+        Artifact candidate = aTestArtifact("candidate");
+        MavenProject project = projectWithRepositorySession(candidate);
+        RepositorySystemSession decorated = mock(RepositorySystemSession.class);
+        when(decorated.getArtifactTypeRegistry()).thenReturn(new DefaultArtifactTypeRegistry());
+        analyzer = new DefaultProjectDependencyAnalyzer(
+                repositorySystem,
+                Collections.singletonList((p, session) -> p == project ? decorated : session),
+                () -> mavenSession,
+                artifactHandlerManager);
+        when(repositorySystem.collectDependencies(any(RepositorySystemSession.class), any(CollectRequest.class)))
+                .thenReturn(dependencyGraph("other", "1.0"));
+
+        assertThat(analyzer.getTestArtifactsWithNonTestScope(project, Collections.singleton(candidate)))
+                .containsExactly(candidate);
+        verify(repositorySystem, times(2)).collectDependencies(eq(decorated), any(CollectRequest.class));
     }
 
     private MavenProject projectWithRepositorySession(Artifact... dependencyArtifacts) {
@@ -325,21 +329,22 @@ class DefaultProjectDependencyAnalyzerTest {
         project.setDependencies(
                 Arrays.stream(dependencyArtifacts).map(this::toDependency).collect(Collectors.toList()));
         RepositorySystemSession repositorySession = mock(RepositorySystemSession.class);
+        when(repositorySession.getArtifactTypeRegistry()).thenReturn(new DefaultArtifactTypeRegistry());
         when(mavenSession.getRepositorySession()).thenReturn(repositorySession);
         return project;
     }
 
-    private DependencyResolutionResult dependencyGraph(String artifactId, String version) {
+    private CollectResult dependencyGraph(String artifactId, String version) {
         DependencyNode root = new DefaultDependencyNode((org.eclipse.aether.graph.Dependency) null);
         root.setChildren(Collections.singletonList(new DefaultDependencyNode(
                 new org.eclipse.aether.artifact.DefaultArtifact("groupId", artifactId, "jar", version))));
-        DependencyResolutionResult result = mock(DependencyResolutionResult.class);
-        when(result.getDependencyGraph()).thenReturn(root);
-        return result;
+        return new CollectResult(new CollectRequest()).setRoot(root);
     }
 
-    private Set<String> artifactIds(MavenProject project) {
-        return project.getDependencies().stream().map(Dependency::getArtifactId).collect(Collectors.toSet());
+    private Set<String> artifactIds(CollectRequest request) {
+        return request.getDependencies().stream()
+                .map(d -> d.getArtifact().getArtifactId())
+                .collect(Collectors.toSet());
     }
 
     private Dependency toDependency(Artifact artifact) {
