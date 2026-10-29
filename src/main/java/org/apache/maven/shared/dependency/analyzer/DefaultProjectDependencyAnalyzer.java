@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
@@ -142,6 +143,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
             Map<Artifact, Set<DependencyUsage>> usedArtifacts =
                     buildUsedArtifacts(classToArtifactMap, dependencyClasses);
+            creditClasslessAggregators(artifactClassMap, declaredArtifacts, usedArtifacts);
             Set<Artifact> mainUsedArtifacts = buildUsedArtifacts(classToArtifactMap, mainDependencyClasses)
                     .keySet();
 
@@ -468,6 +470,56 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         }
 
         return usedArtifacts;
+    }
+
+    /**
+     * Treats a declared artifact without classes of its own (for example {@code junit-jupiter}, which only carries
+     * {@code module-info.class}) as used when one of the artifacts it brings in directly is used. The used artifacts
+     * that are brought in by such an aggregator and are not declared themselves are then no longer reported as used
+     * undeclared. The direct dependencies are taken from the dependency trail of the resolved artifacts, so only the
+     * path that survived dependency mediation is considered.
+     *
+     * @param artifactClassMap the classes of each resolved artifact
+     * @param declaredArtifacts the artifacts declared by the project
+     * @param usedArtifacts the used artifacts, updated in place
+     */
+    static void creditClasslessAggregators(
+            Map<Artifact, Set<String>> artifactClassMap,
+            Set<Artifact> declaredArtifacts,
+            Map<Artifact, Set<DependencyUsage>> usedArtifacts) {
+        Set<String> declaredIds = declaredArtifacts.stream()
+                .map(Artifact::getDependencyConflictId)
+                .collect(Collectors.toSet());
+
+        for (Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet()) {
+            Artifact aggregator = entry.getKey();
+            if (!entry.getValue().isEmpty()
+                    || !declaredIds.contains(aggregator.getDependencyConflictId())
+                    || usedArtifacts.containsKey(aggregator)) {
+                continue;
+            }
+
+            String prefix = aggregator.getGroupId() + ":" + aggregator.getArtifactId() + ":";
+            Set<DependencyUsage> usages = new HashSet<>();
+            List<Artifact> usedChildren = new ArrayList<>();
+            for (Artifact used : usedArtifacts.keySet()) {
+                List<String> trail = used.getDependencyTrail();
+                if (trail != null && trail.size() == 3 && trail.get(1).startsWith(prefix)) {
+                    usedChildren.add(used);
+                    usages.addAll(usedArtifacts.get(used));
+                }
+            }
+            if (usedChildren.isEmpty()) {
+                continue;
+            }
+
+            usedArtifacts.put(aggregator, usages);
+            for (Artifact child : usedChildren) {
+                if (!declaredIds.contains(child.getDependencyConflictId())) {
+                    usedArtifacts.remove(child);
+                }
+            }
+        }
     }
 
     // MSHARED-47 an uncommon case where a commonly used
