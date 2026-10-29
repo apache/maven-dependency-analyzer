@@ -499,7 +499,9 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
     /**
      * Maps each class to the artifact that provides it. When several artifacts contain the class, a declared
      * artifact wins over an undeclared one, and otherwise the first one wins. If two declared artifacts contain the
-     * class, only the first of them is credited.
+     * class, only the first of them is credited. Scope is not considered: a declared test-scoped artifact that
+     * contains the class is credited even for main code, so an undeclared compile-scoped artifact with the same
+     * class is not reported as used.
      *
      * @param artifactClassMap the classes of each artifact
      * @param declaredArtifacts the artifacts declared by the project
