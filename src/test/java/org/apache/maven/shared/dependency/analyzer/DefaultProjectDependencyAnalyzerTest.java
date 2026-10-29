@@ -169,6 +169,81 @@ class DefaultProjectDependencyAnalyzerTest {
     }
 
     @Test
+    void testClasslessDeclaredAggregatorIsUsedWhenItsDirectDependencyIsUsed() {
+        Artifact jupiter = aTestArtifact("junit-jupiter");
+        Artifact api = aTestArtifact("junit-jupiter-api");
+        api.setDependencyTrail(Arrays.asList(
+                "groupId:project:jar:1.0", "groupId:junit-jupiter:jar:1.0", "groupId:junit-jupiter-api:jar:1.0"));
+
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(jupiter, Collections.emptySet());
+        artifactClassMap.put(api, Collections.singleton("org.junit.jupiter.api.Test"));
+
+        Map<Artifact, Set<DependencyUsage>> used = new LinkedHashMap<>();
+        used.put(api, Collections.singleton(new DependencyUsage("org.junit.jupiter.api.Test", "Main")));
+
+        DefaultProjectDependencyAnalyzer.creditClasslessAggregators(
+                artifactClassMap, Collections.singleton(jupiter), used);
+
+        assertThat(used.keySet()).containsExactly(jupiter);
+        assertThat(used.get(jupiter)).hasSize(1);
+    }
+
+    @Test
+    void testClasslessDeclaredAggregatorStaysUnusedWhenNothingItBringsInIsUsed() {
+        Artifact jupiter = aTestArtifact("junit-jupiter");
+
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(jupiter, Collections.emptySet());
+
+        Map<Artifact, Set<DependencyUsage>> used = new LinkedHashMap<>();
+
+        DefaultProjectDependencyAnalyzer.creditClasslessAggregators(
+                artifactClassMap, Collections.singleton(jupiter), used);
+
+        assertThat(used).isEmpty();
+    }
+
+    @Test
+    void testDeclaredChildOfClasslessAggregatorKeepsItsOwnCredit() {
+        Artifact jupiter = aTestArtifact("junit-jupiter");
+        Artifact api = aTestArtifact("junit-jupiter-api");
+        api.setDependencyTrail(Arrays.asList(
+                "groupId:project:jar:1.0", "groupId:junit-jupiter:jar:1.0", "groupId:junit-jupiter-api:jar:1.0"));
+
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(jupiter, Collections.emptySet());
+        artifactClassMap.put(api, Collections.singleton("org.junit.jupiter.api.Test"));
+
+        Map<Artifact, Set<DependencyUsage>> used = new LinkedHashMap<>();
+        used.put(api, Collections.singleton(new DependencyUsage("org.junit.jupiter.api.Test", "Main")));
+
+        DefaultProjectDependencyAnalyzer.creditClasslessAggregators(
+                artifactClassMap, new HashSet<>(Arrays.asList(jupiter, api)), used);
+
+        assertThat(used.keySet()).containsExactlyInAnyOrder(jupiter, api);
+    }
+
+    @Test
+    void testAggregatorWithClassesIsNotTouched() {
+        Artifact lib = aTestArtifact("lib");
+        Artifact child = aTestArtifact("child");
+        child.setDependencyTrail(
+                Arrays.asList("groupId:project:jar:1.0", "groupId:lib:jar:1.0", "groupId:child:jar:1.0"));
+
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(lib, Collections.singleton("lib.Foo"));
+        artifactClassMap.put(child, Collections.singleton("child.Bar"));
+
+        Map<Artifact, Set<DependencyUsage>> used = new LinkedHashMap<>();
+        used.put(child, Collections.singleton(new DependencyUsage("child.Bar", "Main")));
+
+        DefaultProjectDependencyAnalyzer.creditClasslessAggregators(artifactClassMap, Collections.singleton(lib), used);
+
+        assertThat(used.keySet()).containsExactly(child);
+    }
+
+    @Test
     void testBuildClassToArtifactMapWithMultipleClasses() {
         Artifact artifact1 = aTestArtifact("artifact1");
 
