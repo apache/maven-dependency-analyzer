@@ -119,6 +119,56 @@ class DefaultProjectDependencyAnalyzerTest {
     }
 
     @Test
+    void testBuildClassToArtifactMapWithDuplicatesPrefersDeclared() {
+        Artifact undeclared = aTestArtifact("undeclared");
+        Artifact declared = aTestArtifact("declared");
+
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(undeclared, new HashSet<>(Arrays.asList("duplicateClass", "otherClass")));
+        artifactClassMap.put(declared, Collections.singleton("duplicateClass"));
+
+        Map<String, Artifact> result = DefaultProjectDependencyAnalyzer.buildClassToArtifactMap(
+                artifactClassMap, Collections.singleton(declared));
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get("duplicateClass")).isEqualTo(declared);
+        assertThat(result.get("otherClass")).isEqualTo(undeclared);
+    }
+
+    @Test
+    void testBuildClassToArtifactMapWithDuplicatesAndNoneDeclaredKeepsFirst() {
+        Artifact artifact1 = aTestArtifact("artifact1");
+        Artifact artifact2 = aTestArtifact("artifact2");
+        Artifact declaredButAbsent = aTestArtifact("absent");
+
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(artifact1, Collections.singleton("duplicateClass"));
+        artifactClassMap.put(artifact2, Collections.singleton("duplicateClass"));
+
+        Map<String, Artifact> result = DefaultProjectDependencyAnalyzer.buildClassToArtifactMap(
+                artifactClassMap, Collections.singleton(declaredButAbsent));
+
+        assertThat(result.get("duplicateClass")).isEqualTo(artifact1);
+    }
+
+    @Test
+    void testDuplicateClassIsCreditedToDeclaredArtifactOnly() {
+        Artifact plexusUtils = aTestArtifact("plexus-utils");
+        Artifact plexusXml = aTestArtifact("plexus-xml");
+
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(plexusUtils, Collections.singleton("Xpp3Dom"));
+        artifactClassMap.put(plexusXml, Collections.singleton("Xpp3Dom"));
+
+        Map<String, Artifact> classToArtifactMap = DefaultProjectDependencyAnalyzer.buildClassToArtifactMap(
+                artifactClassMap, Collections.singleton(plexusXml));
+        Map<Artifact, Set<DependencyUsage>> used = DefaultProjectDependencyAnalyzer.buildUsedArtifacts(
+                classToArtifactMap, Collections.singleton(new DependencyUsage("Xpp3Dom", "Main")));
+
+        assertThat(used.keySet()).containsExactly(plexusXml);
+    }
+
+    @Test
     void testBuildClassToArtifactMapWithMultipleClasses() {
         Artifact artifact1 = aTestArtifact("artifact1");
 

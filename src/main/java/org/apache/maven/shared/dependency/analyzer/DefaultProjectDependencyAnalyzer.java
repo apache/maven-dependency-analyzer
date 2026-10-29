@@ -120,7 +120,8 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         try {
             ClassesPatterns excludedClassesPatterns = new ClassesPatterns(excludedClasses);
             Map<Artifact, Set<String>> artifactClassMap = buildArtifactClassMap(project, excludedClassesPatterns);
-            Map<String, Artifact> classToArtifactMap = buildClassToArtifactMap(artifactClassMap);
+            Set<Artifact> declaredArtifacts = buildDeclaredArtifacts(project, artifactHandlerManager);
+            Map<String, Artifact> classToArtifactMap = buildClassToArtifactMap(artifactClassMap, declaredArtifacts);
 
             Set<DependencyUsage> mainDependencyClasses = new HashSet<>();
             for (MainDependencyClassesProvider provider : mainDependencyClassesProviders) {
@@ -148,7 +149,6 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
                     .keySet();
             Set<Artifact> testOnlyArtifacts = removeAll(testArtifacts, mainUsedArtifacts);
 
-            Set<Artifact> declaredArtifacts = buildDeclaredArtifacts(project, artifactHandlerManager);
             Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<>(declaredArtifacts);
             usedDeclaredArtifacts.retainAll(usedArtifacts.keySet());
 
@@ -485,8 +485,41 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return false;
     }
 
+    /**
+     * Maps each class to the artifact that provides it. When several artifacts contain the class, the first one
+     * wins.
+     *
+     * @param artifactClassMap the classes of each artifact
+     * @return the providing artifact per class
+     */
     static Map<String, Artifact> buildClassToArtifactMap(Map<Artifact, Set<String>> artifactClassMap) {
+        return buildClassToArtifactMap(artifactClassMap, Collections.emptySet());
+    }
+
+    /**
+     * Maps each class to the artifact that provides it. When several artifacts contain the class, a declared
+     * artifact wins over an undeclared one, and otherwise the first one wins. If two declared artifacts contain the
+     * class, only the first of them is credited.
+     *
+     * @param artifactClassMap the classes of each artifact
+     * @param declaredArtifacts the artifacts declared by the project
+     * @return the providing artifact per class
+     */
+    static Map<String, Artifact> buildClassToArtifactMap(
+            Map<Artifact, Set<String>> artifactClassMap, Set<Artifact> declaredArtifacts) {
+        Set<String> declaredIds = declaredArtifacts.stream()
+                .map(Artifact::getDependencyConflictId)
+                .collect(Collectors.toSet());
         Map<String, Artifact> classToArtifactMap = new HashMap<>();
+
+        for (Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet()) {
+            Artifact artifact = entry.getKey();
+            if (declaredIds.contains(artifact.getDependencyConflictId())) {
+                for (String className : entry.getValue()) {
+                    classToArtifactMap.putIfAbsent(className, artifact);
+                }
+            }
+        }
 
         for (Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet()) {
             Artifact artifact = entry.getKey();
