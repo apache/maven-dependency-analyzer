@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.util.Set;
 
 import org.apache.maven.api.Dependency;
+import org.apache.maven.api.PathScope;
 import org.apache.maven.api.Project;
 import org.apache.maven.api.Session;
 import org.apache.maven.api.di.Inject;
@@ -32,6 +33,8 @@ import org.apache.maven.api.plugin.Log;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.api.plugin.annotations.Mojo;
 import org.apache.maven.api.plugin.annotations.Parameter;
+import org.apache.maven.api.services.DependencyResolver;
+import org.apache.maven.api.services.DependencyResolverResult;
 import org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis;
 import org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzer;
 
@@ -68,13 +71,13 @@ public class MockAnalyzeMojo implements org.apache.maven.api.plugin.Mojo
     private ProjectDependencyAnalyzer analyzer;
 
     @Inject
-    private Session session;
-
-    @Inject
     private Project project;
 
     @Inject
     private Log log;
+
+    @Inject
+    private Session session;
 
     @Parameter( defaultValue = "${project.build.directory}/analysis.txt", readonly = true )
     private File output;
@@ -87,7 +90,12 @@ public class MockAnalyzeMojo implements org.apache.maven.api.plugin.Mojo
     {
         try
         {
-            ProjectDependencyAnalysis analysis = analyzer.analyze( session, project, excludedClasses );
+            // The analyzer takes the dependencies of the project as they were resolved, the Maven 4 API has no
+            // equivalent of MavenProject.getArtifacts(). Once the plugin tools support the @Resolution annotation,
+            // the resolved dependencies can be injected instead of being resolved here.
+            DependencyResolverResult dependencies = session.getService(DependencyResolver.class)
+                    .resolve(session, project, PathScope.TEST_RUNTIME);
+            ProjectDependencyAnalysis analysis = analyzer.analyze( project, dependencies, excludedClasses );
 
             Files.createDirectories( output.toPath().getParent() );
             try ( PrintWriter printWriter = new UnixPrintWiter( output ) )

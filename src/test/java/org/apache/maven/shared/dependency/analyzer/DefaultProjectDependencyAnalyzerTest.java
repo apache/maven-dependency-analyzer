@@ -18,6 +18,8 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +30,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.JarOutputStream;
 import java.util.stream.Collectors;
 
 import org.apache.maven.api.Dependency;
@@ -46,6 +49,7 @@ import org.apache.maven.api.services.DependencyResolverResult;
 import org.apache.maven.api.services.ProjectManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,6 +65,10 @@ import static org.mockito.Mockito.when;
  * @see DefaultProjectDependencyAnalyzer
  */
 class DefaultProjectDependencyAnalyzerTest {
+
+    @TempDir
+    private Path tempDir;
+
     private Session session;
 
     private DependencyResolver dependencyResolver;
@@ -77,7 +85,11 @@ class DefaultProjectDependencyAnalyzerTest {
         project = mock(Project.class);
         when(session.getService(DependencyResolver.class)).thenReturn(dependencyResolver);
         when(session.getService(ProjectManager.class)).thenReturn(projectManager);
-        analyzer = new DefaultProjectDependencyAnalyzer();
+        analyzer = new DefaultProjectDependencyAnalyzer(
+                session,
+                mock(ClassAnalyzer.class),
+                Collections.singletonList(mock(MainDependencyClassesProvider.class)),
+                Collections.singletonList(mock(TestDependencyClassesProvider.class)));
     }
 
     @Test
@@ -304,8 +316,7 @@ class DefaultProjectDependencyAnalyzerTest {
         DependencyCoordinates directCoordinates = toCoordinates(direct);
         when(project.getDependencies()).thenReturn(Collections.singletonList(directCoordinates));
 
-        assertThat(DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(
-                        session, project, Arrays.asList(direct, transitive)))
+        assertThat(DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(project, Arrays.asList(direct, transitive)))
                 .containsExactly(direct)
                 .first()
                 .isSameAs(direct);
@@ -321,8 +332,7 @@ class DefaultProjectDependencyAnalyzerTest {
         when(type.getClassifier()).thenReturn("tests");
         when(project.getDependencies()).thenReturn(Collections.singletonList(coordinates));
 
-        assertThat(DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(
-                        session, project, Collections.singleton(testJar)))
+        assertThat(DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(project, Collections.singleton(testJar)))
                 .containsExactly(testJar);
     }
 
@@ -336,8 +346,7 @@ class DefaultProjectDependencyAnalyzerTest {
         when(type.getClassifier()).thenReturn(null);
         when(project.getDependencies()).thenReturn(Collections.singletonList(declaration));
 
-        assertThat(DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(
-                        session, project, Collections.singleton(relocated)))
+        assertThat(DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(project, Collections.singleton(relocated)))
                 .singleElement()
                 .satisfies(artifact -> {
                     assertThat(artifact.getGroupId()).isEqualTo("axis");
@@ -358,7 +367,7 @@ class DefaultProjectDependencyAnalyzerTest {
                 .thenReturn(compileResult)
                 .thenThrow(new DependencyResolverException("collection failed", new Exception("failure")));
 
-        assertThat(analyzer.getTestArtifactsWithNonTestScope(session, project, Collections.singleton(candidate)))
+        assertThat(analyzer.getTestArtifactsWithNonTestScope(project, Collections.singleton(candidate)))
                 .containsExactly(candidate);
     }
 
@@ -385,7 +394,7 @@ class DefaultProjectDependencyAnalyzerTest {
         when(dependencyResolver.collect(any(DependencyResolverRequest.class))).thenReturn(compileResult, runtimeResult);
 
         Set<Dependency> candidates = new LinkedHashSet<>(Arrays.asList(compileCandidate, runtimeCandidate));
-        assertThat(analyzer.getTestArtifactsWithNonTestScope(session, project, candidates))
+        assertThat(analyzer.getTestArtifactsWithNonTestScope(project, candidates))
                 .isEmpty();
 
         ArgumentCaptor<DependencyResolverRequest> requestCaptor =
@@ -464,6 +473,41 @@ class DefaultProjectDependencyAnalyzerTest {
             id.append(':').append(classifier);
         }
         return id.toString();
+    }
+
+    @Test
+    void testAnalyzeUsesTheResolvedDependencies() throws Exception {
+        Dependency declared = aTestArtifact("groupId", "declared", DependencyScope.COMPILE);
+        Path jar = Files.createTempFile(tempDir, "declared", ".jar");
+        try (JarOutputStream out = new JarOutputStream(Files.newOutputStream(jar))) {
+            // an empty jar, the dependency does not provide any class
+        }
+        DependencyCoordinates coordinates = toCoordinates(declared);
+        Node root = rootWithChildren(declared);
+        when(project.getDependencies()).thenReturn(Collections.singletonList(coordinates));
+        DependencyResolverResult result = mock(DependencyResolverResult.class);
+        when(result.getDependencies()).thenReturn(Collections.singletonMap(declared, jar));
+        when(result.getRoot()).thenReturn(root);
+
+        ProjectDependencyAnalysis analysis = analyzer.analyze(project, result, null);
+
+        assertThat(analysis.getUnusedDeclaredArtifacts()).containsExactly(declared);
+        assertThat(analysis.getUsedDeclaredArtifacts()).isEmpty();
+        assertThat(analysis.getUsedUndeclaredArtifacts()).isEmpty();
+    }
+
+    private Node rootWithChildren(Dependency... dependencies) {
+        Node root = mock(Node.class);
+        List<Node> children = new ArrayList<>();
+        for (Dependency dependency : dependencies) {
+            Node node = mock(Node.class);
+            when(node.getDependency()).thenReturn(dependency);
+            when(node.getArtifact()).thenReturn(dependency);
+            when(node.getChildren()).thenReturn(Collections.emptyList());
+            children.add(node);
+        }
+        when(root.getChildren()).thenReturn(children);
+        return root;
     }
 
     private DependencyResolverResult dependencyGraph(String... artifactIds) {
