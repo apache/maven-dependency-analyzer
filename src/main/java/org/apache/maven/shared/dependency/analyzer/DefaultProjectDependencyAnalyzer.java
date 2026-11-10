@@ -170,9 +170,20 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
             Set<Artifact> testArtifactsWithNonTestScope = getTestArtifactsWithNonTestScope(project, testOnlyArtifacts);
 
+            Set<String> usedDependencyClasses = buildUsedDependencyClasses(dependencyClasses);
+            Map<String, Set<Artifact>> candidateArtifactsByUsedClass =
+                    buildCandidateArtifactsByUsedClass(artifactClassMap, usedDependencyClasses);
+            Map<String, Artifact> selectedArtifactByUsedClass =
+                    buildSelectedArtifactByUsedClass(classToArtifactMap, usedDependencyClasses);
+
             return new ProjectDependencyAnalysis(
-                    usedDeclaredArtifactsWithClasses, usedUndeclaredArtifactsWithClasses,
-                    unusedDeclaredArtifacts, testArtifactsWithNonTestScope);
+                    usedDeclaredArtifactsWithClasses,
+                    usedUndeclaredArtifactsWithClasses,
+                    unusedDeclaredArtifacts,
+                    testArtifactsWithNonTestScope,
+                    usedDependencyClasses,
+                    candidateArtifactsByUsedClass,
+                    selectedArtifactByUsedClass);
         } catch (IOException exception) {
             throw new ProjectDependencyAnalyzerException("Cannot analyze dependencies", exception);
         }
@@ -470,6 +481,41 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         }
 
         return usedArtifacts;
+    }
+
+    static Set<String> buildUsedDependencyClasses(Set<DependencyUsage> dependencyClasses) {
+        Set<String> usedDependencyClasses = new LinkedHashSet<>();
+        for (DependencyUsage usage : dependencyClasses) {
+            usedDependencyClasses.add(usage.getDependencyClass());
+        }
+        return usedDependencyClasses;
+    }
+
+    static Map<String, Set<Artifact>> buildCandidateArtifactsByUsedClass(
+            Map<Artifact, Set<String>> artifactClassMap, Set<String> usedDependencyClasses) {
+        Map<String, Set<Artifact>> candidatesByClass = new LinkedHashMap<>();
+        for (String className : usedDependencyClasses) {
+            Set<Artifact> candidates = new LinkedHashSet<>();
+            for (Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet()) {
+                if (entry.getValue().contains(className)) {
+                    candidates.add(entry.getKey());
+                }
+            }
+            candidatesByClass.put(className, candidates);
+        }
+        return candidatesByClass;
+    }
+
+    static Map<String, Artifact> buildSelectedArtifactByUsedClass(
+            Map<String, Artifact> classToArtifactMap, Set<String> usedDependencyClasses) {
+        Map<String, Artifact> selectedByClass = new LinkedHashMap<>();
+        for (String className : usedDependencyClasses) {
+            Artifact artifact = classToArtifactMap.get(className);
+            if (artifact != null) {
+                selectedByClass.put(className, artifact);
+            }
+        }
+        return selectedByClass;
     }
 
     /**

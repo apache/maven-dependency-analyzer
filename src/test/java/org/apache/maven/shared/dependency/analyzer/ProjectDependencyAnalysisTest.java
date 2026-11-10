@@ -19,7 +19,10 @@
 package org.apache.maven.shared.dependency.analyzer;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -73,6 +76,53 @@ class ProjectDependencyAnalysisTest {
                 .allSatisfy(a -> assertThat(a.getScope()).isEqualTo(Artifact.SCOPE_COMPILE));
 
         assertThat(compileOnlyAnalysis.getTestArtifactsWithNonTestScope()).hasSize(3);
+    }
+
+    @Test
+    void shouldExposeUsedClassesAndCandidateArtifacts() {
+        Artifact declared = aTestArtifact("declared", Artifact.SCOPE_COMPILE);
+        Artifact other = aTestArtifact("other", Artifact.SCOPE_COMPILE);
+        Set<String> used = new HashSet<>(Arrays.asList("a.B", "c.D"));
+        Map<String, Set<Artifact>> candidates = new java.util.LinkedHashMap<>();
+        candidates.put("a.B", new LinkedHashSet<>(Arrays.asList(declared, other)));
+        candidates.put("c.D", new LinkedHashSet<>(Collections.singleton(declared)));
+        Map<String, Artifact> selected = new java.util.LinkedHashMap<>();
+        selected.put("a.B", declared);
+        selected.put("c.D", declared);
+
+        ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
+                Collections.emptyMap(),
+                Collections.emptyMap(),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                used,
+                candidates,
+                selected);
+
+        assertThat(analysis.getUsedDependencyClasses()).containsExactlyInAnyOrder("a.B", "c.D");
+        assertThat(analysis.getCandidateArtifactsByUsedClass().get("a.B")).containsExactly(declared, other);
+        assertThat(analysis.getSelectedArtifactByUsedClass().get("a.B")).isEqualTo(declared);
+        assertThat(analysis.getAmbiguousUsedDependencyClasses()).containsExactly("a.B");
+        assertThat(analysis.getUnmappedUsedDependencyClasses()).isEmpty();
+    }
+
+    @Test
+    void shouldReportUnmappedUsedDependencyClasses() {
+        Set<String> used = new HashSet<>(Collections.singletonList("a.B"));
+        Map<String, Set<Artifact>> candidates = new java.util.LinkedHashMap<>();
+        candidates.put("a.B", Collections.emptySet());
+
+        ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
+                Collections.emptyMap(),
+                Collections.emptyMap(),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                used,
+                candidates,
+                Collections.emptyMap());
+
+        assertThat(analysis.getUnmappedUsedDependencyClasses()).containsExactly("a.B");
+        assertThat(analysis.getSelectedArtifactByUsedClass()).doesNotContainKey("a.B");
     }
 
     private <T> Set<T> asSet(T... items) {
