@@ -20,7 +20,7 @@ package jarWithCompileDependency.project2;
  */
 
 import jarWithCompileDependency.project1.Project1;
-import com.google.common.base.Strings;
+import javax.inject.Inject;
 
 /**
  * 
@@ -32,6 +32,6 @@ public class Project2
     public Project2()
     {
         Project1 project = new Project1();
-        System.out.println(Strings.emptyToNull("this"));
+        System.out.println(Inject.class.getName());
     }
 }
