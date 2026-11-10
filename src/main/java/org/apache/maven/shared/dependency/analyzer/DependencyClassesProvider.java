@@ -21,7 +21,7 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.io.IOException;
 import java.util.Set;
 
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.api.Project;
 
 /**
  * Base interface for services provided the dependency classes used by a project.
@@ -36,5 +36,5 @@ public interface DependencyClassesProvider {
      * @return the set of dependency usages
      * @throws IOException if dependency classes cannot be read
      */
-    Set<DependencyUsage> getDependencyClasses(MavenProject project, ClassesPatterns excludedClasses) throws IOException;
+    Set<DependencyUsage> getDependencyClasses(Project project, ClassesPatterns excludedClasses) throws IOException;
 }

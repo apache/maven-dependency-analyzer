@@ -18,6 +18,7 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,9 +29,7 @@ import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ASMDependencyAnalyzerTest {
     private final DependencyAnalyzer analyzer = new ASMDependencyAnalyzer();
@@ -38,32 +37,33 @@ class ASMDependencyAnalyzerTest {
     @Test
     void test() throws Exception {
         URL jarUrl = this.getClass().getResource("/org/objectweb/asm/ClassReader.class");
-        assertNotNull(jarUrl);
+        assertThat(jarUrl).isNotNull();
         String fileUrl =
                 jarUrl.toString().substring("jar:".length(), jarUrl.toString().indexOf("!/"));
 
         Set<String> result = analyzer.analyze(new URL(fileUrl));
 
-        assertFalse(result.isEmpty());
+        assertThat(result).isNotEmpty();
     }
 
     @Test
-    void verifyImplicitClassReferenceIncludedInUsedClasses() throws Exception {
+    void verifyImplicitClassReferenceIncludedInUsedClasses() throws IOException {
         Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
 
         Set<String> result = analyzer.analyze(file.toUri().toURL());
-        assertTrue(result.contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest"));
-        assertTrue(result.contains("java.util.regex.Pattern"));
+        assertThat(result).contains("org.apache.maven.api.services.ArtifactResolverRequest");
+        assertThat(result).contains("java.util.regex.Pattern");
     }
 
     @Test
-    void verifyExcludedClasses() throws Exception {
+    void verifyExcludedClasses() throws IOException {
         Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
 
         Set<String> result =
                 analyzer.analyze(file.toUri().toURL(), new ClassesPatterns(Collections.singleton("ClassToExclude")));
-        assertTrue(result.contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest"));
-        assertFalse(result.contains("java.util.regex.Pattern"));
-        assertFalse(result.contains("org.apache.maven.shared.dependency.analyzer.testcases.analyze.ClassToExclude"));
+        assertThat(result).contains("org.apache.maven.api.services.ArtifactResolverRequest");
+        assertThat(result).doesNotContain("java.util.regex.Pattern");
+        assertThat(result)
+                .doesNotContain("org.apache.maven.shared.dependency.analyzer.testcases.analyze.ClassToExclude");
     }
 }

@@ -23,7 +23,7 @@ import org.apache.maven.shared.dependency.analyzer.testcases.prepare.Prepare;
 /**
  * Class to be analyzed in unit test.
  * <p>
- * The handler method in {@link Prepare} takes an implicit Consumer&lt;ArtifactResolutionRequest&gt; argument. Analyze
+ * The handler method in {@link Prepare} takes an implicit Consumer&lt;ArtifactResolverRequest&gt; argument. Analyze
  * this class to verify the implicit reference.
  */
 public class AnalyzedClass {
