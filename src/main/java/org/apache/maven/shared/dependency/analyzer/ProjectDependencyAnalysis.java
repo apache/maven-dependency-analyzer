@@ -47,6 +47,12 @@ public class ProjectDependencyAnalysis {
 
     private final Set<Artifact> testArtifactsWithNonTestScope;
 
+    private final Set<String> usedDependencyClasses;
+
+    private final Map<String, Set<Artifact>> candidateArtifactsByUsedClass;
+
+    private final Map<String, Artifact> selectedArtifactByUsedClass;
+
     /**
      * <p>Constructor for ProjectDependencyAnalysis.</p>
      */
@@ -101,10 +107,43 @@ public class ProjectDependencyAnalysis {
             Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifacts,
             Set<Artifact> unusedDeclaredArtifacts,
             Set<Artifact> testArtifactsWithNonTestScope) {
+        this(
+                usedDeclaredArtifacts,
+                usedUndeclaredArtifacts,
+                unusedDeclaredArtifacts,
+                testArtifactsWithNonTestScope,
+                null,
+                null,
+                null);
+    }
+
+    /**
+     * Creates an analysis result with usage details, raw used classes and candidate artifacts.
+     *
+     * @param usedDeclaredArtifacts artifacts both used and declared
+     * @param usedUndeclaredArtifacts artifacts used but not declared
+     * @param unusedDeclaredArtifacts artifacts declared but not used
+     * @param testArtifactsWithNonTestScope artifacts only used in tests but not declared with test scope
+     * @param usedDependencyClasses dependency class names referenced by the analyzed bytecode
+     * @param candidateArtifactsByUsedClass candidate artifacts that provide each used dependency class
+     * @param selectedArtifactByUsedClass artifact selected for each used dependency class
+     * @since 1.18.0
+     */
+    public ProjectDependencyAnalysis(
+            Map<Artifact, Set<DependencyUsage>> usedDeclaredArtifacts,
+            Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifacts,
+            Set<Artifact> unusedDeclaredArtifacts,
+            Set<Artifact> testArtifactsWithNonTestScope,
+            Set<String> usedDependencyClasses,
+            Map<String, Set<Artifact>> candidateArtifactsByUsedClass,
+            Map<String, Artifact> selectedArtifactByUsedClass) {
         this.usedDeclaredArtifacts = safeCopy(usedDeclaredArtifacts);
         this.usedUndeclaredArtifacts = safeCopy(usedUndeclaredArtifacts);
         this.unusedDeclaredArtifacts = safeCopy(unusedDeclaredArtifacts);
         this.testArtifactsWithNonTestScope = safeCopy(testArtifactsWithNonTestScope);
+        this.usedDependencyClasses = safeCopyStrings(usedDependencyClasses);
+        this.candidateArtifactsByUsedClass = safeCopyStringArtifactSetMap(candidateArtifactsByUsedClass);
+        this.selectedArtifactByUsedClass = safeCopyStringArtifactMap(selectedArtifactByUsedClass);
     }
 
     /**
@@ -181,6 +220,70 @@ public class ProjectDependencyAnalysis {
     }
 
     /**
+     * Returns dependency class names referenced by the analyzed bytecode.
+     *
+     * @return dependency class names referenced by the analyzed bytecode
+     * @since 1.18.0
+     */
+    public Set<String> getUsedDependencyClasses() {
+        return safeCopyStrings(usedDependencyClasses);
+    }
+
+    /**
+     * Returns the artifacts that provide each referenced dependency class.
+     *
+     * @return candidate artifacts per referenced dependency class
+     * @since 1.18.0
+     */
+    public Map<String, Set<Artifact>> getCandidateArtifactsByUsedClass() {
+        return safeCopyStringArtifactSetMap(candidateArtifactsByUsedClass);
+    }
+
+    /**
+     * Returns the artifact selected for each referenced dependency class.
+     *
+     * @return selected artifact per referenced dependency class
+     * @since 1.18.0
+     */
+    public Map<String, Artifact> getSelectedArtifactByUsedClass() {
+        return safeCopyStringArtifactMap(selectedArtifactByUsedClass);
+    }
+
+    /**
+     * Returns referenced dependency classes provided by more than one artifact.
+     *
+     * @return ambiguous referenced dependency classes
+     * @since 1.18.0
+     */
+    public Set<String> getAmbiguousUsedDependencyClasses() {
+        Set<String> ambiguous = new LinkedHashSet<>();
+        for (Map.Entry<String, Set<Artifact>> entry : candidateArtifactsByUsedClass.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                ambiguous.add(entry.getKey());
+            }
+        }
+        return Collections.unmodifiableSet(ambiguous);
+    }
+
+    /**
+     * Returns referenced dependency classes that could not be mapped to any dependency artifact.
+     *
+     * @return unmapped referenced dependency classes
+     * @since 1.18.0
+     */
+    public Set<String> getUnmappedUsedDependencyClasses() {
+        Set<String> unmapped = new LinkedHashSet<>();
+        for (String className : usedDependencyClasses) {
+            if (candidateArtifactsByUsedClass
+                    .getOrDefault(className, Collections.emptySet())
+                    .isEmpty()) {
+                unmapped.add(className);
+            }
+        }
+        return Collections.unmodifiableSet(unmapped);
+    }
+
+    /**
      * Filter non-compile scoped artifacts from unused declared.
      *
      * @return updated project dependency analysis
@@ -191,7 +294,13 @@ public class ProjectDependencyAnalysis {
         filteredUnusedDeclared.removeIf(artifact -> !artifact.getScope().equals(Artifact.SCOPE_COMPILE));
 
         return new ProjectDependencyAnalysis(
-                usedDeclaredArtifacts, usedUndeclaredArtifacts, filteredUnusedDeclared, testArtifactsWithNonTestScope);
+                usedDeclaredArtifacts,
+                usedUndeclaredArtifacts,
+                filteredUnusedDeclared,
+                testArtifactsWithNonTestScope,
+                usedDependencyClasses,
+                candidateArtifactsByUsedClass,
+                selectedArtifactByUsedClass);
     }
 
     /**
@@ -250,7 +359,10 @@ public class ProjectDependencyAnalysis {
                 mapWithKeys(forcedUsedDeclared),
                 usedUndeclaredArtifacts,
                 forcedUnusedDeclared,
-                testArtifactsWithNonTestScope);
+                testArtifactsWithNonTestScope,
+                usedDependencyClasses,
+                candidateArtifactsByUsedClass,
+                selectedArtifactByUsedClass);
     }
 
     /**
@@ -334,6 +446,10 @@ public class ProjectDependencyAnalysis {
         return (set == null) ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(set));
     }
 
+    private static Set<String> safeCopyStrings(Set<String> set) {
+        return (set == null) ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(set));
+    }
+
     private static Map<Artifact, Set<DependencyUsage>> safeCopy(Map<Artifact, Set<DependencyUsage>> origMap) {
         if (origMap == null) {
             return Collections.emptyMap();
@@ -346,6 +462,28 @@ public class ProjectDependencyAnalysis {
         }
 
         return map;
+    }
+
+    private static Map<String, Set<Artifact>> safeCopyStringArtifactSetMap(Map<String, Set<Artifact>> origMap) {
+        if (origMap == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, Set<Artifact>> map = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Set<Artifact>> e : origMap.entrySet()) {
+            map.put(e.getKey(), Collections.unmodifiableSet(new LinkedHashSet<>(e.getValue())));
+        }
+
+        return map;
+    }
+
+    private static Map<String, Artifact> safeCopyStringArtifactMap(Map<String, Artifact> origMap) {
+        if (origMap == null) {
+            return Collections.emptyMap();
+        }
+
+        return Collections.unmodifiableMap(new LinkedHashMap<>(origMap));
     }
 
     private static Map<Artifact, Set<DependencyUsage>> mapWithKeys(Set<Artifact> keys) {

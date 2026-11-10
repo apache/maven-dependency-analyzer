@@ -498,4 +498,38 @@ class DefaultProjectDependencyAnalyzerTest {
     private Artifact aTestArtifact(String groupId, String artifactId, String scope) {
         return new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion("1.0"), scope, "jar", "", null);
     }
+
+    @Test
+    void buildCandidateArtifactsByUsedClassShouldReturnAllProviders() {
+        Artifact first = aTestArtifact("first");
+        Artifact second = aTestArtifact("second");
+
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(first, Collections.singleton("com.example.Cls"));
+        artifactClassMap.put(second, Collections.singleton("com.example.Cls"));
+
+        Set<String> used = Collections.singleton("com.example.Cls");
+        Map<String, Set<Artifact>> candidates =
+                DefaultProjectDependencyAnalyzer.buildCandidateArtifactsByUsedClass(artifactClassMap, used);
+
+        assertThat(candidates.get("com.example.Cls")).containsExactly(first, second);
+    }
+
+    @Test
+    void buildSelectedArtifactByUsedClassShouldKeepSelectedProvider() {
+        Artifact first = aTestArtifact("first");
+        Artifact second = aTestArtifact("second");
+
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(first, Collections.singleton("com.example.Cls"));
+        artifactClassMap.put(second, Collections.singleton("com.example.Cls"));
+
+        Set<String> used = Collections.singleton("com.example.Cls");
+        Map<String, Artifact> classToArtifactMap =
+                DefaultProjectDependencyAnalyzer.buildClassToArtifactMap(artifactClassMap);
+        Map<String, Artifact> selected =
+                DefaultProjectDependencyAnalyzer.buildSelectedArtifactByUsedClass(classToArtifactMap, used);
+
+        assertThat(selected.get("com.example.Cls")).isEqualTo(first);
+    }
 }
