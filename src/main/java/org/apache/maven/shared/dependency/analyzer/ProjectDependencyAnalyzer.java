@@ -21,7 +21,7 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.util.Collection;
 
 import org.apache.maven.api.Project;
-import org.apache.maven.api.Session;
+import org.apache.maven.api.services.DependencyResolverResult;
 
 /**
  * Analyze a project's declared dependencies and effective classes used to find which artifacts are:
@@ -39,25 +39,26 @@ public interface ProjectDependencyAnalyzer {
     /**
      * <p>analyze.</p>
      *
-     * @param session the current {@link org.apache.maven.api.Session}, used to resolve the project's dependencies
      * @param project a {@link org.apache.maven.api.Project} object
+     * @param dependencies the dependencies of the project, as resolved by the dependency resolver
      * @return a {@link org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis} object
      * @throws org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException if any
      */
-    default ProjectDependencyAnalysis analyze(Session session, Project project)
+    default ProjectDependencyAnalysis analyze(Project project, DependencyResolverResult dependencies)
             throws ProjectDependencyAnalyzerException {
-        return analyze(session, project, null);
+        return analyze(project, dependencies, null);
     }
 
     /**
      * <p>analyze.</p>
      *
-     * @param session the current {@link org.apache.maven.api.Session}, used to resolve the project's dependencies
      * @param project a {@link org.apache.maven.api.Project} object
+     * @param dependencies the dependencies of the project, as resolved by the dependency resolver
      * @param excludedClasses collection of regular expression of classes name to exclude
      * @return a {@link org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis} object
      * @throws org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException if any
      */
-    ProjectDependencyAnalysis analyze(Session session, Project project, Collection<String> excludedClasses)
+    ProjectDependencyAnalysis analyze(
+            Project project, DependencyResolverResult dependencies, Collection<String> excludedClasses)
             throws ProjectDependencyAnalyzerException;
 }

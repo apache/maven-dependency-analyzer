@@ -50,6 +50,7 @@ import org.apache.maven.api.Project;
 import org.apache.maven.api.Session;
 import org.apache.maven.api.Type;
 import org.apache.maven.api.Version;
+import org.apache.maven.api.annotations.Nullable;
 import org.apache.maven.api.di.Inject;
 import org.apache.maven.api.di.Named;
 import org.apache.maven.api.di.Singleton;
@@ -83,20 +84,43 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
     @Inject
     private List<TestDependencyClassesProvider> testDependencyClassesProviders;
 
+    /**
+     * The session of the current build, used to collect the non-test classpaths of the project. It is not
+     * available when the analyzer is used outside of a Maven build, in which case the test-only dependencies
+     * are reported as they are.
+     */
+    @Inject
+    @Nullable
+    private Session session;
+
     /** Constructor used by the dependency injection container. */
+    @Inject
     public DefaultProjectDependencyAnalyzer() {}
+
+    /** Constructor used by tests. */
+    DefaultProjectDependencyAnalyzer(
+            Session session,
+            ClassAnalyzer classAnalyzer,
+            List<MainDependencyClassesProvider> mainDependencyClassesProviders,
+            List<TestDependencyClassesProvider> testDependencyClassesProviders) {
+        this.session = session;
+        this.classAnalyzer = classAnalyzer;
+        this.mainDependencyClassesProviders = mainDependencyClassesProviders;
+        this.testDependencyClassesProviders = testDependencyClassesProviders;
+    }
 
     /** {@inheritDoc} */
     @Override
-    public ProjectDependencyAnalysis analyze(Session session, Project project, Collection<String> excludedClasses)
+    public ProjectDependencyAnalysis analyze(
+            Project project, DependencyResolverResult dependencies, Collection<String> excludedClasses)
             throws ProjectDependencyAnalyzerException {
         try {
             ClassesPatterns excludedClassesPatterns = new ClassesPatterns(excludedClasses);
-            ResolvedDependencies resolved = resolveDependencies(session, project);
+            Map<Dependency, Path> resolvedDependencies = dependencies.getDependencies();
+            Map<String, String> parentIds = buildParentIds(dependencies.getRoot());
             Map<Dependency, Set<String>> artifactClassMap =
-                    buildArtifactClassMap(resolved.getDependencies(), excludedClassesPatterns);
-            Set<Dependency> declaredArtifacts = buildDeclaredArtifacts(
-                    session, project, resolved.getDependencies().keySet());
+                    buildArtifactClassMap(resolvedDependencies, excludedClassesPatterns);
+            Set<Dependency> declaredArtifacts = buildDeclaredArtifacts(project, resolvedDependencies.keySet());
             Map<String, Dependency> classToArtifactMap = buildClassToArtifactMap(artifactClassMap, declaredArtifacts);
 
             Set<DependencyUsage> mainDependencyClasses = new HashSet<>();
@@ -118,7 +142,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
             Map<Dependency, Set<DependencyUsage>> usedArtifacts =
                     buildUsedArtifacts(classToArtifactMap, dependencyClasses);
-            creditClasslessAggregators(artifactClassMap, declaredArtifacts, usedArtifacts, resolved.getParentIds());
+            creditClasslessAggregators(artifactClassMap, declaredArtifacts, usedArtifacts, parentIds);
             Set<Dependency> mainUsedArtifacts = buildUsedArtifacts(classToArtifactMap, mainDependencyClasses)
                     .keySet();
 
@@ -143,7 +167,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             Set<Dependency> unusedDeclaredArtifacts = removeAll(declaredArtifacts, usedArtifacts.keySet());
 
             Set<Dependency> testArtifactsWithNonTestScope =
-                    getTestArtifactsWithNonTestScope(session, project, testOnlyArtifacts);
+                    getTestArtifactsWithNonTestScope(project, testOnlyArtifacts);
 
             Set<String> usedDependencyClasses = buildUsedDependencyClasses(dependencyClasses);
             Map<String, Set<Dependency>> candidateArtifactsByUsedClass =
@@ -162,17 +186,6 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         } catch (IOException | DependencyResolverException exception) {
             throw new ProjectDependencyAnalyzerException("Cannot analyze dependencies", exception);
         }
-    }
-
-    /**
-     * Resolves all dependencies of the project needed to compile and run its tests.
-     * The Maven 4 API has no equivalent of {@code MavenProject.getArtifacts()}, so the analyzer resolves them itself.
-     */
-    private static ResolvedDependencies resolveDependencies(Session session, Project project)
-            throws DependencyResolverException {
-        DependencyResolverResult result =
-                session.getService(DependencyResolver.class).resolve(session, project, PathScope.TEST_RUNTIME);
-        return new ResolvedDependencies(result.getDependencies(), buildParentIds(result.getRoot()));
     }
 
     /**
@@ -249,8 +262,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return results;
     }
 
-    Set<Dependency> getTestArtifactsWithNonTestScope(
-            Session session, Project project, Set<Dependency> testOnlyArtifacts) {
+    Set<Dependency> getTestArtifactsWithNonTestScope(Project project, Set<Dependency> testOnlyArtifacts) {
         Set<Dependency> nonTestScopeArtifacts = new LinkedHashSet<>();
 
         for (Dependency artifact : testOnlyArtifacts) {
@@ -260,6 +272,11 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         }
 
         if (nonTestScopeArtifacts.isEmpty()) {
+            return nonTestScopeArtifacts;
+        }
+
+        if (session == null) {
+            LOGGER.debug("Cannot refine test-only dependency scopes without a session");
             return nonTestScopeArtifacts;
         }
 
@@ -436,8 +453,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return testOnlyDependencyClasses;
     }
 
-    static Set<Dependency> buildDeclaredArtifacts(
-            Session session, Project project, Collection<Dependency> resolvedDependencies) {
+    static Set<Dependency> buildDeclaredArtifacts(Project project, Collection<Dependency> resolvedDependencies) {
         Map<String, Dependency> resolvedArtifacts = resolvedDependencies.stream()
                 .collect(Collectors.toMap(
                         DefaultProjectDependencyAnalyzer::toVersionlessId,
@@ -448,7 +464,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         for (DependencyCoordinates coordinates : project.getDependencies()) {
             Dependency artifact = resolvedArtifacts.get(toVersionlessId(coordinates));
             if (artifact == null) {
-                artifact = new DeclaredDependency(session, coordinates);
+                artifact = new DeclaredDependency(coordinates);
             }
             declaredArtifacts.add(artifact);
         }
@@ -613,27 +629,6 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
     }
 
     /**
-     * The resolved dependencies of a project, together with the parent of every dependency in the resolved graph.
-     */
-    static final class ResolvedDependencies {
-        private final Map<Dependency, Path> dependencies;
-        private final Map<String, String> parentIds;
-
-        ResolvedDependencies(Map<Dependency, Path> dependencies, Map<String, String> parentIds) {
-            this.dependencies = dependencies;
-            this.parentIds = parentIds;
-        }
-
-        Map<Dependency, Path> getDependencies() {
-            return dependencies;
-        }
-
-        Map<String, String> getParentIds() {
-            return parentIds;
-        }
-    }
-
-    /**
      * A declared dependency that was not resolved, for example because it was relocated. The Maven 4 API has no
      * factory for a {@link Dependency} from {@link DependencyCoordinates}, only for {@code Artifact}, so the analysis
      * result is given this minimal implementation.
@@ -643,11 +638,11 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         private final Version version;
         private final boolean snapshot;
 
-        DeclaredDependency(Session session, DependencyCoordinates coordinates) {
+        DeclaredDependency(DependencyCoordinates coordinates) {
             this.coordinates = coordinates;
             String versionString = String.valueOf(coordinates.getVersionConstraint());
-            this.version = session.parseVersion(versionString);
-            this.snapshot = session.isVersionSnapshot(versionString);
+            this.version = new SimpleVersion(versionString);
+            this.snapshot = versionString.endsWith("SNAPSHOT");
         }
 
         @Override
@@ -731,6 +726,38 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         @Override
         public String toString() {
             return key() + ":" + getScope().id();
+        }
+    }
+
+    /**
+     * The version of a declared dependency. The Maven 4 API has no factory for a {@link Version} that does not
+     * need a session, so the declared version is kept as it was written in the model.
+     */
+    static final class SimpleVersion implements Version {
+        private final String id;
+
+        SimpleVersion(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public String toString() {
+            return id;
+        }
+
+        @Override
+        public int compareTo(Version other) {
+            return id.compareTo(other.toString());
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof SimpleVersion && id.equals(obj.toString());
+        }
+
+        @Override
+        public int hashCode() {
+            return id.hashCode();
         }
     }
 }
