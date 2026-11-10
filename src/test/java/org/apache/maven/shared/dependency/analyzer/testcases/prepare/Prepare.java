@@ -20,18 +20,12 @@ package org.apache.maven.shared.dependency.analyzer.testcases.prepare;
 
 import java.util.function.Consumer;
 
-import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
-import org.apache.maven.artifact.resolver.ResolutionErrorHandler;
+import org.apache.maven.api.services.ArtifactResolverRequest;
 
 /**
  * Class to be used for verifying that analyzer picks up usage of classes with no import.
  */
 public class Prepare {
 
-    @SuppressWarnings("checkstyle:UnusedLocalVariable")
-    public void handler(Consumer<ArtifactResolutionRequest> consumer) {
-        ResolutionErrorHandler resolutionErrorHandler = (request, result) -> {
-            consumer.accept(request);
-        };
-    }
+    public void handler(Consumer<ArtifactResolverRequest> consumer) {}
 }

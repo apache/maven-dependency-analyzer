@@ -20,7 +20,8 @@ package org.apache.maven.shared.dependency.analyzer;
 
 import java.util.Collection;
 
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.Session;
 
 /**
  * Analyze a project's declared dependencies and effective classes used to find which artifacts are:
@@ -39,23 +40,26 @@ public interface ProjectDependencyAnalyzer {
      * Analyzes the dependencies of a project. The project's main and test classes must be compiled and its
      * dependencies resolved in the test scope.
      *
+     * @param session the current {@link org.apache.maven.api.Session}, used to resolve the project's dependencies
      * @param project the project to analyze
      * @return the analysis result
      * @throws ProjectDependencyAnalyzerException if the classes of the project or of a dependency cannot be read
      */
-    default ProjectDependencyAnalysis analyze(MavenProject project) throws ProjectDependencyAnalyzerException {
-        return analyze(project, null);
+    default ProjectDependencyAnalysis analyze(Session session, Project project)
+            throws ProjectDependencyAnalyzerException {
+        return analyze(session, project, null);
     }
 
     /**
      * Analyzes the dependencies of a project, leaving out the classes that match {@code excludedClasses} both in the
      * project and in its dependencies.
      *
+     * @param session the current {@link org.apache.maven.api.Session}, used to resolve the project's dependencies
      * @param project the project to analyze
      * @param excludedClasses regular expressions of class names to exclude, or {@code null} for none
      * @return the analysis result
      * @throws ProjectDependencyAnalyzerException if the classes of the project or of a dependency cannot be read
      */
-    ProjectDependencyAnalysis analyze(MavenProject project, Collection<String> excludedClasses)
+    ProjectDependencyAnalysis analyze(Session session, Project project, Collection<String> excludedClasses)
             throws ProjectDependencyAnalyzerException;
 }

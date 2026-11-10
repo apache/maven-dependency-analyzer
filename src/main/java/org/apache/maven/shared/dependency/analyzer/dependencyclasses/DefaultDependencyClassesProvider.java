@@ -18,14 +18,14 @@
  */
 package org.apache.maven.shared.dependency.analyzer.dependencyclasses;
 
-import javax.inject.Inject;
-
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Set;
 
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.di.Inject;
 import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.apache.maven.shared.dependency.analyzer.DependencyClassesProvider;
@@ -44,19 +44,15 @@ abstract class DefaultDependencyClassesProvider implements DependencyClassesProv
     }
 
     @Override
-    public Set<DependencyUsage> getDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
+    public Set<DependencyUsage> getDependencyClasses(Project project, ClassesPatterns excludedClasses)
             throws IOException {
-        String classesDirectory = getOutputClassesDirectory(project);
-        if (classesDirectory == null) {
-            return Collections.emptySet();
-        }
-        File directory = new File(classesDirectory);
-        if (!directory.isDirectory()) {
+        Path classesDirectory = getOutputClassesDirectory(project);
+        if (classesDirectory == null || !Files.isDirectory(classesDirectory)) {
             return Collections.emptySet();
         }
 
-        return dependencyAnalyzer.analyzeUsages(directory.toURI().toURL(), excludedClasses);
+        return dependencyAnalyzer.analyzeUsages(classesDirectory, excludedClasses);
     }
 
-    protected abstract String getOutputClassesDirectory(MavenProject project);
+    protected abstract Path getOutputClassesDirectory(Project project);
 }
