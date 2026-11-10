@@ -32,6 +32,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.apache.maven.shared.dependency.analyzer.asm.VisitClassException;
 
@@ -71,6 +73,24 @@ public final class ClassFileVisitorUtils {
         }
     }
 
+    /**
+     * Visits the classes of the given jar file or directory. The analysis of an artifact is usually done on the
+     * file of the artifact, which is a {@link Path}, so the file can be read without being converted to a URL first.
+     *
+     * @param path the path of the jar file or directory to visit
+     * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object
+     * @throws java.io.IOException I/O error or corrupt class file
+     */
+    public static void accept(Path path, ClassFileVisitor visitor) throws IOException {
+        if (Files.isDirectory(path)) {
+            acceptDirectory(path.toFile(), visitor);
+        } else if (Files.isRegularFile(path) && path.getFileName().toString().endsWith(".jar")) {
+            acceptJarFile(path, visitor);
+        } else if (Files.exists(path)) {
+            throw new IllegalArgumentException("Cannot accept visitor on path: " + path);
+        }
+    }
+
     // private methods --------------------------------------------------------
 
     private static void acceptJar(URL url, ClassFileVisitor visitor) throws IOException {
@@ -82,6 +102,21 @@ public final class ClassFileVisitorUtils {
                 if (name.endsWith(".class") && name.indexOf('-') == -1) {
                     // Jars(ZIP) always use / as the separator character
                     visitClass(name, in, visitor, '/');
+                }
+            }
+        }
+    }
+
+    private static void acceptJarFile(Path file, ClassFileVisitor visitor) throws IOException {
+        try (ZipFile zip = new ZipFile(file.toFile())) {
+            for (ZipEntry entry : zip.stream().collect(Collectors.toList())) {
+                String name = entry.getName();
+                // ignore files like package-info.class and module-info.class
+                if (name.endsWith(".class") && name.indexOf('-') == -1) {
+                    // Jars(ZIP) always use / as the separator character
+                    try (InputStream in = zip.getInputStream(entry)) {
+                        visitClass(name, in, visitor, '/');
+                    }
                 }
             }
         }

@@ -56,6 +56,15 @@ class ASMDependencyAnalyzerTest {
     }
 
     @Test
+    void verifyImplicitClassReferenceIncludedInUsedClassesWithPath() throws IOException {
+        Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
+
+        Set<String> result = analyzer.analyze(file);
+        assertThat(result).contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest");
+        assertThat(result).contains("java.util.regex.Pattern");
+    }
+
+    @Test
     void verifyExcludedClasses() throws IOException {
         Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
 

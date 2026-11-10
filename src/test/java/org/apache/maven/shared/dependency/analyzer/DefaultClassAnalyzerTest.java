@@ -106,6 +106,31 @@ class DefaultClassAnalyzerTest {
         assertThat(actualClasses).containsExactly("library.Dollar$Class");
     }
 
+    @Test
+    void testAnalyzeJarWithPath() throws IOException {
+        Set<String> expectedClasses = new HashSet<>();
+        expectedClasses.add("a.b.c");
+        expectedClasses.add("x.y.z");
+
+        DefaultClassAnalyzer analyzer = new DefaultClassAnalyzer();
+        Set<String> actualClasses = analyzer.analyze(file);
+
+        assertThat(actualClasses).isEqualTo(expectedClasses);
+    }
+
+    @Test
+    void testAnalyzeDirectoryWithPathPreservesDollarClassNames() throws IOException {
+        Path directory = Files.createDirectories(tempDir.resolve("classes/library"));
+        Files.write(directory.resolve("Dollar$Class.class"), new byte[0]);
+        Files.write(directory.resolve("Outer$Inner.class"), new byte[0]);
+
+        DefaultClassAnalyzer analyzer = new DefaultClassAnalyzer();
+        Set<String> actualClasses = analyzer.analyze(
+                tempDir.resolve("classes"), new ClassesPatterns(Collections.singleton("library\\.Outer\\$Inner")));
+
+        assertThat(actualClasses).containsExactly("library.Dollar$Class");
+    }
+
     private void addZipEntry(JarOutputStream out, String fileName, String content) throws IOException {
         out.putNextEntry(new ZipEntry(fileName));
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
