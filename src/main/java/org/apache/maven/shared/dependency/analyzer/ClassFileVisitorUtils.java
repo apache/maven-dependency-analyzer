@@ -32,6 +32,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.apache.maven.shared.dependency.analyzer.asm.VisitClassException;
 
@@ -59,7 +61,7 @@ public final class ClassFileVisitorUtils {
                 File file = new File(new URI(url.toString()));
 
                 if (file.isDirectory()) {
-                    acceptDirectory(file, visitor);
+                    acceptDirectory(file.toPath(), visitor);
                 } else if (file.exists()) {
                     throw new IllegalArgumentException("Cannot accept visitor on URL: " + url);
                 }
@@ -68,6 +70,24 @@ public final class ClassFileVisitorUtils {
             }
         } else {
             throw new IllegalArgumentException("Cannot accept visitor on URL: " + url);
+        }
+    }
+
+    /**
+     * Visits the classes of the given jar file or directory. The Maven 4 API hands out the artifacts of a project as
+     * {@link Path}s, so the analysis can be done without converting them to URLs first.
+     *
+     * @param path the path of the jar file or directory to visit
+     * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object
+     * @throws java.io.IOException I/O error or corrupt class file
+     */
+    public static void accept(Path path, ClassFileVisitor visitor) throws IOException {
+        if (Files.isDirectory(path)) {
+            acceptDirectory(path, visitor);
+        } else if (Files.isRegularFile(path) && path.getFileName().toString().endsWith(".jar")) {
+            acceptJarFile(path, visitor);
+        } else if (Files.exists(path)) {
+            throw new IllegalArgumentException("Cannot accept visitor on path: " + path);
         }
     }
 
@@ -87,8 +107,23 @@ public final class ClassFileVisitorUtils {
         }
     }
 
-    private static void acceptDirectory(File directory, ClassFileVisitor visitor) throws IOException {
-        try (Stream<Path> walk = Files.walk(directory.toPath())) {
+    private static void acceptJarFile(Path file, ClassFileVisitor visitor) throws IOException {
+        try (ZipFile zip = new ZipFile(file.toFile())) {
+            for (ZipEntry entry : zip.stream().collect(Collectors.toList())) {
+                String name = entry.getName();
+                // ignore files like package-info.class and module-info.class
+                if (name.endsWith(".class") && name.indexOf('-') == -1) {
+                    // Jars(ZIP) always use / as the separator character
+                    try (InputStream in = zip.getInputStream(entry)) {
+                        visitClass(name, in, visitor, '/');
+                    }
+                }
+            }
+        }
+    }
+
+    private static void acceptDirectory(Path directory, ClassFileVisitor visitor) throws IOException {
+        try (Stream<Path> walk = Files.walk(directory)) {
             List<Path> classFiles = walk.filter(
                             path -> path.getFileName().toString().endsWith(".class"))
                     .collect(Collectors.toList());
@@ -105,11 +140,12 @@ public final class ClassFileVisitorUtils {
         }
     }
 
-    private static void visitClass(File baseDirectory, Path path, InputStream in, ClassFileVisitor visitor)
+    private static void visitClass(Path baseDirectory, Path path, InputStream in, ClassFileVisitor visitor)
             throws IOException {
         // getPath() returns a String, not a java.nio.file.Path
-        String stringPath =
-                path.toFile().getPath().substring(baseDirectory.getPath().length() + 1);
+        String stringPath = path.toFile()
+                .getPath()
+                .substring(baseDirectory.toFile().getPath().length() + 1);
         visitClass(stringPath, in, visitor, File.separatorChar);
     }
 

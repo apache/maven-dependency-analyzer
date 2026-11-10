@@ -20,6 +20,7 @@ package org.apache.maven.shared.dependency.analyzer;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -65,4 +66,40 @@ public interface DependencyAnalyzer {
      * @throws IOException if an error occurs reading a JAR or .class file
      */
     Set<DependencyUsage> analyzeUsages(URL url, ClassesPatterns excludeClasses) throws IOException;
+
+    /**
+     * <p>analyze.</p>
+     *
+     * @param path the JAR file or directory to analyze
+     * @return the set of class names referenced by the library
+     * @throws IOException if an error occurs reading a JAR or .class file
+     */
+    default Set<String> analyze(Path path) throws IOException {
+        return analyze(path, new ClassesPatterns());
+    }
+
+    /**
+     * <p>analyze.</p>
+     *
+     * @param path the JAR file or directory to analyze
+     * @param excludeClasses a class list to exclude
+     * @return the set of class names referenced by the library
+     * @throws IOException if an error occurs reading a JAR or .class file
+     */
+    default Set<String> analyze(Path path, ClassesPatterns excludeClasses) throws IOException {
+        return analyzeUsages(path, excludeClasses).stream()
+                .map(DependencyUsage::getDependencyClass)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * <p>analyzeUsages.</p>
+     *
+     * @param path the JAR file or directory to analyze
+     * @param excludeClasses patterns of classes to exclude
+     * @return the set of class names referenced by the library, paired with the
+     * classes declaring those references.
+     * @throws IOException if an error occurs reading a JAR or .class file
+     */
+    Set<DependencyUsage> analyzeUsages(Path path, ClassesPatterns excludeClasses) throws IOException;
 }

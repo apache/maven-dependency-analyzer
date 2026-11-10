@@ -20,6 +20,7 @@ package org.apache.maven.shared.dependency.analyzer;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Set;
 
 /**
@@ -49,4 +50,25 @@ public interface ClassAnalyzer {
      * @throws java.io.IOException if any
      */
     Set<String> analyze(URL url, ClassesPatterns excludedClasses) throws IOException;
+
+    /**
+     * <p>analyze.</p>
+     *
+     * @param path the JAR file or directory to analyze
+     * @return a {@link java.util.Set} object
+     * @throws java.io.IOException if any
+     */
+    default Set<String> analyze(Path path) throws IOException {
+        return analyze(path, new ClassesPatterns());
+    }
+
+    /**
+     * <p>analyze.</p>
+     *
+     * @param path the JAR file or directory to analyze
+     * @param excludedClasses patterns of classes to exclude
+     * @return a {@link java.util.Set} object
+     * @throws java.io.IOException if any
+     */
+    Set<String> analyze(Path path, ClassesPatterns excludedClasses) throws IOException;
 }

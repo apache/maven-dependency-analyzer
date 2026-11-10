@@ -51,7 +51,7 @@ class ASMDependencyAnalyzerTest {
         Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
 
         Set<String> result = analyzer.analyze(file.toUri().toURL());
-        assertThat(result).contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest");
+        assertThat(result).contains("org.apache.maven.api.services.ArtifactResolverRequest");
         assertThat(result).contains("java.util.regex.Pattern");
     }
 
@@ -61,7 +61,7 @@ class ASMDependencyAnalyzerTest {
 
         Set<String> result =
                 analyzer.analyze(file.toUri().toURL(), new ClassesPatterns(Collections.singleton("ClassToExclude")));
-        assertThat(result).contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest");
+        assertThat(result).contains("org.apache.maven.api.services.ArtifactResolverRequest");
         assertThat(result).doesNotContain("java.util.regex.Pattern");
         assertThat(result)
                 .doesNotContain("org.apache.maven.shared.dependency.analyzer.testcases.analyze.ClassToExclude");

@@ -29,27 +29,21 @@
 
   <dependencies>
     <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-      <version>1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
+      <artifactId>maven-api-core</artifactId>
       <version>@mavenVersion@</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
+      <artifactId>maven-api-di</artifactId>
       <version>@mavenVersion@</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.maven.plugin-tools</groupId>
-      <artifactId>maven-plugin-tools-annotations</artifactId>
-      <version>@version.maven-plugin-tools@</version>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-api-annotations</artifactId>
+      <version>@mavenVersion@</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -65,7 +59,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>@version.maven-plugin-tools@</version>
+          <version>@mavenPluginToolsVersion@</version>
         </plugin>
       </plugins>
     </pluginManagement>
