@@ -18,14 +18,9 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,30 +34,30 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
-import org.apache.maven.RepositoryUtils;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.handler.ArtifactHandler;
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DependencyManagement;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.RepositorySessionDecorator;
-import org.eclipse.aether.RepositorySystem;
-import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.artifact.ArtifactTypeRegistry;
-import org.eclipse.aether.collection.CollectRequest;
-import org.eclipse.aether.collection.DependencyCollectionException;
-import org.eclipse.aether.graph.DependencyNode;
-import org.eclipse.aether.util.artifact.ArtifactIdUtils;
+import org.apache.maven.api.Artifact;
+import org.apache.maven.api.Dependency;
+import org.apache.maven.api.DependencyCoordinates;
+import org.apache.maven.api.DependencyScope;
+import org.apache.maven.api.Node;
+import org.apache.maven.api.PathScope;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.Session;
+import org.apache.maven.api.Type;
+import org.apache.maven.api.Version;
+import org.apache.maven.api.di.Inject;
+import org.apache.maven.api.di.Named;
+import org.apache.maven.api.di.Singleton;
+import org.apache.maven.api.services.DependencyResolver;
+import org.apache.maven.api.services.DependencyResolverException;
+import org.apache.maven.api.services.DependencyResolverRequest;
+import org.apache.maven.api.services.DependencyResolverResult;
+import org.apache.maven.api.services.ProjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,41 +83,21 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
     @Inject
     private List<TestDependencyClassesProvider> testDependencyClassesProviders;
 
-    @Inject
-    private RepositorySystem repositorySystem;
-
-    @Inject
-    private List<RepositorySessionDecorator> repositorySessionDecorators;
-
-    @Inject
-    private Provider<MavenSession> mavenSessionProvider;
-
-    @Inject
-    private ArtifactHandlerManager artifactHandlerManager;
-
-    /** Constructor used by Sisu. */
+    /** Constructor used by the dependency injection container. */
     public DefaultProjectDependencyAnalyzer() {}
-
-    DefaultProjectDependencyAnalyzer(
-            RepositorySystem repositorySystem,
-            List<RepositorySessionDecorator> repositorySessionDecorators,
-            Provider<MavenSession> mavenSessionProvider,
-            ArtifactHandlerManager artifactHandlerManager) {
-        this.repositorySystem = repositorySystem;
-        this.repositorySessionDecorators = repositorySessionDecorators;
-        this.mavenSessionProvider = mavenSessionProvider;
-        this.artifactHandlerManager = artifactHandlerManager;
-    }
 
     /** {@inheritDoc} */
     @Override
-    public ProjectDependencyAnalysis analyze(MavenProject project, Collection<String> excludedClasses)
+    public ProjectDependencyAnalysis analyze(Session session, Project project, Collection<String> excludedClasses)
             throws ProjectDependencyAnalyzerException {
         try {
             ClassesPatterns excludedClassesPatterns = new ClassesPatterns(excludedClasses);
-            Map<Artifact, Set<String>> artifactClassMap = buildArtifactClassMap(project, excludedClassesPatterns);
-            Set<Artifact> declaredArtifacts = buildDeclaredArtifacts(project, artifactHandlerManager);
-            Map<String, Artifact> classToArtifactMap = buildClassToArtifactMap(artifactClassMap, declaredArtifacts);
+            ResolvedDependencies resolved = resolveDependencies(session, project);
+            Map<Dependency, Set<String>> artifactClassMap =
+                    buildArtifactClassMap(resolved.getDependencies(), excludedClassesPatterns);
+            Set<Dependency> declaredArtifacts = buildDeclaredArtifacts(
+                    session, project, resolved.getDependencies().keySet());
+            Map<String, Dependency> classToArtifactMap = buildClassToArtifactMap(artifactClassMap, declaredArtifacts);
 
             Set<DependencyUsage> mainDependencyClasses = new HashSet<>();
             for (MainDependencyClassesProvider provider : mainDependencyClassesProviders) {
@@ -141,39 +116,39 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             Set<DependencyUsage> testOnlyDependencyClasses =
                     buildTestOnlyDependencyClasses(mainDependencyClasses, testDependencyClasses);
 
-            Map<Artifact, Set<DependencyUsage>> usedArtifacts =
+            Map<Dependency, Set<DependencyUsage>> usedArtifacts =
                     buildUsedArtifacts(classToArtifactMap, dependencyClasses);
-            creditClasslessAggregators(artifactClassMap, declaredArtifacts, usedArtifacts);
-            Set<Artifact> mainUsedArtifacts = buildUsedArtifacts(classToArtifactMap, mainDependencyClasses)
+            creditClasslessAggregators(artifactClassMap, declaredArtifacts, usedArtifacts, resolved.getParentIds());
+            Set<Dependency> mainUsedArtifacts = buildUsedArtifacts(classToArtifactMap, mainDependencyClasses)
                     .keySet();
 
-            Set<Artifact> testArtifacts = buildUsedArtifacts(classToArtifactMap, testOnlyDependencyClasses)
+            Set<Dependency> testArtifacts = buildUsedArtifacts(classToArtifactMap, testOnlyDependencyClasses)
                     .keySet();
-            Set<Artifact> testOnlyArtifacts = removeAll(testArtifacts, mainUsedArtifacts);
+            Set<Dependency> testOnlyArtifacts = removeAll(testArtifacts, mainUsedArtifacts);
 
-            Set<Artifact> usedDeclaredArtifacts = new LinkedHashSet<>(declaredArtifacts);
-            usedDeclaredArtifacts.retainAll(usedArtifacts.keySet());
+            Set<Dependency> usedDeclaredArtifacts = retainAll(declaredArtifacts, usedArtifacts.keySet());
 
-            Map<Artifact, Set<DependencyUsage>> usedDeclaredArtifactsWithClasses = new LinkedHashMap<>();
-            for (Artifact a : usedDeclaredArtifacts) {
+            Map<Dependency, Set<DependencyUsage>> usedDeclaredArtifactsWithClasses = new LinkedHashMap<>();
+            for (Dependency a : usedDeclaredArtifacts) {
                 usedDeclaredArtifactsWithClasses.put(a, usedArtifacts.get(a));
             }
 
-            Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>(usedArtifacts);
-            Set<Artifact> usedUndeclaredArtifacts =
+            Map<Dependency, Set<DependencyUsage>> usedUndeclaredArtifactsWithClasses =
+                    new LinkedHashMap<>(usedArtifacts);
+            Set<Dependency> usedUndeclaredArtifacts =
                     removeAll(usedUndeclaredArtifactsWithClasses.keySet(), declaredArtifacts);
 
             usedUndeclaredArtifactsWithClasses.keySet().retainAll(usedUndeclaredArtifacts);
 
-            Set<Artifact> unusedDeclaredArtifacts = new LinkedHashSet<>(declaredArtifacts);
-            unusedDeclaredArtifacts = removeAll(unusedDeclaredArtifacts, usedArtifacts.keySet());
+            Set<Dependency> unusedDeclaredArtifacts = removeAll(declaredArtifacts, usedArtifacts.keySet());
 
-            Set<Artifact> testArtifactsWithNonTestScope = getTestArtifactsWithNonTestScope(project, testOnlyArtifacts);
+            Set<Dependency> testArtifactsWithNonTestScope =
+                    getTestArtifactsWithNonTestScope(session, project, testOnlyArtifacts);
 
             Set<String> usedDependencyClasses = buildUsedDependencyClasses(dependencyClasses);
-            Map<String, Set<Artifact>> candidateArtifactsByUsedClass =
+            Map<String, Set<Dependency>> candidateArtifactsByUsedClass =
                     buildCandidateArtifactsByUsedClass(artifactClassMap, usedDependencyClasses);
-            Map<String, Artifact> selectedArtifactByUsedClass =
+            Map<String, Dependency> selectedArtifactByUsedClass =
                     buildSelectedArtifactByUsedClass(classToArtifactMap, usedDependencyClasses);
 
             return new ProjectDependencyAnalysis(
@@ -184,13 +159,51 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
                     usedDependencyClasses,
                     candidateArtifactsByUsedClass,
                     selectedArtifactByUsedClass);
-        } catch (IOException exception) {
+        } catch (IOException | DependencyResolverException exception) {
             throw new ProjectDependencyAnalyzerException("Cannot analyze dependencies", exception);
         }
     }
 
     /**
-     * This method defines a new way to remove the artifacts by using the conflict
+     * Resolves all dependencies of the project needed to compile and run its tests.
+     * The Maven 4 API has no equivalent of {@code MavenProject.getArtifacts()}, so the analyzer resolves them itself.
+     */
+    private static ResolvedDependencies resolveDependencies(Session session, Project project)
+            throws DependencyResolverException {
+        DependencyResolverResult result =
+                session.getService(DependencyResolver.class).resolve(session, project, PathScope.TEST_RUNTIME);
+        return new ResolvedDependencies(result.getDependencies(), buildParentIds(result.getRoot()));
+    }
+
+    /**
+     * Maps every resolved dependency to the versionless id of the dependency it was reached through.
+     * The Maven 4 API has no equivalent of {@code Artifact.getDependencyTrail()}, so the parent of each dependency is
+     * read from the resolved dependency graph.
+     *
+     * @param root the root of the resolved dependency graph
+     * @return the versionless id of the parent of every dependency, {@code null} for a direct dependency
+     */
+    private static Map<String, String> buildParentIds(Node root) {
+        Map<String, String> parentIds = new HashMap<>();
+        if (root != null) {
+            collectParentIds(root, null, parentIds);
+        }
+        return parentIds;
+    }
+
+    private static void collectParentIds(Node node, String parentId, Map<String, String> parentIds) {
+        for (Node child : node.getChildren()) {
+            Dependency dependency = child.getDependency();
+            String id = dependency != null ? toVersionlessId(dependency) : null;
+            if (id != null) {
+                parentIds.putIfAbsent(id, parentId);
+            }
+            collectParentIds(child, id != null ? id : parentId, parentIds);
+        }
+    }
+
+    /**
+     * This method defines a new way to remove the artifacts by using the versionless
      * id. We don't care about the version
      * here because there can be only 1 for a given artifact anyway.
      *
@@ -198,20 +211,14 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
      * @param remove set to exclude
      * @return set with remove excluded
      */
-    private static Set<Artifact> removeAll(Set<Artifact> start, Set<Artifact> remove) {
-        Set<Artifact> results = new LinkedHashSet<>(start.size());
+    private static Set<Dependency> removeAll(Set<Dependency> start, Set<Dependency> remove) {
+        Set<String> removeIds = remove.stream()
+                .map(DefaultProjectDependencyAnalyzer::toVersionlessId)
+                .collect(Collectors.toSet());
+        Set<Dependency> results = new LinkedHashSet<>(start.size());
 
-        for (Artifact artifact : start) {
-            boolean found = false;
-
-            for (Artifact artifact2 : remove) {
-                if (artifact.getDependencyConflictId().equals(artifact2.getDependencyConflictId())) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
+        for (Dependency artifact : start) {
+            if (!removeIds.contains(toVersionlessId(artifact))) {
                 results.add(artifact);
             }
         }
@@ -219,11 +226,35 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return results;
     }
 
-    Set<Artifact> getTestArtifactsWithNonTestScope(MavenProject project, Set<Artifact> testOnlyArtifacts) {
-        Set<Artifact> nonTestScopeArtifacts = new LinkedHashSet<>();
+    /**
+     * Keeps the artifacts of the given set that are also part of the given set, comparing them by their versionless
+     * id.
+     *
+     * @param start  initial set
+     * @param keep set to keep
+     * @return set with only the artifacts of keep
+     */
+    private static Set<Dependency> retainAll(Set<Dependency> start, Set<Dependency> keep) {
+        Set<String> keepIds = keep.stream()
+                .map(DefaultProjectDependencyAnalyzer::toVersionlessId)
+                .collect(Collectors.toSet());
+        Set<Dependency> results = new LinkedHashSet<>(start.size());
 
-        for (Artifact artifact : testOnlyArtifacts) {
-            if (Artifact.SCOPE_COMPILE.equals(artifact.getScope())) {
+        for (Dependency artifact : start) {
+            if (keepIds.contains(toVersionlessId(artifact))) {
+                results.add(artifact);
+            }
+        }
+
+        return results;
+    }
+
+    Set<Dependency> getTestArtifactsWithNonTestScope(
+            Session session, Project project, Set<Dependency> testOnlyArtifacts) {
+        Set<Dependency> nonTestScopeArtifacts = new LinkedHashSet<>();
+
+        for (Dependency artifact : testOnlyArtifacts) {
+            if (artifact.getScope() == DependencyScope.COMPILE) {
                 nonTestScopeArtifacts.add(artifact);
             }
         }
@@ -232,84 +263,56 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             return nonTestScopeArtifacts;
         }
 
-        RepositorySystemSession repositorySession = getRepositorySystemSession();
-        if (repositorySession == null) {
-            LOGGER.debug("Cannot refine test-only dependency scopes without a repository session");
-            return nonTestScopeArtifacts;
-        }
-
         try {
             // Collect each non-test classpath independently and without the candidates as direct roots. Otherwise a
             // direct declaration can hide the same artifact reached transitively with a different scope.
-            Set<String> nonTestDependencyIds = collectDependencyIds(
-                    project,
-                    filterDependencies(project, nonTestScopeArtifacts, NonTestClasspath.COMPILE),
-                    repositorySession);
-            nonTestDependencyIds.addAll(collectDependencyIds(
-                    project,
-                    filterDependencies(project, nonTestScopeArtifacts, NonTestClasspath.RUNTIME),
-                    repositorySession));
+            Set<String> candidateIds = nonTestScopeArtifacts.stream()
+                    .map(DefaultProjectDependencyAnalyzer::toVersionlessId)
+                    .collect(Collectors.toSet());
+            Set<String> nonTestDependencyIds =
+                    collectDependencyIds(session, project, candidateIds, NonTestClasspath.COMPILE);
+            nonTestDependencyIds.addAll(collectDependencyIds(session, project, candidateIds, NonTestClasspath.RUNTIME));
 
             nonTestScopeArtifacts.removeIf(artifact -> nonTestDependencyIds.contains(toVersionlessId(artifact)));
-        } catch (DependencyCollectionException exception) {
+        } catch (DependencyResolverException exception) {
             LOGGER.debug("Cannot refine test-only dependency scopes using the non-test dependency graphs", exception);
         }
 
         return nonTestScopeArtifacts;
     }
 
-    /**
-     * Collects the dependency graph of the given project with only the given dependencies as direct roots, without
-     * resolving any artifact file. This mirrors what {@code ProjectDependenciesResolver} sends to the repository
-     * system, including the per-project {@link RepositorySessionDecorator}s.
-     */
     private Set<String> collectDependencyIds(
-            MavenProject project, List<Dependency> dependencies, RepositorySystemSession repositorySession)
-            throws DependencyCollectionException {
-        RepositorySystemSession session = repositorySession;
-        if (repositorySessionDecorators != null) {
-            for (RepositorySessionDecorator decorator : repositorySessionDecorators) {
-                RepositorySystemSession decorated = decorator.decorate(project, session);
-                if (decorated != null) {
-                    session = decorated;
-                }
-            }
-        }
-        ArtifactTypeRegistry stereotypes = session.getArtifactTypeRegistry();
+            Session session, Project project, Set<String> candidateIds, NonTestClasspath classpath) {
+        // The Maven 4 API collects from an explicit list of coordinates, so the model does not have to be copied and
+        // patched as it was with MavenProject.
+        List<DependencyCoordinates> dependencies = project.getDependencies().stream()
+                .filter(dependency -> classpath.includes(dependency.getScope()))
+                .filter(dependency -> !candidateIds.contains(toVersionlessId(dependency)))
+                .collect(Collectors.toList());
+        DependencyResolverRequest request = DependencyResolverRequest.builder()
+                .session(session)
+                .requestType(DependencyResolverRequest.RequestType.COLLECT)
+                .pathScope(classpath.pathScope())
+                .rootArtifact(project.getPomArtifact())
+                .dependencies(dependencies)
+                .managedDependencies(project.getManagedDependencies())
+                .repositories(session.getService(ProjectManager.class).getRemoteProjectRepositories(project))
+                .build();
+        DependencyResolverResult result =
+                session.getService(DependencyResolver.class).collect(request);
 
-        CollectRequest collect = new CollectRequest();
-        collect.setRootArtifact(RepositoryUtils.toArtifact(project.getArtifact()));
-        collect.setRequestContext("project");
-        collect.setRepositories(project.getRemoteProjectRepositories());
-        for (Dependency dependency : dependencies) {
-            if (isEmpty(dependency.getGroupId())
-                    || isEmpty(dependency.getArtifactId())
-                    || isEmpty(dependency.getVersion())) {
-                continue;
-            }
-            collect.addDependency(RepositoryUtils.toDependency(dependency, stereotypes));
-        }
-        DependencyManagement dependencyManagement = project.getDependencyManagement();
-        if (dependencyManagement != null) {
-            for (Dependency dependency : dependencyManagement.getDependencies()) {
-                collect.addManagedDependency(RepositoryUtils.toDependency(dependency, stereotypes));
-            }
-        }
-
-        DependencyNode root =
-                repositorySystem.collectDependencies(session, collect).getRoot();
         Set<String> dependencyIds = new HashSet<>();
+        Node root = result.getRoot();
         if (root == null) {
             return dependencyIds;
         }
-
-        Deque<DependencyNode> remaining = new ArrayDeque<>(root.getChildren());
-        Set<DependencyNode> visited = Collections.newSetFromMap(new IdentityHashMap<DependencyNode, Boolean>());
+        Deque<Node> remaining = new ArrayDeque<>(root.getChildren());
+        Set<Node> visited = Collections.newSetFromMap(new IdentityHashMap<>());
         while (!remaining.isEmpty()) {
-            DependencyNode node = remaining.removeFirst();
+            Node node = remaining.removeFirst();
             if (visited.add(node)) {
                 if (node.getArtifact() != null) {
-                    dependencyIds.add(ArtifactIdUtils.toVersionlessId(node.getArtifact()));
+                    dependencyIds.add(toVersionlessId(node.getArtifact()));
                 }
                 remaining.addAll(node.getChildren());
             }
@@ -317,99 +320,93 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return dependencyIds;
     }
 
-    private static boolean isEmpty(String value) {
-        return value == null || value.isEmpty();
-    }
-
-    private List<Dependency> filterDependencies(
-            MavenProject project, Set<Artifact> candidates, NonTestClasspath classpath) {
-        Set<String> candidateIds =
-                candidates.stream().map(Artifact::getDependencyConflictId).collect(Collectors.toSet());
-        return project.getDependencies().stream()
-                .filter(dependency -> classpath.includes(dependency.getScope()))
-                .filter(dependency -> !candidateIds.contains(toDependencyConflictId(dependency)))
-                .collect(Collectors.toList());
-    }
-
-    private RepositorySystemSession getRepositorySystemSession() {
-        MavenSession mavenSession = mavenSessionProvider != null ? mavenSessionProvider.get() : null;
-        return mavenSession != null ? mavenSession.getRepositorySession() : null;
-    }
-
-    private String toDependencyConflictId(Dependency dependency) {
-        return toDependencyConflictId(dependency, artifactHandlerManager.getArtifactHandler(dependency.getType()));
-    }
-
-    private static String toDependencyConflictId(Dependency dependency, ArtifactHandler artifactHandler) {
-        String classifier = dependency.getClassifier();
-        if (classifier == null) {
-            classifier = artifactHandler.getClassifier();
-        }
-        return ArtifactIdUtils.toVersionlessId(
-                dependency.getGroupId(), dependency.getArtifactId(), dependency.getType(), classifier);
-    }
-
     private static String toVersionlessId(Artifact artifact) {
-        String extension = artifact.getArtifactHandler() != null
-                ? artifact.getArtifactHandler().getExtension()
-                : artifact.getType();
-        return ArtifactIdUtils.toVersionlessId(
-                artifact.getGroupId(), artifact.getArtifactId(), extension, artifact.getClassifier());
+        return toVersionlessId(
+                artifact.getGroupId(), artifact.getArtifactId(), artifact.getExtension(), artifact.getClassifier());
+    }
+
+    private static String toVersionlessId(DependencyCoordinates coordinates) {
+        Type type = coordinates.getType();
+        String classifier = coordinates.getClassifier();
+        if (classifier == null || classifier.isEmpty()) {
+            classifier = type.getClassifier();
+        }
+        return toVersionlessId(coordinates.getGroupId(), coordinates.getArtifactId(), type.getExtension(), classifier);
+    }
+
+    private static String toVersionlessId(String groupId, String artifactId, String extension, String classifier) {
+        StringBuilder id = new StringBuilder();
+        id.append(groupId).append(':').append(artifactId).append(':').append(extension);
+        if (classifier != null && !classifier.isEmpty()) {
+            id.append(':').append(classifier);
+        }
+        return id.toString();
     }
 
     private enum NonTestClasspath {
         COMPILE {
             @Override
-            boolean includes(String scope) {
+            PathScope pathScope() {
+                return PathScope.MAIN_COMPILE;
+            }
+
+            @Override
+            boolean includes(DependencyScope scope) {
                 return scope == null
-                        || scope.isEmpty()
-                        || Artifact.SCOPE_COMPILE.equals(scope)
-                        || Artifact.SCOPE_PROVIDED.equals(scope)
-                        || Artifact.SCOPE_SYSTEM.equals(scope);
+                        || scope == DependencyScope.UNDEFINED
+                        || scope == DependencyScope.COMPILE
+                        || scope == DependencyScope.PROVIDED
+                        || scope == DependencyScope.SYSTEM;
             }
         },
         RUNTIME {
             @Override
-            boolean includes(String scope) {
+            PathScope pathScope() {
+                return PathScope.MAIN_RUNTIME;
+            }
+
+            @Override
+            boolean includes(DependencyScope scope) {
                 return scope == null
-                        || scope.isEmpty()
-                        || Artifact.SCOPE_COMPILE.equals(scope)
-                        || Artifact.SCOPE_RUNTIME.equals(scope);
+                        || scope == DependencyScope.UNDEFINED
+                        || scope == DependencyScope.COMPILE
+                        || scope == DependencyScope.RUNTIME;
             }
         };
 
-        abstract boolean includes(String scope);
+        abstract PathScope pathScope();
+
+        abstract boolean includes(DependencyScope scope);
     }
 
     /**
      * Maps dependency artifacts to their classes.
      *
-     * @param project Maven project
+     * @param resolvedDependencies resolved dependencies and the paths of their files or directories
      * @param excludedClasses patterns of classes to exclude
      * @return dependency artifacts and their classes
      * @throws IOException if a dependency cannot be read
      */
-    protected Map<Artifact, Set<String>> buildArtifactClassMap(MavenProject project, ClassesPatterns excludedClasses)
-            throws IOException {
-        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+    protected Map<Dependency, Set<String>> buildArtifactClassMap(
+            Map<Dependency, Path> resolvedDependencies, ClassesPatterns excludedClasses) throws IOException {
+        Map<Dependency, Set<String>> artifactClassMap = new LinkedHashMap<>();
 
-        Set<Artifact> dependencyArtifacts = project.getArtifacts();
+        for (Map.Entry<Dependency, Path> entry : resolvedDependencies.entrySet()) {
+            Dependency artifact = entry.getKey();
+            Path path = entry.getValue();
 
-        for (Artifact artifact : dependencyArtifacts) {
-            File file = artifact.getFile();
-
-            if (file != null && file.getName().endsWith(".jar")) {
+            if (path != null && path.getFileName().toString().endsWith(".jar")) {
                 // optimized solution for the jar case
 
-                try (JarFile jarFile = new JarFile(file)) {
+                try (JarFile jarFile = new JarFile(path.toFile())) {
                     Enumeration<JarEntry> jarEntries = jarFile.entries();
 
                     Set<String> classes = new HashSet<>();
 
                     while (jarEntries.hasMoreElements()) {
-                        String entry = jarEntries.nextElement().getName();
-                        if (entry.endsWith(".class")) {
-                            String className = entry.replace('/', '.');
+                        String jarEntry = jarEntries.nextElement().getName();
+                        if (jarEntry.endsWith(".class")) {
+                            String className = jarEntry.replace('/', '.');
                             className = className.substring(0, className.length() - ".class".length());
                             if (!excludedClasses.isMatch(className)) {
                                 classes.add(className);
@@ -419,9 +416,8 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
                     artifactClassMap.put(artifact, classes);
                 }
-            } else if (file != null && file.isDirectory()) {
-                URL url = file.toURI().toURL();
-                Set<String> classes = classAnalyzer.analyze(url, excludedClasses);
+            } else if (path != null && Files.isDirectory(path)) {
+                Set<String> classes = classAnalyzer.analyze(path, excludedClasses);
 
                 artifactClassMap.put(artifact, classes);
             }
@@ -440,40 +436,31 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return testOnlyDependencyClasses;
     }
 
-    static Set<Artifact> buildDeclaredArtifacts(MavenProject project, ArtifactHandlerManager artifactHandlerManager) {
-        Map<String, Artifact> resolvedArtifacts = project.getArtifacts().stream()
+    static Set<Dependency> buildDeclaredArtifacts(
+            Session session, Project project, Collection<Dependency> resolvedDependencies) {
+        Map<String, Dependency> resolvedArtifacts = resolvedDependencies.stream()
                 .collect(Collectors.toMap(
-                        Artifact::getDependencyConflictId,
-                        Function.identity(),
+                        DefaultProjectDependencyAnalyzer::toVersionlessId,
+                        dependency -> dependency,
                         (first, second) -> first,
                         LinkedHashMap::new));
-        Set<Artifact> declaredArtifacts = new LinkedHashSet<>();
-        for (Dependency dependency : project.getDependencies()) {
-            ArtifactHandler artifactHandler = artifactHandlerManager.getArtifactHandler(dependency.getType());
-            String dependencyConflictId = toDependencyConflictId(dependency, artifactHandler);
-            Artifact artifact = resolvedArtifacts.get(dependencyConflictId);
+        Set<Dependency> declaredArtifacts = new LinkedHashSet<>();
+        for (DependencyCoordinates coordinates : project.getDependencies()) {
+            Dependency artifact = resolvedArtifacts.get(toVersionlessId(coordinates));
             if (artifact == null) {
-                artifact = new DefaultArtifact(
-                        dependency.getGroupId(),
-                        dependency.getArtifactId(),
-                        VersionRange.createFromVersion(dependency.getVersion()),
-                        dependency.getScope(),
-                        dependency.getType(),
-                        dependency.getClassifier(),
-                        artifactHandler,
-                        dependency.isOptional());
+                artifact = new DeclaredDependency(session, coordinates);
             }
             declaredArtifacts.add(artifact);
         }
         return declaredArtifacts;
     }
 
-    static Map<Artifact, Set<DependencyUsage>> buildUsedArtifacts(
-            Map<String, Artifact> classToArtifactMap, Set<DependencyUsage> dependencyClasses) {
-        Map<Artifact, Set<DependencyUsage>> usedArtifacts = new HashMap<>();
+    static Map<Dependency, Set<DependencyUsage>> buildUsedArtifacts(
+            Map<String, Dependency> classToArtifactMap, Set<DependencyUsage> dependencyClasses) {
+        Map<Dependency, Set<DependencyUsage>> usedArtifacts = new HashMap<>();
 
         for (DependencyUsage classUsage : dependencyClasses) {
-            Artifact artifact = classToArtifactMap.get(classUsage.getDependencyClass());
+            Dependency artifact = classToArtifactMap.get(classUsage.getDependencyClass());
 
             if (artifact != null && !includedInJDK(artifact)) {
                 usedArtifacts.computeIfAbsent(artifact, k -> new HashSet<>()).add(classUsage);
@@ -491,12 +478,12 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return usedDependencyClasses;
     }
 
-    static Map<String, Set<Artifact>> buildCandidateArtifactsByUsedClass(
-            Map<Artifact, Set<String>> artifactClassMap, Set<String> usedDependencyClasses) {
-        Map<String, Set<Artifact>> candidatesByClass = new LinkedHashMap<>();
+    static Map<String, Set<Dependency>> buildCandidateArtifactsByUsedClass(
+            Map<Dependency, Set<String>> artifactClassMap, Set<String> usedDependencyClasses) {
+        Map<String, Set<Dependency>> candidatesByClass = new LinkedHashMap<>();
         for (String className : usedDependencyClasses) {
-            Set<Artifact> candidates = new LinkedHashSet<>();
-            for (Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet()) {
+            Set<Dependency> candidates = new LinkedHashSet<>();
+            for (Map.Entry<Dependency, Set<String>> entry : artifactClassMap.entrySet()) {
                 if (entry.getValue().contains(className)) {
                     candidates.add(entry.getKey());
                 }
@@ -506,11 +493,11 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return candidatesByClass;
     }
 
-    static Map<String, Artifact> buildSelectedArtifactByUsedClass(
-            Map<String, Artifact> classToArtifactMap, Set<String> usedDependencyClasses) {
-        Map<String, Artifact> selectedByClass = new LinkedHashMap<>();
+    static Map<String, Dependency> buildSelectedArtifactByUsedClass(
+            Map<String, Dependency> classToArtifactMap, Set<String> usedDependencyClasses) {
+        Map<String, Dependency> selectedByClass = new LinkedHashMap<>();
         for (String className : usedDependencyClasses) {
-            Artifact artifact = classToArtifactMap.get(className);
+            Dependency artifact = classToArtifactMap.get(className);
             if (artifact != null) {
                 selectedByClass.put(className, artifact);
             }
@@ -522,35 +509,36 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
      * Treats a declared artifact without classes of its own (for example {@code junit-jupiter}, which only carries
      * {@code module-info.class}) as used when one of the artifacts it brings in directly is used. The used artifacts
      * that are brought in by such an aggregator and are not declared themselves are then no longer reported as used
-     * undeclared. The direct dependencies are taken from the dependency trail of the resolved artifacts, so only the
+     * undeclared. The direct dependencies are taken from the dependency graph of the resolved artifacts, so only the
      * path that survived dependency mediation is considered.
      *
      * @param artifactClassMap the classes of each resolved artifact
      * @param declaredArtifacts the artifacts declared by the project
      * @param usedArtifacts the used artifacts, updated in place
+     * @param parentIds the parent of every resolved dependency, by versionless id
      */
     static void creditClasslessAggregators(
-            Map<Artifact, Set<String>> artifactClassMap,
-            Set<Artifact> declaredArtifacts,
-            Map<Artifact, Set<DependencyUsage>> usedArtifacts) {
+            Map<Dependency, Set<String>> artifactClassMap,
+            Set<Dependency> declaredArtifacts,
+            Map<Dependency, Set<DependencyUsage>> usedArtifacts,
+            Map<String, String> parentIds) {
         Set<String> declaredIds = declaredArtifacts.stream()
-                .map(Artifact::getDependencyConflictId)
+                .map(DefaultProjectDependencyAnalyzer::toVersionlessId)
                 .collect(Collectors.toSet());
 
-        for (Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet()) {
-            Artifact aggregator = entry.getKey();
+        for (Map.Entry<Dependency, Set<String>> entry : artifactClassMap.entrySet()) {
+            Dependency aggregator = entry.getKey();
+            String aggregatorId = toVersionlessId(aggregator);
             if (!entry.getValue().isEmpty()
-                    || !declaredIds.contains(aggregator.getDependencyConflictId())
+                    || !declaredIds.contains(aggregatorId)
                     || usedArtifacts.containsKey(aggregator)) {
                 continue;
             }
 
-            String prefix = aggregator.getGroupId() + ":" + aggregator.getArtifactId() + ":";
             Set<DependencyUsage> usages = new HashSet<>();
-            List<Artifact> usedChildren = new ArrayList<>();
-            for (Artifact used : usedArtifacts.keySet()) {
-                List<String> trail = used.getDependencyTrail();
-                if (trail != null && trail.size() == 3 && trail.get(1).startsWith(prefix)) {
+            List<Dependency> usedChildren = new ArrayList<>();
+            for (Dependency used : usedArtifacts.keySet()) {
+                if (aggregatorId.equals(parentIds.get(toVersionlessId(used)))) {
                     usedChildren.add(used);
                     usages.addAll(usedArtifacts.get(used));
                 }
@@ -560,8 +548,8 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
             }
 
             usedArtifacts.put(aggregator, usages);
-            for (Artifact child : usedChildren) {
-                if (!declaredIds.contains(child.getDependencyConflictId())) {
+            for (Dependency child : usedChildren) {
+                if (!declaredIds.contains(toVersionlessId(child))) {
                     usedArtifacts.remove(child);
                 }
             }
@@ -570,7 +558,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
     // MSHARED-47 an uncommon case where a commonly used
     // third party dependency was added to the JDK
-    static boolean includedInJDK(Artifact artifact) {
+    static boolean includedInJDK(Dependency artifact) {
         if ("xml-apis".equals(artifact.getGroupId())) {
             if ("xml-apis".equals(artifact.getArtifactId())) {
                 return true;
@@ -584,17 +572,6 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
     }
 
     /**
-     * Maps each class to the artifact that provides it. When several artifacts contain the class, the first one
-     * wins.
-     *
-     * @param artifactClassMap the classes of each artifact
-     * @return the providing artifact per class
-     */
-    static Map<String, Artifact> buildClassToArtifactMap(Map<Artifact, Set<String>> artifactClassMap) {
-        return buildClassToArtifactMap(artifactClassMap, Collections.emptySet());
-    }
-
-    /**
      * Maps each class to the artifact that provides it. When several artifacts contain the class, a declared
      * artifact wins over an undeclared one, and otherwise the first one wins. If two declared artifacts contain the
      * class, only the first of them is credited. Scope is not considered: a declared test-scoped artifact that
@@ -605,29 +582,155 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
      * @param declaredArtifacts the artifacts declared by the project
      * @return the providing artifact per class
      */
-    static Map<String, Artifact> buildClassToArtifactMap(
-            Map<Artifact, Set<String>> artifactClassMap, Set<Artifact> declaredArtifacts) {
-        Set<String> declaredIds = declaredArtifacts.stream()
-                .map(Artifact::getDependencyConflictId)
-                .collect(Collectors.toSet());
-        Map<String, Artifact> classToArtifactMap = new HashMap<>();
+    static Map<String, Dependency> buildClassToArtifactMap(Map<Dependency, Set<String>> artifactClassMap) {
+        return buildClassToArtifactMap(artifactClassMap, Collections.emptySet());
+    }
 
-        for (Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet()) {
-            Artifact artifact = entry.getKey();
-            if (declaredIds.contains(artifact.getDependencyConflictId())) {
+    static Map<String, Dependency> buildClassToArtifactMap(
+            Map<Dependency, Set<String>> artifactClassMap, Set<Dependency> declaredArtifacts) {
+        Set<String> declaredIds = declaredArtifacts.stream()
+                .map(DefaultProjectDependencyAnalyzer::toVersionlessId)
+                .collect(Collectors.toSet());
+        Map<String, Dependency> classToArtifactMap = new HashMap<>();
+
+        for (Map.Entry<Dependency, Set<String>> entry : artifactClassMap.entrySet()) {
+            Dependency artifact = entry.getKey();
+            if (declaredIds.contains(toVersionlessId(artifact))) {
                 for (String className : entry.getValue()) {
                     classToArtifactMap.putIfAbsent(className, artifact);
                 }
             }
         }
 
-        for (Map.Entry<Artifact, Set<String>> entry : artifactClassMap.entrySet()) {
-            Artifact artifact = entry.getKey();
+        for (Map.Entry<Dependency, Set<String>> entry : artifactClassMap.entrySet()) {
+            Dependency artifact = entry.getKey();
             for (String className : entry.getValue()) {
                 classToArtifactMap.putIfAbsent(className, artifact);
             }
         }
 
         return classToArtifactMap;
+    }
+
+    /**
+     * The resolved dependencies of a project, together with the parent of every dependency in the resolved graph.
+     */
+    static final class ResolvedDependencies {
+        private final Map<Dependency, Path> dependencies;
+        private final Map<String, String> parentIds;
+
+        ResolvedDependencies(Map<Dependency, Path> dependencies, Map<String, String> parentIds) {
+            this.dependencies = dependencies;
+            this.parentIds = parentIds;
+        }
+
+        Map<Dependency, Path> getDependencies() {
+            return dependencies;
+        }
+
+        Map<String, String> getParentIds() {
+            return parentIds;
+        }
+    }
+
+    /**
+     * A declared dependency that was not resolved, for example because it was relocated. The Maven 4 API has no
+     * factory for a {@link Dependency} from {@link DependencyCoordinates}, only for {@code Artifact}, so the analysis
+     * result is given this minimal implementation.
+     */
+    static final class DeclaredDependency implements Dependency {
+        private final DependencyCoordinates coordinates;
+        private final Version version;
+        private final boolean snapshot;
+
+        DeclaredDependency(Session session, DependencyCoordinates coordinates) {
+            this.coordinates = coordinates;
+            String versionString = String.valueOf(coordinates.getVersionConstraint());
+            this.version = session.parseVersion(versionString);
+            this.snapshot = session.isVersionSnapshot(versionString);
+        }
+
+        @Override
+        public Type getType() {
+            return coordinates.getType();
+        }
+
+        @Override
+        public DependencyScope getScope() {
+            DependencyScope scope = coordinates.getScope();
+            return scope == null || scope == DependencyScope.UNDEFINED ? DependencyScope.COMPILE : scope;
+        }
+
+        @Override
+        public boolean isOptional() {
+            return Boolean.TRUE.equals(coordinates.getOptional());
+        }
+
+        @Override
+        public DependencyCoordinates toCoordinates() {
+            return coordinates;
+        }
+
+        @Override
+        public String getGroupId() {
+            return coordinates.getGroupId();
+        }
+
+        @Override
+        public String getArtifactId() {
+            return coordinates.getArtifactId();
+        }
+
+        @Override
+        public Version getVersion() {
+            return version;
+        }
+
+        @Override
+        public Version getBaseVersion() {
+            return version;
+        }
+
+        @Override
+        public String getClassifier() {
+            String classifier = coordinates.getClassifier();
+            if (classifier == null || classifier.isEmpty()) {
+                classifier = getType().getClassifier();
+            }
+            // Artifact.key() does not accept null
+            return classifier == null ? "" : classifier;
+        }
+
+        @Override
+        public String getExtension() {
+            return getType().getExtension();
+        }
+
+        @Override
+        public boolean isSnapshot() {
+            return snapshot;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof DeclaredDependency)) {
+                return false;
+            }
+            DeclaredDependency other = (DeclaredDependency) obj;
+            return key().equals(other.key()) && getScope() == other.getScope();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(key(), getScope());
+        }
+
+        @Override
+        public String toString() {
+            return key() + ":" + getScope().id();
+        }
     }
 }

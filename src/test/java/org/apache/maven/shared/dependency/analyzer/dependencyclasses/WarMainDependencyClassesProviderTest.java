@@ -26,12 +26,13 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.apache.maven.model.Build;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.api.Packaging;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.model.Build;
+import org.apache.maven.api.model.Plugin;
+import org.apache.maven.api.xml.XmlNode;
 import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,15 +49,16 @@ import static org.mockito.Mockito.when;
 class WarMainDependencyClassesProviderTest {
 
     @Mock
-    private MavenProject project;
+    private Project project;
 
     private final WarMainDependencyClassesProvider provider = new WarMainDependencyClassesProvider();
 
     @Test
     void parseDefaultWebXml() throws IOException, URISyntaxException {
         Path basePath = Paths.get(getClass().getResource("/webapp").toURI());
-        when(project.getBasedir()).thenReturn(basePath.toFile());
-        when(project.getPackaging()).thenReturn("war");
+        when(project.getBasedir()).thenReturn(basePath);
+        Packaging packaging = warPackaging();
+        when(project.getPackaging()).thenReturn(packaging);
 
         Set<DependencyUsage> classes =
                 provider.getDependencyClasses(project, new ClassesPatterns(Collections.singleton(".*\\.Servlet$")));
@@ -69,9 +71,10 @@ class WarMainDependencyClassesProviderTest {
     @Test
     void noDefaultWebXml() throws IOException, URISyntaxException {
         Path basePath = Paths.get(getClass().getResource("/webapp/examples").toURI());
-        when(project.getBasedir()).thenReturn(basePath.toFile());
-        when(project.getPackaging()).thenReturn("war");
-        when(project.getBuild()).thenReturn(new Build());
+        when(project.getBasedir()).thenReturn(basePath);
+        Packaging packaging = warPackaging();
+        when(project.getPackaging()).thenReturn(packaging);
+        when(project.getBuild()).thenReturn(Build.newInstance());
 
         Set<DependencyUsage> classes = provider.getDependencyClasses(project, new ClassesPatterns());
 
@@ -111,19 +114,26 @@ class WarMainDependencyClassesProviderTest {
     private void setupProjectWithWebXml(String webXmlName) throws URISyntaxException {
         Path basePath = Paths.get(getClass().getResource("/webapp/examples").toURI());
 
-        when(project.getBasedir()).thenReturn(basePath.toFile());
-        when(project.getPackaging()).thenReturn("war");
+        when(project.getBasedir()).thenReturn(basePath);
+        Packaging packaging = warPackaging();
+        when(project.getPackaging()).thenReturn(packaging);
 
-        Plugin plugin = new Plugin();
-        Xpp3Dom configuration = new Xpp3Dom("configuration");
-        Xpp3Dom webXmlConfig = new Xpp3Dom("webXml");
-        webXmlConfig.setValue(webXmlName);
-        configuration.addChild(webXmlConfig);
-        plugin.setConfiguration(configuration);
+        Plugin plugin = Plugin.newBuilder()
+                .groupId("org.apache.maven.plugins")
+                .artifactId("maven-war-plugin")
+                .configuration(XmlNode.newInstance(
+                        "configuration", Collections.singletonList(XmlNode.newInstance("webXml", webXmlName))))
+                .build();
 
-        Build build = mock(Build.class);
-        when(project.getBuild()).thenReturn(build);
-        when(build.getPluginsAsMap())
-                .thenReturn(Collections.singletonMap("org.apache.maven.plugins:maven-war-plugin", plugin));
+        when(project.getBuild())
+                .thenReturn(Build.newBuilder()
+                        .plugins(Collections.singletonList(plugin))
+                        .build());
+    }
+
+    private static Packaging warPackaging() {
+        Packaging packaging = mock(Packaging.class);
+        when(packaging.id()).thenReturn("war");
+        return packaging;
     }
 }

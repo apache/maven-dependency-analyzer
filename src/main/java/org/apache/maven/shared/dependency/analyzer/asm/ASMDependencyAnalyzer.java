@@ -18,13 +18,13 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Set;
 
+import org.apache.maven.api.di.Named;
+import org.apache.maven.api.di.Singleton;
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitorUtils;
 import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
@@ -44,6 +44,16 @@ public class ASMDependencyAnalyzer implements DependencyAnalyzer {
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor(excludeClasses);
 
         ClassFileVisitorUtils.accept(url, visitor);
+
+        return visitor.getDependencyUsages();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<DependencyUsage> analyzeUsages(Path path, ClassesPatterns excludeClasses) throws IOException {
+        DependencyClassFileVisitor visitor = new DependencyClassFileVisitor(excludeClasses);
+
+        ClassFileVisitorUtils.accept(path, visitor);
 
         return visitor.getDependencyUsages();
     }

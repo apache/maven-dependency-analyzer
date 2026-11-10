@@ -36,6 +36,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests <code>ClassFileVisitorUtils</code>.
@@ -146,6 +147,50 @@ class ClassFileVisitorUtilsTest {
         } catch (IllegalArgumentException exception) {
             assertThat(exception).hasMessage("Cannot accept visitor on URL: " + url);
         }
+    }
+
+    @Test
+    void testAcceptJarPath() throws IOException {
+        Path path = Files.createTempFile(tempDir, "test", ".jar");
+
+        try (JarOutputStream out = new JarOutputStream(Files.newOutputStream(path))) {
+            addZipEntry(out, "a/b/c.class", "class a.b.c");
+            addZipEntry(out, "x/y/z.class", "class x.y.z");
+        }
+
+        ClassFileVisitorUtils.accept(path, visitor);
+
+        assertThat(visitor.classNames).contains("a.b.c");
+        assertThat(visitor.classNames).contains("x.y.z");
+        assertThat(visitor.data).contains("class a.b.c");
+        assertThat(visitor.data).contains("class x.y.z");
+    }
+
+    @Test
+    void testAcceptDirPath() throws IOException {
+        Path dir = Files.createTempDirectory(tempDir, "d-a-test");
+
+        Path abDir = Files.createDirectories(dir.resolve("a/b"));
+        writeToFile(abDir, "c.class", "class a.b.c");
+
+        Path xyDir = Files.createDirectories(dir.resolve("x/y"));
+        writeToFile(xyDir, "z.class", "class x.y.z");
+
+        ClassFileVisitorUtils.accept(dir, visitor);
+
+        assertThat(visitor.classNames).contains("a.b.c");
+        assertThat(visitor.classNames).contains("x.y.z");
+        assertThat(visitor.data).contains("class a.b.c");
+        assertThat(visitor.data).contains("class x.y.z");
+    }
+
+    @Test
+    void testAcceptWithNonJarFilePath() throws IOException {
+        Path path = Files.createTempFile(tempDir, "test", ".class");
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> ClassFileVisitorUtils.accept(path, visitor));
+        assertThat(exception).hasMessage("Cannot accept visitor on path: " + path);
     }
 
     private void writeToFile(Path parent, String file, String data) throws IOException {
