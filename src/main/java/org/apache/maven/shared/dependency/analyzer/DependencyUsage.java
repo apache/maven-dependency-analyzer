@@ -57,6 +57,7 @@ public class DependencyUsage {
     /*
      * @see java.lang.Object#hashCode()
      */
+    @Override
     public int hashCode() {
         int hashCode = dependencyClass.hashCode();
         return (hashCode * 37) + usedBy.hashCode();
@@ -65,6 +66,7 @@ public class DependencyUsage {
     /*
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object object) {
         if (object instanceof DependencyUsage) {
             DependencyUsage usage = (DependencyUsage) object;
@@ -79,6 +81,7 @@ public class DependencyUsage {
     /*
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
 
