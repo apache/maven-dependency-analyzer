@@ -59,9 +59,7 @@ public class DependencyUsage {
      */
     public int hashCode() {
         int hashCode = dependencyClass.hashCode();
-        hashCode = (hashCode * 37) + usedBy.hashCode();
-
-        return hashCode;
+        return (hashCode * 37) + usedBy.hashCode();
     }
 
     /*

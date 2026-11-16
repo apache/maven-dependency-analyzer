@@ -375,9 +375,7 @@ public class ProjectDependencyAnalysis {
         int hashCode = getUsedDeclaredArtifacts().hashCode();
         hashCode = (hashCode * 37) + getUsedUndeclaredArtifacts().hashCode();
         hashCode = (hashCode * 37) + getUnusedDeclaredArtifacts().hashCode();
-        hashCode = (hashCode * 37) + getTestArtifactsWithNonTestScope().hashCode();
-
-        return hashCode;
+        return (hashCode * 37) + getTestArtifactsWithNonTestScope().hashCode();
     }
 
     /** {@inheritDoc} */
@@ -443,11 +441,11 @@ public class ProjectDependencyAnalysis {
     // private methods --------------------------------------------------------
 
     private Set<Artifact> safeCopy(Set<Artifact> set) {
-        return (set == null) ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(set));
+        return set == null ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(set));
     }
 
     private static Set<String> safeCopyStrings(Set<String> set) {
-        return (set == null) ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(set));
+        return set == null ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(set));
     }
 
     private static Map<Artifact, Set<DependencyUsage>> safeCopy(Map<Artifact, Set<DependencyUsage>> origMap) {
