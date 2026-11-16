@@ -61,7 +61,7 @@ class DefaultClassAnalyzerTest {
     }
 
     @Test
-    void testAnalyzeWithJar() throws IOException {
+    void testAnalyzeWithJar() throws Exception {
         Set<String> expectedClasses = new HashSet<>();
         expectedClasses.add("a.b.c");
         expectedClasses.add("x.y.z");
@@ -73,7 +73,7 @@ class DefaultClassAnalyzerTest {
     }
 
     @Test
-    void testAnalyzeBadJar() throws IOException {
+    void testAnalyzeBadJar() throws Exception {
         // to reproduce MDEP-143
         // corrupt the jar file by altering its contents
         ByteArrayOutputStream baos = new ByteArrayOutputStream(100);
@@ -93,7 +93,7 @@ class DefaultClassAnalyzerTest {
     }
 
     @Test
-    void testAnalyzeDirectoryPreservesDollarClassNames() throws IOException {
+    void testAnalyzeDirectoryPreservesDollarClassNames() throws Exception {
         Path directory = Files.createDirectories(tempDir.resolve("classes/library"));
         Files.write(directory.resolve("Dollar$Class.class"), new byte[0]);
         Files.write(directory.resolve("Outer$Inner.class"), new byte[0]);

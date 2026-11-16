@@ -54,7 +54,7 @@ class ResultCollectorTest {
     }
 
     @Test
-    void testJava11Invoke() throws IOException {
+    void testJava11Invoke() throws Exception {
         Path path = Paths.get(
                 "src/test/resources/org/apache/maven/shared/dependency/analyzer/commons-bcel-issue362/Bcel362.classx");
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
@@ -64,7 +64,7 @@ class ResultCollectorTest {
     }
 
     @Test
-    void testJava17DynamicInvokeRecord() throws IOException {
+    void testJava17DynamicInvokeRecord() throws Exception {
         Path path = Paths.get(
                 "src/test/resources/org/apache/maven/shared/dependency/analyzer/record-invokedynamic/RecordInvokeDynamic.classx");
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
@@ -102,7 +102,7 @@ class ResultCollectorTest {
     }
 
     @Test
-    void testArrayCases() throws IOException {
+    void testArrayCases() throws Exception {
         Set<String> dependencies = getDependencies(ArrayCases.class);
         assertThat(dependencies).doesNotContain("[I");
         assertThat(dependencies).allSatisfy(dependency -> assertThat(dependency).doesNotStartWith("["));
@@ -110,7 +110,7 @@ class ResultCollectorTest {
     }
 
     @Test
-    void testNoMethodHandle() throws IOException {
+    void testNoMethodHandle() throws Exception {
         Set<String> dependencies = getDependencies(MethodHandleCases.class);
         for (String dependency : dependencies) {
             assertThat(dependency).doesNotStartWith("(");
@@ -118,7 +118,7 @@ class ResultCollectorTest {
     }
 
     @Test
-    void testInnerClassNamePreserved() throws IOException {
+    void testInnerClassNamePreserved() throws Exception {
         Set<String> dependencies = getDependencies(InnerClassCase.class);
         assertThat(dependencies).contains("java.lang.System", "java.lang.invoke.MethodHandles$Lookup");
     }
