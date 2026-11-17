@@ -18,6 +18,7 @@
  */
 package org.apache.maven.shared.dependency.analyzer.dependencyclasses;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,7 +53,7 @@ class WarMainDependencyClassesProviderTest {
     private final WarMainDependencyClassesProvider provider = new WarMainDependencyClassesProvider();
 
     @Test
-    void parseDefaultWebXml() throws Exception {
+    void parseDefaultWebXml() throws IOException, URISyntaxException {
         Path basePath = Paths.get(getClass().getResource("/webapp").toURI());
         when(project.getBasedir()).thenReturn(basePath.toFile());
         when(project.getPackaging()).thenReturn("war");
@@ -66,7 +67,7 @@ class WarMainDependencyClassesProviderTest {
     }
 
     @Test
-    void noDefaultWebXml() throws Exception {
+    void noDefaultWebXml() throws IOException, URISyntaxException {
         Path basePath = Paths.get(getClass().getResource("/webapp/examples").toURI());
         when(project.getBasedir()).thenReturn(basePath.toFile());
         when(project.getPackaging()).thenReturn("war");

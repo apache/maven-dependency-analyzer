@@ -19,6 +19,7 @@
 package org.apache.maven.shared.dependency.analyzer.dependencyclasses;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Set;
 
 import org.apache.maven.model.Build;
@@ -46,7 +47,7 @@ class DefaultTestDependencyClassesProviderTest {
     private DefaultTestDependencyClassesProvider provider;
 
     @Test
-    void testOutputIsUsed() throws Exception {
+    void testOutputIsUsed() throws IOException {
         MavenProject project = Mockito.mock(MavenProject.class);
         Build build = Mockito.mock(Build.class);
         when(project.getBuild()).thenReturn(build);
