@@ -42,7 +42,7 @@
     <url>https://github.com/apache/maven-dependency-analyzer/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
-    <system>jira</system>
+    <system>GitHub Issues</system>
     <url>https://github.com/apache/maven-dependency-analyzer/issues</url>
   </issueManagement>
   <ciManagement>
