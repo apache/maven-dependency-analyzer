@@ -32,7 +32,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +54,7 @@ class DefaultTestDependencyClassesProviderTest {
 
         Set<DependencyUsage> dependencyUsages = provider.getDependencyClasses(project, null);
 
-        assertThat(dependencyUsages).isNotNull();
+        assertNotNull(dependencyUsages);
 
         verify(analyzer).analyzeUsages(new File("target/test-classes").toURI().toURL(), null);
     }

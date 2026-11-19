@@ -34,8 +34,9 @@ import java.util.zip.ZipEntry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests <code>ClassFileVisitorUtils</code>.
@@ -74,10 +75,10 @@ class ClassFileVisitorUtilsTest {
 
         ClassFileVisitorUtils.accept(path.toUri().toURL(), visitor);
 
-        assertThat(visitor.classNames).contains("a.b.c");
-        assertThat(visitor.classNames).contains("x.y.z");
-        assertThat(visitor.data).contains("class a.b.c");
-        assertThat(visitor.data).contains("class x.y.z");
+        assertTrue(visitor.classNames.contains("a.b.c"));
+        assertTrue(visitor.classNames.contains("x.y.z"));
+        assertTrue(visitor.data.contains("class a.b.c"));
+        assertTrue(visitor.data.contains("class x.y.z"));
     }
 
     @Test
@@ -90,7 +91,7 @@ class ClassFileVisitorUtilsTest {
 
         ClassFileVisitorUtils.accept(path.toUri().toURL(), visitor);
 
-        assertThat(visitor.classNames).isEmpty();
+        assertTrue(visitor.classNames.isEmpty());
     }
 
     @Test
@@ -105,10 +106,10 @@ class ClassFileVisitorUtilsTest {
 
         ClassFileVisitorUtils.accept(dir.toUri().toURL(), visitor);
 
-        assertThat(visitor.classNames).contains("a.b.c");
-        assertThat(visitor.classNames).contains("x.y.z");
-        assertThat(visitor.data).contains("class a.b.c");
-        assertThat(visitor.data).contains("class x.y.z");
+        assertTrue(visitor.classNames.contains("a.b.c"));
+        assertTrue(visitor.classNames.contains("x.y.z"));
+        assertTrue(visitor.data.contains("class a.b.c"));
+        assertTrue(visitor.data.contains("class x.y.z"));
     }
 
     @Test
@@ -120,7 +121,7 @@ class ClassFileVisitorUtilsTest {
 
         ClassFileVisitorUtils.accept(dir.toUri().toURL(), visitor);
 
-        assertThat(visitor.classNames).isEmpty();
+        assertTrue(visitor.classNames.isEmpty());
     }
 
     @Test
@@ -132,7 +133,7 @@ class ClassFileVisitorUtilsTest {
             ClassFileVisitorUtils.accept(url, visitor);
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException exception) {
-            assertThat(exception).hasMessage("Cannot accept visitor on URL: " + url);
+            assertEquals("Cannot accept visitor on URL: " + url, exception.getMessage());
         }
     }
 
@@ -144,7 +145,7 @@ class ClassFileVisitorUtilsTest {
             ClassFileVisitorUtils.accept(url, visitor);
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException exception) {
-            assertThat(exception).hasMessage("Cannot accept visitor on URL: " + url);
+            assertEquals("Cannot accept visitor on URL: " + url, exception.getMessage());
         }
     }
 

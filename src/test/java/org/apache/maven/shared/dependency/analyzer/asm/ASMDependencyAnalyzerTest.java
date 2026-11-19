@@ -28,7 +28,9 @@ import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ASMDependencyAnalyzerTest {
     private final DependencyAnalyzer analyzer = new ASMDependencyAnalyzer();
@@ -36,13 +38,13 @@ class ASMDependencyAnalyzerTest {
     @Test
     void test() throws Exception {
         URL jarUrl = this.getClass().getResource("/org/objectweb/asm/ClassReader.class");
-        assertThat(jarUrl).isNotNull();
+        assertNotNull(jarUrl);
         String fileUrl =
                 jarUrl.toString().substring("jar:".length(), jarUrl.toString().indexOf("!/"));
 
         Set<String> result = analyzer.analyze(new URL(fileUrl));
 
-        assertThat(result).isNotEmpty();
+        assertFalse(result.isEmpty());
     }
 
     @Test
@@ -50,8 +52,8 @@ class ASMDependencyAnalyzerTest {
         Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
 
         Set<String> result = analyzer.analyze(file.toUri().toURL());
-        assertThat(result).contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest");
-        assertThat(result).contains("java.util.regex.Pattern");
+        assertTrue(result.contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest"));
+        assertTrue(result.contains("java.util.regex.Pattern"));
     }
 
     @Test
@@ -60,9 +62,8 @@ class ASMDependencyAnalyzerTest {
 
         Set<String> result =
                 analyzer.analyze(file.toUri().toURL(), new ClassesPatterns(Collections.singleton("ClassToExclude")));
-        assertThat(result).contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest");
-        assertThat(result).doesNotContain("java.util.regex.Pattern");
-        assertThat(result)
-                .doesNotContain("org.apache.maven.shared.dependency.analyzer.testcases.analyze.ClassToExclude");
+        assertTrue(result.contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest"));
+        assertFalse(result.contains("java.util.regex.Pattern"));
+        assertFalse(result.contains("org.apache.maven.shared.dependency.analyzer.testcases.analyze.ClassToExclude"));
     }
 }

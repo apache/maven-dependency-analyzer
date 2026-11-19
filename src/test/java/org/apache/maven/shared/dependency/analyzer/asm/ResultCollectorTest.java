@@ -36,8 +36,10 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ResultCollectorTest {
 
@@ -71,7 +73,7 @@ class ResultCollectorTest {
         try (InputStream is = Files.newInputStream(path)) {
             visitor.visitClass("recordinvokedynamic.RecordInvokeDynamic", is);
         }
-        assertThat(visitor.getDependencies()).contains("recordinvokedynamic.RecordInvokeDynamic");
+        assertTrue(visitor.getDependencies().contains("recordinvokedynamic.RecordInvokeDynamic"));
     }
 
     @ParameterizedTest
@@ -89,8 +91,9 @@ class ResultCollectorTest {
             })
     void testOssFuzz(String name) {
         // Add a non-"class" suffix so that surefire does not try to read the file and fail the build
-        assertThatCode(() -> visitClass(ROOT + "/ossfuzz/" + name + "/Test.class.clazz"))
-                .isExactlyInstanceOf(VisitClassException.class);
+        VisitClassException exception = assertThrows(
+                VisitClassException.class, () -> visitClass(ROOT + "/ossfuzz/" + name + "/Test.class.clazz"));
+        assertEquals(VisitClassException.class, exception.getClass());
     }
 
     private void visitClass(String location) throws IOException {
@@ -104,23 +107,27 @@ class ResultCollectorTest {
     @Test
     void testArrayCases() throws Exception {
         Set<String> dependencies = getDependencies(ArrayCases.class);
-        assertThat(dependencies).doesNotContain("[I");
-        assertThat(dependencies).allSatisfy(dependency -> assertThat(dependency).doesNotStartWith("["));
-        assertThat(dependencies).contains("java.lang.annotation.Annotation").contains("java.lang.reflect.Constructor");
+        assertFalse(dependencies.contains("[I"));
+        for (String dependency : dependencies) {
+            assertFalse(dependency.startsWith("["));
+        }
+        assertTrue(dependencies.contains("java.lang.annotation.Annotation"));
+        assertTrue(dependencies.contains("java.lang.reflect.Constructor"));
     }
 
     @Test
     void testNoMethodHandle() throws Exception {
         Set<String> dependencies = getDependencies(MethodHandleCases.class);
         for (String dependency : dependencies) {
-            assertThat(dependency).doesNotStartWith("(");
+            assertFalse(dependency.startsWith("("));
         }
     }
 
     @Test
     void testInnerClassNamePreserved() throws Exception {
         Set<String> dependencies = getDependencies(InnerClassCase.class);
-        assertThat(dependencies).contains("java.lang.System", "java.lang.invoke.MethodHandles$Lookup");
+        assertTrue(dependencies.contains("java.lang.System"));
+        assertTrue(dependencies.contains("java.lang.invoke.MethodHandles$Lookup"));
     }
 
     @Test
@@ -142,6 +149,7 @@ class ResultCollectorTest {
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor();
         visitor.visitClass("consumer.Example", new ByteArrayInputStream(writer.toByteArray()));
 
-        assertThat(visitor.getDependencies()).contains("dependency.Outer$Inner").doesNotContain("dependency.Outer");
+        assertTrue(visitor.getDependencies().contains("dependency.Outer$Inner"));
+        assertFalse(visitor.getDependencies().contains("dependency.Outer"));
     }
 }
