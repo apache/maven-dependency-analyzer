@@ -35,6 +35,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests <code>ClassFileVisitorUtils</code>.
@@ -73,10 +75,10 @@ class ClassFileVisitorUtilsTest {
 
         ClassFileVisitorUtils.accept(path.toUri().toURL(), visitor);
 
-        assertThat(visitor.classNames).contains("a.b.c");
-        assertThat(visitor.classNames).contains("x.y.z");
-        assertThat(visitor.data).contains("class a.b.c");
-        assertThat(visitor.data).contains("class x.y.z");
+        assertTrue(visitor.classNames.contains("a.b.c"));
+        assertTrue(visitor.classNames.contains("x.y.z"));
+        assertTrue(visitor.data.contains("class a.b.c"));
+        assertTrue(visitor.data.contains("class x.y.z"));
     }
 
     @Test
@@ -89,7 +91,7 @@ class ClassFileVisitorUtilsTest {
 
         ClassFileVisitorUtils.accept(path.toUri().toURL(), visitor);
 
-        assertThat(visitor.classNames).isEmpty();
+        assertTrue(visitor.classNames.isEmpty());
     }
 
     @Test
@@ -104,10 +106,10 @@ class ClassFileVisitorUtilsTest {
 
         ClassFileVisitorUtils.accept(dir.toUri().toURL(), visitor);
 
-        assertThat(visitor.classNames).contains("a.b.c");
-        assertThat(visitor.classNames).contains("x.y.z");
-        assertThat(visitor.data).contains("class a.b.c");
-        assertThat(visitor.data).contains("class x.y.z");
+        assertTrue(visitor.classNames.contains("a.b.c"));
+        assertTrue(visitor.classNames.contains("x.y.z"));
+        assertTrue(visitor.data.contains("class a.b.c"));
+        assertTrue(visitor.data.contains("class x.y.z"));
     }
 
     @Test
@@ -119,7 +121,7 @@ class ClassFileVisitorUtilsTest {
 
         ClassFileVisitorUtils.accept(dir.toUri().toURL(), visitor);
 
-        assertThat(visitor.classNames).isEmpty();
+        assertTrue(visitor.classNames.isEmpty());
     }
 
     @Test
@@ -148,10 +150,10 @@ class ClassFileVisitorUtilsTest {
 
         ClassFileVisitorUtils.accept(path, visitor);
 
-        assertThat(visitor.classNames).contains("a.b.c");
-        assertThat(visitor.classNames).contains("x.y.z");
-        assertThat(visitor.data).contains("class a.b.c");
-        assertThat(visitor.data).contains("class x.y.z");
+        assertTrue(visitor.classNames.contains("a.b.c"));
+        assertTrue(visitor.classNames.contains("x.y.z"));
+        assertTrue(visitor.data.contains("class a.b.c"));
+        assertTrue(visitor.data.contains("class x.y.z"));
     }
 
     @Test
@@ -166,10 +168,10 @@ class ClassFileVisitorUtilsTest {
 
         ClassFileVisitorUtils.accept(dir, visitor);
 
-        assertThat(visitor.classNames).contains("a.b.c");
-        assertThat(visitor.classNames).contains("x.y.z");
-        assertThat(visitor.data).contains("class a.b.c");
-        assertThat(visitor.data).contains("class x.y.z");
+        assertTrue(visitor.classNames.contains("a.b.c"));
+        assertTrue(visitor.classNames.contains("x.y.z"));
+        assertTrue(visitor.data.contains("class a.b.c"));
+        assertTrue(visitor.data.contains("class x.y.z"));
     }
 
     @Test
@@ -178,7 +180,7 @@ class ClassFileVisitorUtilsTest {
 
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> ClassFileVisitorUtils.accept(path, visitor));
-        assertThat(exception).hasMessage("Cannot accept visitor on path: " + path);
+        assertEquals("Cannot accept visitor on path: " + path, exception.getMessage());
     }
 
     private void writeToFile(Path parent, String file, String data) throws IOException {

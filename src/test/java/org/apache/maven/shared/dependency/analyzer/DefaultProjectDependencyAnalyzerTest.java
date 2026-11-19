@@ -52,7 +52,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -103,9 +107,9 @@ class DefaultProjectDependencyAnalyzerTest {
 
         Map<String, Dependency> result = DefaultProjectDependencyAnalyzer.buildClassToArtifactMap(artifactClassMap);
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get("class1")).isEqualTo(artifact1);
-        assertThat(result.get("class2")).isEqualTo(artifact2);
+        assertEquals(2, result.size());
+        assertEquals(artifact1, result.get("class1"));
+        assertEquals(artifact2, result.get("class2"));
     }
 
     @Test
@@ -119,9 +123,9 @@ class DefaultProjectDependencyAnalyzerTest {
 
         Map<String, Dependency> result = DefaultProjectDependencyAnalyzer.buildClassToArtifactMap(artifactClassMap);
 
-        assertThat(result).hasSize(1);
+        assertEquals(1, result.size());
         // Should favor the first artifact encountered
-        assertThat(result.get("duplicateClass")).isEqualTo(artifact1);
+        assertEquals(artifact1, result.get("duplicateClass"));
     }
 
     @Test
@@ -136,9 +140,9 @@ class DefaultProjectDependencyAnalyzerTest {
         Map<String, Dependency> result = DefaultProjectDependencyAnalyzer.buildClassToArtifactMap(
                 artifactClassMap, Collections.singleton(declared));
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get("duplicateClass")).isEqualTo(declared);
-        assertThat(result.get("otherClass")).isEqualTo(undeclared);
+        assertEquals(2, result.size());
+        assertEquals(declared, result.get("duplicateClass"));
+        assertEquals(undeclared, result.get("otherClass"));
     }
 
     @Test
@@ -154,7 +158,7 @@ class DefaultProjectDependencyAnalyzerTest {
         Map<String, Dependency> result = DefaultProjectDependencyAnalyzer.buildClassToArtifactMap(
                 artifactClassMap, Collections.singleton(declaredButAbsent));
 
-        assertThat(result.get("duplicateClass")).isEqualTo(artifact1);
+        assertEquals(artifact1, result.get("duplicateClass"));
     }
 
     @Test
@@ -171,7 +175,7 @@ class DefaultProjectDependencyAnalyzerTest {
         Map<Dependency, Set<DependencyUsage>> used = DefaultProjectDependencyAnalyzer.buildUsedArtifacts(
                 classToArtifactMap, Collections.singleton(new DependencyUsage("Xpp3Dom", "Main")));
 
-        assertThat(used.keySet()).containsExactly(plexusXml);
+        assertIterableEquals(Collections.singletonList(plexusXml), used.keySet());
     }
 
     @Test
@@ -189,8 +193,8 @@ class DefaultProjectDependencyAnalyzerTest {
         DefaultProjectDependencyAnalyzer.creditClasslessAggregators(
                 artifactClassMap, Collections.singleton(jupiter), used, parentOf(jupiter, api));
 
-        assertThat(used.keySet()).containsExactly(jupiter);
-        assertThat(used.get(jupiter)).hasSize(1);
+        assertIterableEquals(Collections.singletonList(jupiter), used.keySet());
+        assertEquals(1, used.get(jupiter).size());
     }
 
     @Test
@@ -205,7 +209,7 @@ class DefaultProjectDependencyAnalyzerTest {
         DefaultProjectDependencyAnalyzer.creditClasslessAggregators(
                 artifactClassMap, Collections.singleton(jupiter), used, Collections.emptyMap());
 
-        assertThat(used).isEmpty();
+        assertTrue(used.isEmpty());
     }
 
     @Test
@@ -223,7 +227,7 @@ class DefaultProjectDependencyAnalyzerTest {
         DefaultProjectDependencyAnalyzer.creditClasslessAggregators(
                 artifactClassMap, new HashSet<>(Arrays.asList(jupiter, api)), used, parentOf(jupiter, api));
 
-        assertThat(used.keySet()).containsExactlyInAnyOrder(jupiter, api);
+        assertEquals(new HashSet<>(Arrays.asList(jupiter, api)), new HashSet<>(used.keySet()));
     }
 
     @Test
@@ -241,7 +245,7 @@ class DefaultProjectDependencyAnalyzerTest {
         DefaultProjectDependencyAnalyzer.creditClasslessAggregators(
                 artifactClassMap, Collections.singleton(lib), used, parentOf(lib, child));
 
-        assertThat(used.keySet()).containsExactly(child);
+        assertIterableEquals(Collections.singletonList(child), used.keySet());
     }
 
     @Test
@@ -253,9 +257,9 @@ class DefaultProjectDependencyAnalyzerTest {
 
         Map<String, Dependency> result = DefaultProjectDependencyAnalyzer.buildClassToArtifactMap(artifactClassMap);
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get("class1")).isEqualTo(artifact1);
-        assertThat(result.get("class2")).isEqualTo(artifact1);
+        assertEquals(2, result.size());
+        assertEquals(artifact1, result.get("class1"));
+        assertEquals(artifact1, result.get("class2"));
     }
 
     @Test
@@ -267,9 +271,9 @@ class DefaultProjectDependencyAnalyzerTest {
         Map<Dependency, Set<DependencyUsage>> result =
                 DefaultProjectDependencyAnalyzer.buildUsedArtifacts(classToArtifactMap, dependencyClasses);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(artifact1)).hasSize(1);
-        assertThat(result.get(artifact1).iterator().next().getDependencyClass()).isEqualTo("class1");
+        assertEquals(1, result.size());
+        assertEquals(1, result.get(artifact1).size());
+        assertEquals("class1", result.get(artifact1).iterator().next().getDependencyClass());
     }
 
     @Test
@@ -282,8 +286,8 @@ class DefaultProjectDependencyAnalyzerTest {
         Map<Dependency, Set<DependencyUsage>> result =
                 DefaultProjectDependencyAnalyzer.buildUsedArtifacts(classToArtifactMap, dependencyClasses);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(artifact1)).hasSize(2);
+        assertEquals(1, result.size());
+        assertEquals(2, result.get(artifact1).size());
     }
 
     @Test
@@ -296,17 +300,14 @@ class DefaultProjectDependencyAnalyzerTest {
                 DefaultProjectDependencyAnalyzer.buildUsedArtifacts(classToArtifactMap, dependencyClasses);
 
         // Being in JDK, it should be excluded from used artifacts
-        assertThat(result).isEmpty();
+        assertTrue(result.isEmpty());
     }
 
     @Test
     void testIncludedInJDK() {
-        assertThat(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("xml-apis", "xml-apis")))
-                .isTrue();
-        assertThat(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("xerces", "xmlParserAPIs")))
-                .isTrue();
-        assertThat(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("groupId", "artifactId")))
-                .isFalse();
+        assertTrue(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("xml-apis", "xml-apis")));
+        assertTrue(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("xerces", "xmlParserAPIs")));
+        assertFalse(DefaultProjectDependencyAnalyzer.includedInJDK(aTestArtifact("groupId", "artifactId")));
     }
 
     @Test
@@ -316,10 +317,10 @@ class DefaultProjectDependencyAnalyzerTest {
         DependencyCoordinates directCoordinates = toCoordinates(direct);
         when(project.getDependencies()).thenReturn(Collections.singletonList(directCoordinates));
 
-        assertThat(DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(project, Arrays.asList(direct, transitive)))
-                .containsExactly(direct)
-                .first()
-                .isSameAs(direct);
+        Set<Dependency> declaredArtifacts =
+                DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(project, Arrays.asList(direct, transitive));
+        assertIterableEquals(Collections.singletonList(direct), declaredArtifacts);
+        assertSame(direct, declaredArtifacts.iterator().next());
     }
 
     @Test
@@ -332,8 +333,9 @@ class DefaultProjectDependencyAnalyzerTest {
         when(type.getClassifier()).thenReturn("tests");
         when(project.getDependencies()).thenReturn(Collections.singletonList(coordinates));
 
-        assertThat(DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(project, Collections.singleton(testJar)))
-                .containsExactly(testJar);
+        assertIterableEquals(
+                Collections.singletonList(testJar),
+                DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(project, Collections.singleton(testJar)));
     }
 
     @Test
@@ -346,15 +348,15 @@ class DefaultProjectDependencyAnalyzerTest {
         when(type.getClassifier()).thenReturn(null);
         when(project.getDependencies()).thenReturn(Collections.singletonList(declaration));
 
-        assertThat(DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(project, Collections.singleton(relocated)))
-                .singleElement()
-                .satisfies(artifact -> {
-                    assertThat(artifact.getGroupId()).isEqualTo("axis");
-                    assertThat(artifact.getArtifactId()).isEqualTo("axis-ant");
-                    assertThat(artifact.getScope()).isEqualTo(DependencyScope.COMPILE);
-                    assertThat(artifact.getClassifier()).isEmpty();
-                    assertThat(artifact).isNotSameAs(relocated);
-                });
+        Set<Dependency> declaredArtifacts =
+                DefaultProjectDependencyAnalyzer.buildDeclaredArtifacts(project, Collections.singleton(relocated));
+        assertEquals(1, declaredArtifacts.size());
+        Dependency artifact = declaredArtifacts.iterator().next();
+        assertEquals("axis", artifact.getGroupId());
+        assertEquals("axis-ant", artifact.getArtifactId());
+        assertEquals(DependencyScope.COMPILE, artifact.getScope());
+        assertEquals("", artifact.getClassifier());
+        assertFalse(artifact == relocated);
     }
 
     @Test
@@ -367,8 +369,9 @@ class DefaultProjectDependencyAnalyzerTest {
                 .thenReturn(compileResult)
                 .thenThrow(new DependencyResolverException("collection failed", new Exception("failure")));
 
-        assertThat(analyzer.getTestArtifactsWithNonTestScope(project, Collections.singleton(candidate)))
-                .containsExactly(candidate);
+        assertIterableEquals(
+                Collections.singletonList(candidate),
+                analyzer.getTestArtifactsWithNonTestScope(project, Collections.singleton(candidate)));
     }
 
     @Test
@@ -394,22 +397,23 @@ class DefaultProjectDependencyAnalyzerTest {
         when(dependencyResolver.collect(any(DependencyResolverRequest.class))).thenReturn(compileResult, runtimeResult);
 
         Set<Dependency> candidates = new LinkedHashSet<>(Arrays.asList(compileCandidate, runtimeCandidate));
-        assertThat(analyzer.getTestArtifactsWithNonTestScope(project, candidates))
-                .isEmpty();
+        assertTrue(
+                analyzer.getTestArtifactsWithNonTestScope(project, candidates).isEmpty());
 
         ArgumentCaptor<DependencyResolverRequest> requestCaptor =
                 ArgumentCaptor.forClass(DependencyResolverRequest.class);
         verify(dependencyResolver, times(2)).collect(requestCaptor.capture());
         List<DependencyResolverRequest> requests = requestCaptor.getAllValues();
-        assertThat(artifactIds(requests.get(0))).containsExactlyInAnyOrder("compile", "provided", "system");
-        assertThat(artifactIds(requests.get(1))).containsExactlyInAnyOrder("compile", "runtime");
-        assertThat(requests.get(0).getPathScope()).isEqualTo(PathScope.MAIN_COMPILE);
-        assertThat(requests.get(1).getPathScope()).isEqualTo(PathScope.MAIN_RUNTIME);
-        assertThat(requests).allSatisfy(request -> {
-            assertThat(request.getRequestType()).isEqualTo(DependencyResolverRequest.RequestType.COLLECT);
-            assertThat(request.getRootArtifact()).containsSame(pom);
-            assertThat(request.getManagedDependencies()).containsExactlyElementsOf(managed);
-        });
+        assertEquals(new HashSet<>(Arrays.asList("compile", "provided", "system")), artifactIds(requests.get(0)));
+        assertEquals(new HashSet<>(Arrays.asList("compile", "runtime")), artifactIds(requests.get(1)));
+        assertEquals(PathScope.MAIN_COMPILE, requests.get(0).getPathScope());
+        assertEquals(PathScope.MAIN_RUNTIME, requests.get(1).getPathScope());
+        for (DependencyResolverRequest request : requests) {
+            assertEquals(DependencyResolverRequest.RequestType.COLLECT, request.getRequestType());
+            assertTrue(request.getRootArtifact().isPresent());
+            assertSame(pom, request.getRootArtifact().get());
+            assertIterableEquals(managed, request.getManagedDependencies());
+        }
     }
 
     @Test
@@ -425,7 +429,7 @@ class DefaultProjectDependencyAnalyzerTest {
         Map<String, Set<Dependency>> candidates =
                 DefaultProjectDependencyAnalyzer.buildCandidateArtifactsByUsedClass(artifactClassMap, used);
 
-        assertThat(candidates.get("com.example.Cls")).containsExactly(first, second);
+        assertIterableEquals(Arrays.asList(first, second), candidates.get("com.example.Cls"));
     }
 
     @Test
@@ -443,7 +447,7 @@ class DefaultProjectDependencyAnalyzerTest {
         Map<String, Dependency> selected =
                 DefaultProjectDependencyAnalyzer.buildSelectedArtifactByUsedClass(classToArtifactMap, used);
 
-        assertThat(selected.get("com.example.Cls")).isEqualTo(first);
+        assertEquals(first, selected.get("com.example.Cls"));
     }
 
     private static Set<String> artifactIds(DependencyResolverRequest request) {
@@ -491,9 +495,9 @@ class DefaultProjectDependencyAnalyzerTest {
 
         ProjectDependencyAnalysis analysis = analyzer.analyze(project, result, null);
 
-        assertThat(analysis.getUnusedDeclaredArtifacts()).containsExactly(declared);
-        assertThat(analysis.getUsedDeclaredArtifacts()).isEmpty();
-        assertThat(analysis.getUsedUndeclaredArtifacts()).isEmpty();
+        assertIterableEquals(Collections.singletonList(declared), analysis.getUnusedDeclaredArtifacts());
+        assertTrue(analysis.getUsedDeclaredArtifacts().isEmpty());
+        assertTrue(analysis.getUsedUndeclaredArtifacts().isEmpty());
     }
 
     private Node rootWithChildren(Dependency... dependencies) {

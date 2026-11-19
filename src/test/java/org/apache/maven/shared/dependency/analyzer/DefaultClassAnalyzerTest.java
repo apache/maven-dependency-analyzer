@@ -114,7 +114,7 @@ class DefaultClassAnalyzerTest {
         DefaultClassAnalyzer analyzer = new DefaultClassAnalyzer();
         Set<String> actualClasses = analyzer.analyze(file);
 
-        assertThat(actualClasses).isEqualTo(expectedClasses);
+        assertEquals(expectedClasses, actualClasses);
     }
 
     @Test
@@ -127,7 +127,7 @@ class DefaultClassAnalyzerTest {
         Set<String> actualClasses = analyzer.analyze(
                 tempDir.resolve("classes"), new ClassesPatterns(Collections.singleton("library\\.Outer\\$Inner")));
 
-        assertThat(actualClasses).containsExactly("library.Dollar$Class");
+        assertIterableEquals(Collections.singletonList("library.Dollar$Class"), actualClasses);
     }
 
     private void addZipEntry(JarOutputStream out, String fileName, String content) throws IOException {
