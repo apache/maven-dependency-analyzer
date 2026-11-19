@@ -330,7 +330,7 @@ public class ProjectDependencyAnalysis {
         while (iter.hasNext()) {
             Artifact artifact = iter.next();
 
-            if (forced.remove(artifact.getGroupId() + ':' + artifact.getArtifactId())) {
+            if (forced.remove(ArtifactKeys.groupArtifactId(artifact))) {
                 // ok, change artifact status from unused-declared to used-declared
                 iter.remove();
                 forcedUsedDeclared.add(artifact);
@@ -341,7 +341,7 @@ public class ProjectDependencyAnalysis {
             // trying to force dependencies as used-declared which were not declared or already detected as used
             Set<String> used = new HashSet<>();
             for (Artifact artifact : usedDeclaredArtifacts.keySet()) {
-                String id = artifact.getGroupId() + ':' + artifact.getArtifactId();
+                String id = ArtifactKeys.groupArtifactId(artifact);
                 if (forced.remove(id)) {
                     used.add(id);
                 }
