@@ -20,6 +20,7 @@ package org.apache.maven.shared.dependency.analyzer;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Set;
 
 /**
@@ -30,11 +31,41 @@ import java.util.Set;
 public interface ClassAnalyzer {
 
     /**
+     * Returns the class names contained in a JAR file or directory. The path is converted to a
+     * {@code file:} URL, so entries inside a JAR, non-default file systems and other URL protocols
+     * are not supported; use the URL overloads for those cases.
+     *
+     * @param path the JAR file or directory to analyze
+     * @return a {@link java.util.Set} object
+     * @throws java.io.IOException if any
+     * @since 1.18.0
+     */
+    default Set<String> analyze(Path path) throws IOException {
+        return analyze(path, new ClassesPatterns());
+    }
+
+    /**
+     * Returns the class names contained in a JAR file or directory, excluding matching classes.
+     * The path is converted to a {@code file:} URL, so entries inside a JAR, non-default file
+     * systems and other URL protocols are not supported.
+     *
+     * @param path the JAR file or directory to analyze
+     * @param excludedClasses patterns of classes to exclude
+     * @return a {@link java.util.Set} object
+     * @throws java.io.IOException if any
+     * @since 1.18.0
+     */
+    default Set<String> analyze(Path path, ClassesPatterns excludedClasses) throws IOException {
+        return analyze(path.toUri().toURL(), excludedClasses);
+    }
+
+    /**
      * <p>analyze.</p>
      *
      * @param url the JAR file or directory to analyze
      * @return a {@link java.util.Set} object
      * @throws java.io.IOException if any
+     * @see #analyze(Path)
      */
     default Set<String> analyze(URL url) throws IOException {
         return analyze(url, new ClassesPatterns());
@@ -47,6 +78,7 @@ public interface ClassAnalyzer {
      * @param excludedClasses patterns of classes to exclude
      * @return a {@link java.util.Set} object
      * @throws java.io.IOException if any
+     * @see #analyze(Path, ClassesPatterns)
      */
     Set<String> analyze(URL url, ClassesPatterns excludedClasses) throws IOException;
 }

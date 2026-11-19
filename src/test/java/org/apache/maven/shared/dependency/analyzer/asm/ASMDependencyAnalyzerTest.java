@@ -28,6 +28,7 @@ import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,6 +55,15 @@ class ASMDependencyAnalyzerTest {
         Set<String> result = analyzer.analyze(file.toUri().toURL());
         assertTrue(result.contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest"));
         assertTrue(result.contains("java.util.regex.Pattern"));
+    }
+
+    @Test
+    void verifyPathOverloadMatchesUrl() throws Exception {
+        Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
+        ClassesPatterns patterns = new ClassesPatterns(Collections.singleton("ClassToExclude"));
+
+        assertEquals(analyzer.analyze(file.toUri().toURL()), analyzer.analyze(file));
+        assertEquals(analyzer.analyzeUsages(file.toUri().toURL(), patterns), analyzer.analyzeUsages(file, patterns));
     }
 
     @Test

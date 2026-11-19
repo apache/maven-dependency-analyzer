@@ -47,6 +47,20 @@ public final class ClassFileVisitorUtils {
     }
 
     /**
+     * Visits the classes in a JAR file or directory identified by a local path. The path is
+     * converted to a {@code file:} URL, so entries inside a JAR, non-default file systems and
+     * other URL protocols are not supported; use {@link #accept(URL, ClassFileVisitor)} for those.
+     *
+     * @param path the JAR file or directory to visit
+     * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object
+     * @throws java.io.IOException I/O error or corrupt class file
+     * @since 1.18.0
+     */
+    public static void accept(Path path, ClassFileVisitor visitor) throws IOException {
+        accept(path.toUri().toURL(), visitor);
+    }
+
+    /**
      * @param url the URL of the jar file or directory to visit
      * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object
      * @throws java.io.IOException I/O error or corrupt class file

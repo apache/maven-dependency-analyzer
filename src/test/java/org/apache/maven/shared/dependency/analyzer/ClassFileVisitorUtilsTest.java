@@ -82,6 +82,31 @@ class ClassFileVisitorUtilsTest {
     }
 
     @Test
+    void testAcceptPathJar() throws Exception {
+        Path path = Files.createTempFile(tempDir, "test", ".jar");
+
+        try (JarOutputStream out = new JarOutputStream(Files.newOutputStream(path))) {
+            addZipEntry(out, "a/b/c.class", "class a.b.c");
+            addZipEntry(out, "x/y/z.class", "class x.y.z");
+        }
+
+        ClassFileVisitorUtils.accept(path, visitor);
+
+        assertTrue(visitor.classNames.contains("a.b.c"));
+        assertTrue(visitor.classNames.contains("x.y.z"));
+    }
+
+    @Test
+    void testAcceptPathDirectory() throws Exception {
+        Path dir = Files.createTempDirectory(tempDir, "d-a-test");
+        writeToFile(Files.createDirectories(dir.resolve("a/b")), "c.class", "class a.b.c");
+
+        ClassFileVisitorUtils.accept(dir, visitor);
+
+        assertTrue(visitor.classNames.contains("a.b.c"));
+    }
+
+    @Test
     void testAcceptJarWithNonClassEntry() throws Exception {
         Path path = Files.createTempFile(tempDir, "test", ".jar");
 

@@ -63,6 +63,13 @@ class DefaultClassAnalyzerTest {
     }
 
     @Test
+    void testPathOverloadMatchesUrl() throws Exception {
+        DefaultClassAnalyzer analyzer = new DefaultClassAnalyzer();
+
+        assertEquals(analyzer.analyze(file.toUri().toURL()), analyzer.analyze(file));
+    }
+
+    @Test
     void testAnalyzeWithJar() throws Exception {
         Set<String> expectedClasses = new HashSet<>();
         expectedClasses.add("a.b.c");
