@@ -18,8 +18,6 @@
  */
 package org.apache.maven.shared.dependency.analyzer.dependencyclasses;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,12 +33,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.maven.model.Plugin;
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.di.Named;
+import org.apache.maven.api.di.Singleton;
+import org.apache.maven.api.model.Plugin;
+import org.apache.maven.api.xml.XmlNode;
 import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
 import org.apache.maven.shared.dependency.analyzer.MainDependencyClassesProvider;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -64,9 +64,9 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
             );
 
     @Override
-    public Set<DependencyUsage> getDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
+    public Set<DependencyUsage> getDependencyClasses(Project project, ClassesPatterns excludedClasses)
             throws IOException {
-        if (!"war".equals(project.getPackaging())) {
+        if (!"war".equals(project.getPackaging().id())) {
             return Collections.emptySet();
         }
 
@@ -89,15 +89,19 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
         }
     }
 
-    private File findWebXml(MavenProject project) {
+    private File findWebXml(Project project) {
         // standard location
-        File webXmlFile = new File(project.getBasedir(), "src/main/webapp/WEB-INF/web.xml");
+        File webXmlFile =
+                project.getBasedir().resolve("src/main/webapp/WEB-INF/web.xml").toFile();
         if (webXmlFile.isFile()) {
             return webXmlFile;
         }
 
         // check maven-war-plugin configuration for custom location of web.xml
-        Plugin plugin = project.getBuild().getPluginsAsMap().get("org.apache.maven.plugins:maven-war-plugin");
+        Plugin plugin = project.getBuild().getPlugins().stream()
+                .filter(p -> "org.apache.maven.plugins:maven-war-plugin".equals(p.getKey()))
+                .findFirst()
+                .orElse(null);
         if (plugin == null) {
             // should not happen as we are in a war project
             LOGGER.debug("No war plugin found for project {}", project);
@@ -105,10 +109,9 @@ class WarMainDependencyClassesProvider implements MainDependencyClassesProvider 
         }
 
         return Optional.ofNullable(plugin.getConfiguration())
-                .map(Xpp3Dom.class::cast)
-                .map(config -> config.getChild("webXml"))
-                .map(Xpp3Dom::getValue)
-                .map(path -> new File(project.getBasedir(), path))
+                .map(config -> config.child("webXml"))
+                .map(XmlNode::value)
+                .map(path -> project.getBasedir().resolve(path).toFile())
                 .orElse(null);
     }
 

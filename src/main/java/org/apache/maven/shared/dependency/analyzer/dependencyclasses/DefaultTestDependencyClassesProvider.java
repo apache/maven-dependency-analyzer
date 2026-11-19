@@ -18,11 +18,13 @@
  */
 package org.apache.maven.shared.dependency.analyzer.dependencyclasses;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
+import java.nio.file.Path;
 
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.ProjectScope;
+import org.apache.maven.api.di.Inject;
+import org.apache.maven.api.di.Named;
+import org.apache.maven.api.di.Singleton;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.apache.maven.shared.dependency.analyzer.TestDependencyClassesProvider;
 
@@ -40,7 +42,7 @@ class DefaultTestDependencyClassesProvider extends DefaultDependencyClassesProvi
     }
 
     @Override
-    protected String getOutputClassesDirectory(MavenProject project) {
-        return project.getBuild().getTestOutputDirectory();
+    protected Path getOutputClassesDirectory(Project project) {
+        return project.getOutputDirectory(ProjectScope.TEST);
     }
 }

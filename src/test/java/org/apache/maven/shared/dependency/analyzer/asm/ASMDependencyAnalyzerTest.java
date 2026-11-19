@@ -18,6 +18,7 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,21 +49,21 @@ class ASMDependencyAnalyzerTest {
     }
 
     @Test
-    void verifyImplicitClassReferenceIncludedInUsedClasses() throws Exception {
+    void verifyImplicitClassReferenceIncludedInUsedClasses() throws IOException {
         Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
 
         Set<String> result = analyzer.analyze(file.toUri().toURL());
-        assertTrue(result.contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest"));
+        assertTrue(result.contains("org.apache.maven.api.services.ArtifactResolverRequest"));
         assertTrue(result.contains("java.util.regex.Pattern"));
     }
 
     @Test
-    void verifyExcludedClasses() throws Exception {
+    void verifyExcludedClasses() throws IOException {
         Path file = Paths.get("target/test-classes/org/apache/maven/shared/dependency/analyzer/testcases/analyze");
 
         Set<String> result =
                 analyzer.analyze(file.toUri().toURL(), new ClassesPatterns(Collections.singleton("ClassToExclude")));
-        assertTrue(result.contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest"));
+        assertTrue(result.contains("org.apache.maven.api.services.ArtifactResolverRequest"));
         assertFalse(result.contains("java.util.regex.Pattern"));
         assertFalse(result.contains("org.apache.maven.shared.dependency.analyzer.testcases.analyze.ClassToExclude"));
     }
