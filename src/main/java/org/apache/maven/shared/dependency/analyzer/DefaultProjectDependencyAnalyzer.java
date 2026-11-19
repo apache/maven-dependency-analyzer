@@ -202,15 +202,9 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         Set<Artifact> results = new LinkedHashSet<>(start.size());
 
         for (Artifact artifact : start) {
-            boolean found = false;
-
-            for (Artifact artifact2 : remove) {
-                if (artifact.getDependencyConflictId().equals(artifact2.getDependencyConflictId())) {
-                    found = true;
-                    break;
-                }
-            }
-
+            boolean found = remove.stream()
+                    .anyMatch(candidate ->
+                            artifact.getDependencyConflictId().equals(candidate.getDependencyConflictId()));
             if (!found) {
                 results.add(artifact);
             }
