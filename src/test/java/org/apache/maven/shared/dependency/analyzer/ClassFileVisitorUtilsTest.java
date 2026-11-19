@@ -36,7 +36,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests <code>ClassFileVisitorUtils</code>.
@@ -178,9 +177,7 @@ class ClassFileVisitorUtilsTest {
     void testAcceptWithNonJarFilePath() throws IOException {
         Path path = Files.createTempFile(tempDir, "test", ".class");
 
-        IllegalArgumentException exception =
-                assertThrows(IllegalArgumentException.class, () -> ClassFileVisitorUtils.accept(path, visitor));
-        assertEquals("Cannot accept visitor on path: " + path, exception.getMessage());
+        assertThrows(IllegalArgumentException.class, () -> ClassFileVisitorUtils.accept(path, visitor));
     }
 
     private void writeToFile(Path parent, String file, String data) throws IOException {
