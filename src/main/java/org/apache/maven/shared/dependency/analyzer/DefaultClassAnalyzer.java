@@ -35,12 +35,25 @@ import java.util.zip.ZipException;
 @Singleton
 public class DefaultClassAnalyzer implements ClassAnalyzer {
 
+    /**
+     * Analyzes the classes exposed by a source. Uses the same collector and filtering rules as the URL form.
+     *
+     * @param source the class entry source to analyze
+     * @param excludedClasses patterns of classes to exclude
+     * @return the class names found in the source
+     * @throws IOException if the source cannot be read
+     * @since 1.18.0
+     */
+    public Set<String> analyze(ClassEntrySource source, ClassesPatterns excludedClasses) throws IOException {
+        CollectorClassFileVisitor visitor = new CollectorClassFileVisitor(excludedClasses);
+        ClassFileVisitorUtils.accept(source, visitor);
+        return visitor.getClasses();
+    }
+
     @Override
     public Set<String> analyze(URL url, ClassesPatterns excludedClasses) throws IOException {
-        CollectorClassFileVisitor visitor = new CollectorClassFileVisitor(excludedClasses);
-
         try {
-            ClassFileVisitorUtils.accept(url, visitor);
+            return analyze(new UrlClassEntrySource(url), excludedClasses);
         } catch (ZipException e) {
             // since the current ZipException gives no indication what jar file is corrupted
             // we prefer to wrap another ZipException for better error visibility
@@ -48,7 +61,5 @@ public class DefaultClassAnalyzer implements ClassAnalyzer {
             ze.initCause(e);
             throw ze;
         }
-
-        return visitor.getClasses();
     }
 }

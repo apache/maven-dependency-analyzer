@@ -18,20 +18,12 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Iterator;
 
 import org.apache.maven.shared.dependency.analyzer.asm.VisitClassException;
 
@@ -47,71 +39,51 @@ public final class ClassFileVisitorUtils {
     }
 
     /**
+     * Visits the classes exposed by a {@link ClassEntrySource} and closes the source afterwards.
+     * This is the common implementation for local paths, URLs and in-memory archives.
+     *
+     * @param source the class entry source to visit
+     * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object
+     * @throws java.io.IOException I/O error or corrupt class file
+     * @since 1.18.0
+     */
+    public static void accept(ClassEntrySource source, ClassFileVisitor visitor) throws IOException {
+        try (ClassEntrySource closeable = source) {
+            Iterator<ClassEntry> iterator = source.classes().iterator();
+            while (iterator.hasNext()) {
+                ClassEntry entry = iterator.next();
+                try (InputStream in = entry.open()) {
+                    visitClass(entry.name(), in, visitor, '/');
+                }
+            }
+        }
+    }
+
+    /**
+     * Visits the classes of a local JAR file or directory.
+     *
+     * @param path the JAR file or directory to visit
+     * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object
+     * @throws java.io.IOException I/O error or corrupt class file
+     * @since 1.18.0
+     */
+    public static void accept(Path path, ClassFileVisitor visitor) throws IOException {
+        accept(new PathClassEntrySource(path), visitor);
+    }
+
+    /**
      * @param url the URL of the jar file or directory to visit
      * @param visitor a {@link org.apache.maven.shared.dependency.analyzer.ClassFileVisitor} object
      * @throws java.io.IOException I/O error or corrupt class file
      */
     public static void accept(URL url, ClassFileVisitor visitor) throws IOException {
-        if (url.getPath().endsWith(".jar")) {
-            acceptJar(url, visitor);
-        } else if (url.getProtocol().equalsIgnoreCase("file")) {
-            try {
-                File file = new File(new URI(url.toString()));
-
-                if (file.isDirectory()) {
-                    acceptDirectory(file, visitor);
-                } else if (file.exists()) {
-                    throw new IllegalArgumentException("Cannot accept visitor on URL: " + url);
-                }
-            } catch (URISyntaxException exception) {
-                throw new IllegalArgumentException("Cannot accept visitor on URL: " + url, exception);
-            }
-        } else {
+        if (!url.getPath().endsWith(".jar") && !"file".equalsIgnoreCase(url.getProtocol())) {
             throw new IllegalArgumentException("Cannot accept visitor on URL: " + url);
         }
+        accept(new UrlClassEntrySource(url), visitor);
     }
 
     // private methods --------------------------------------------------------
-
-    private static void acceptJar(URL url, ClassFileVisitor visitor) throws IOException {
-        try (JarInputStream in = new JarInputStream(url.openStream())) {
-            JarEntry entry;
-            while ((entry = in.getNextJarEntry()) != null) {
-                String name = entry.getName();
-                // ignore files like package-info.class and module-info.class
-                if (name.endsWith(".class") && name.indexOf('-') == -1) {
-                    // Jars(ZIP) always use / as the separator character
-                    visitClass(name, in, visitor, '/');
-                }
-            }
-        }
-    }
-
-    private static void acceptDirectory(File directory, ClassFileVisitor visitor) throws IOException {
-        try (Stream<Path> walk = Files.walk(directory.toPath())) {
-            List<Path> classFiles = walk.filter(
-                            path -> path.getFileName().toString().endsWith(".class"))
-                    .collect(Collectors.toList());
-            for (Path path : classFiles) {
-                try (InputStream in = Files.newInputStream(path)) {
-                    try {
-                        visitClass(directory, path, in, visitor);
-                    } catch (IOException e) {
-                        throw new IOException(
-                                String.format("%s from directory = %s, path = %s", e.getMessage(), directory, path), e);
-                    }
-                }
-            }
-        }
-    }
-
-    private static void visitClass(File baseDirectory, Path path, InputStream in, ClassFileVisitor visitor)
-            throws IOException {
-        // getPath() returns a String, not a java.nio.file.Path
-        String stringPath =
-                path.toFile().getPath().substring(baseDirectory.getPath().length() + 1);
-        visitClass(stringPath, in, visitor, File.separatorChar);
-    }
 
     private static void visitClass(String stringPath, InputStream in, ClassFileVisitor visitor, char separator)
             throws IOException {
