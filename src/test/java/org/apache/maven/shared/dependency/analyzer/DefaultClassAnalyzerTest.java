@@ -37,8 +37,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests <code>DefaultClassAnalyzer</code>.
@@ -86,12 +86,9 @@ class DefaultClassAnalyzerTest {
 
         ClassAnalyzer analyzer = new DefaultClassAnalyzer();
 
-        try {
-            analyzer.analyze(file.toUri().toURL());
-            fail("Exception expected");
-        } catch (ZipException e) {
-            assertTrue(e.getMessage().startsWith("Cannot process Jar entry on URL:"));
-        }
+        ZipException exception = assertThrows(
+                ZipException.class, () -> analyzer.analyze(file.toUri().toURL()));
+        assertTrue(exception.getMessage().startsWith("Cannot process Jar entry on URL:"));
     }
 
     @Test

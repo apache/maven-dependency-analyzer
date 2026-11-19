@@ -25,10 +25,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
 
+import org.apache.maven.shared.dependency.analyzer.ClassEntrySource;
 import org.apache.maven.shared.dependency.analyzer.ClassFileVisitorUtils;
 import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
+import org.apache.maven.shared.dependency.analyzer.UrlClassEntrySource;
 
 /**
  * ASMDependencyAnalyzer
@@ -39,12 +41,26 @@ import org.apache.maven.shared.dependency.analyzer.DependencyUsage;
 @Singleton
 public class ASMDependencyAnalyzer implements DependencyAnalyzer {
 
-    @Override
-    public Set<DependencyUsage> analyzeUsages(URL url, ClassesPatterns excludeClasses) throws IOException {
+    /**
+     * Analyzes usages in the classes exposed by a source. Uses the same visitor as the URL form.
+     *
+     * @param source the class entry source to analyze
+     * @param excludeClasses patterns of classes to exclude
+     * @return the referenced classes and their declaring classes
+     * @throws IOException if the source cannot be read
+     * @since 1.18.0
+     */
+    public Set<DependencyUsage> analyzeUsages(ClassEntrySource source, ClassesPatterns excludeClasses)
+            throws IOException {
         DependencyClassFileVisitor visitor = new DependencyClassFileVisitor(excludeClasses);
 
-        ClassFileVisitorUtils.accept(url, visitor);
+        ClassFileVisitorUtils.accept(source, visitor);
 
         return visitor.getDependencyUsages();
+    }
+
+    @Override
+    public Set<DependencyUsage> analyzeUsages(URL url, ClassesPatterns excludeClasses) throws IOException {
+        return analyzeUsages(new UrlClassEntrySource(url), excludeClasses);
     }
 }
