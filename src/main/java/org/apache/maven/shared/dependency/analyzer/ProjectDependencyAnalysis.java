@@ -55,7 +55,10 @@ public class ProjectDependencyAnalysis {
 
     /**
      * <p>Constructor for ProjectDependencyAnalysis.</p>
+     *
+     * @deprecated use {@link #ProjectDependencyAnalysis(Map, Map, Set, Set)} instead
      */
+    @Deprecated
     public ProjectDependencyAnalysis() {
         this(null, (Map<Artifact, Set<DependencyUsage>>) null, null, null);
     }
@@ -66,7 +69,9 @@ public class ProjectDependencyAnalysis {
      * @param usedDeclaredArtifacts artifacts both used and declared
      * @param usedUndeclaredArtifacts artifacts used but not declared
      * @param unusedDeclaredArtifacts artifacts declared but not used
+     * @deprecated use {@link #ProjectDependencyAnalysis(Set, Set, Set, Set)} instead
      */
+    @Deprecated
     public ProjectDependencyAnalysis(
             Set<Artifact> usedDeclaredArtifacts,
             Set<Artifact> usedUndeclaredArtifacts,
@@ -440,7 +445,7 @@ public class ProjectDependencyAnalysis {
 
     // private methods --------------------------------------------------------
 
-    private Set<Artifact> safeCopy(Set<Artifact> set) {
+    private static Set<Artifact> safeCopy(Set<Artifact> set) {
         return set == null ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(set));
     }
 
