@@ -21,8 +21,11 @@ package org.apache.maven.shared.dependency.analyzer.dependencyclasses;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.maven.model.Build;
@@ -39,7 +42,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -60,9 +64,9 @@ class WarMainDependencyClassesProviderTest {
         Set<DependencyUsage> classes =
                 provider.getDependencyClasses(project, new ClassesPatterns(Collections.singleton(".*\\.Servlet$")));
 
-        assertThat(classes)
-                .map(DependencyUsage::getDependencyClass)
-                .containsExactlyInAnyOrder("org.example.test.Filter", "org.example.test.Listener");
+        assertEquals(
+                new HashSet<>(Arrays.asList("org.example.test.Filter", "org.example.test.Listener")),
+                classes.stream().map(DependencyUsage::getDependencyClass).collect(Collectors.toSet()));
     }
 
     @Test
@@ -74,7 +78,7 @@ class WarMainDependencyClassesProviderTest {
 
         Set<DependencyUsage> classes = provider.getDependencyClasses(project, new ClassesPatterns());
 
-        assertThat(classes).isEmpty();
+        assertTrue(classes.isEmpty());
     }
 
     public static Stream<Arguments> examplesData() {
@@ -104,7 +108,9 @@ class WarMainDependencyClassesProviderTest {
 
         Set<DependencyUsage> classes = provider.getDependencyClasses(project, new ClassesPatterns());
 
-        assertThat(classes).map(DependencyUsage::getDependencyClass).containsExactlyInAnyOrder(expectedClasses);
+        assertEquals(
+                new HashSet<>(Arrays.asList(expectedClasses)),
+                classes.stream().map(DependencyUsage::getDependencyClass).collect(Collectors.toSet()));
     }
 
     private void setupProjectWithWebXml(String webXmlName) throws URISyntaxException {

@@ -35,8 +35,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests <code>DefaultClassAnalyzer</code>.
@@ -69,7 +71,7 @@ class DefaultClassAnalyzerTest {
         DefaultClassAnalyzer analyzer = new DefaultClassAnalyzer();
         Set<String> actualClasses = analyzer.analyze(file.toUri().toURL());
 
-        assertThat(actualClasses).isEqualTo(expectedClasses);
+        assertEquals(expectedClasses, actualClasses);
     }
 
     @Test
@@ -88,7 +90,7 @@ class DefaultClassAnalyzerTest {
             analyzer.analyze(file.toUri().toURL());
             fail("Exception expected");
         } catch (ZipException e) {
-            assertThat(e).hasMessageStartingWith("Cannot process Jar entry on URL:");
+            assertTrue(e.getMessage().startsWith("Cannot process Jar entry on URL:"));
         }
     }
 
@@ -103,7 +105,7 @@ class DefaultClassAnalyzerTest {
                 tempDir.resolve("classes").toUri().toURL(),
                 new ClassesPatterns(Collections.singleton("library\\.Outer\\$Inner")));
 
-        assertThat(actualClasses).containsExactly("library.Dollar$Class");
+        assertIterableEquals(Collections.singletonList("library.Dollar$Class"), actualClasses);
     }
 
     private void addZipEntry(JarOutputStream out, String fileName, String content) throws IOException {

@@ -30,7 +30,10 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests <code>ProjectDependencyAnalysis</code>.
@@ -49,9 +52,9 @@ class ProjectDependencyAnalysisTest {
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
                 usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts, testArtifactsWithNonTestScope);
 
-        assertThat(analysis.getUsedDeclaredArtifacts()).isEqualTo(usedDeclaredArtifacts);
-        assertThat(analysis.getUsedUndeclaredArtifacts()).isEqualTo(usedUndeclaredArtifacts);
-        assertThat(analysis.getUnusedDeclaredArtifacts()).isEqualTo(unusedDeclaredArtifacts);
+        assertEquals(usedDeclaredArtifacts, analysis.getUsedDeclaredArtifacts());
+        assertEquals(usedUndeclaredArtifacts, analysis.getUsedUndeclaredArtifacts());
+        assertEquals(unusedDeclaredArtifacts, analysis.getUnusedDeclaredArtifacts());
     }
 
     @Test
@@ -68,14 +71,15 @@ class ProjectDependencyAnalysisTest {
 
         ProjectDependencyAnalysis compileOnlyAnalysis = analysis.ignoreNonCompile();
 
-        assertThat(compileOnlyAnalysis.getUsedDeclaredArtifacts()).hasSize(3);
-        assertThat(compileOnlyAnalysis.getUsedUndeclaredArtifacts()).hasSize(3);
+        assertEquals(3, compileOnlyAnalysis.getUsedDeclaredArtifacts().size());
+        assertEquals(3, compileOnlyAnalysis.getUsedUndeclaredArtifacts().size());
 
-        assertThat(compileOnlyAnalysis.getUnusedDeclaredArtifacts())
-                .hasSize(1)
-                .allSatisfy(a -> assertThat(a.getScope()).isEqualTo(Artifact.SCOPE_COMPILE));
+        assertEquals(1, compileOnlyAnalysis.getUnusedDeclaredArtifacts().size());
+        for (Artifact a : compileOnlyAnalysis.getUnusedDeclaredArtifacts()) {
+            assertEquals(Artifact.SCOPE_COMPILE, a.getScope());
+        }
 
-        assertThat(compileOnlyAnalysis.getTestArtifactsWithNonTestScope()).hasSize(3);
+        assertEquals(3, compileOnlyAnalysis.getTestArtifactsWithNonTestScope().size());
     }
 
     @Test
@@ -99,11 +103,13 @@ class ProjectDependencyAnalysisTest {
                 candidates,
                 selected);
 
-        assertThat(analysis.getUsedDependencyClasses()).containsExactlyInAnyOrder("a.B", "c.D");
-        assertThat(analysis.getCandidateArtifactsByUsedClass().get("a.B")).containsExactly(declared, other);
-        assertThat(analysis.getSelectedArtifactByUsedClass().get("a.B")).isEqualTo(declared);
-        assertThat(analysis.getAmbiguousUsedDependencyClasses()).containsExactly("a.B");
-        assertThat(analysis.getUnmappedUsedDependencyClasses()).isEmpty();
+        assertEquals(new HashSet<>(Arrays.asList("a.B", "c.D")), new HashSet<>(analysis.getUsedDependencyClasses()));
+        assertIterableEquals(
+                Arrays.asList(declared, other),
+                analysis.getCandidateArtifactsByUsedClass().get("a.B"));
+        assertEquals(declared, analysis.getSelectedArtifactByUsedClass().get("a.B"));
+        assertIterableEquals(Collections.singletonList("a.B"), analysis.getAmbiguousUsedDependencyClasses());
+        assertTrue(analysis.getUnmappedUsedDependencyClasses().isEmpty());
     }
 
     @Test
@@ -121,8 +127,8 @@ class ProjectDependencyAnalysisTest {
                 candidates,
                 Collections.emptyMap());
 
-        assertThat(analysis.getUnmappedUsedDependencyClasses()).containsExactly("a.B");
-        assertThat(analysis.getSelectedArtifactByUsedClass()).doesNotContainKey("a.B");
+        assertIterableEquals(Collections.singletonList("a.B"), analysis.getUnmappedUsedDependencyClasses());
+        assertFalse(analysis.getSelectedArtifactByUsedClass().containsKey("a.B"));
     }
 
     private <T> Set<T> asSet(T... items) {

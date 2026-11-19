@@ -20,7 +20,8 @@ package org.apache.maven.shared.dependency.analyzer;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * Tests <code>ProjectDependencyAnalyzerException</code>.
@@ -31,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProjectDependencyAnalyzerExceptionTest {
     @Test
     void testConstructor() {
-        assertThat(new ProjectDependencyAnalyzerException("a")).hasMessage("a");
+        assertEquals("a", new ProjectDependencyAnalyzerException("a").getMessage());
     }
 
     @Test
@@ -39,6 +40,7 @@ class ProjectDependencyAnalyzerExceptionTest {
         Throwable throwable = new Exception();
         ProjectDependencyAnalyzerException exception = new ProjectDependencyAnalyzerException("a", throwable);
 
-        assertThat(exception).hasMessage("a").hasCause(throwable);
+        assertEquals("a", exception.getMessage());
+        assertSame(throwable, exception.getCause());
     }
 }

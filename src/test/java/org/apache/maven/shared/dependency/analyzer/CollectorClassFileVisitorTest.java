@@ -18,13 +18,14 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests <code>CollectorClassFileVisitor</code>.
@@ -49,7 +50,7 @@ class CollectorClassFileVisitorTest {
         expected.add("a.b.c");
         expected.add("x.y.z");
 
-        assertThat(visitor.getClasses()).isEqualTo(expected);
+        assertEquals(expected, visitor.getClasses());
     }
 
     @Test
@@ -57,6 +58,8 @@ class CollectorClassFileVisitorTest {
         visitor.visitClass("a.b.Outer$Inner", null);
         visitor.visitClass("x.y.Outer$Inner$Nested", null);
 
-        assertThat(visitor.getClasses()).containsExactlyInAnyOrder("a.b.Outer$Inner", "x.y.Outer$Inner$Nested");
+        assertEquals(
+                new HashSet<>(Arrays.asList("a.b.Outer$Inner", "x.y.Outer$Inner$Nested")),
+                new HashSet<>(visitor.getClasses()));
     }
 }
