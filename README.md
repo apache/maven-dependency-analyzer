@@ -20,64 +20,61 @@ Contributing to [Apache Maven Dependency Analyzer](https://maven.apache.org/shar
 [![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)][license]
 [![Maven Central](https://img.shields.io/maven-central/v/org.apache.maven.shared/maven-dependency-analyzer.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/org.apache.maven.shared/maven-dependency-analyzer)
 [![Reproducible Builds](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jvm-repo-rebuild/reproducible-central/master/content/org/apache/maven/shared/maven-dependency-analyzer/badge.json)](https://github.com/jvm-repo-rebuild/reproducible-central/blob/master/content/org/apache/maven/shared/maven-dependency-analyzer/README.md)
-[![Jenkins Build](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fci-maven.apache.org%2Fjob%2FMaven%2Fjob%2Fmaven-box%2Fjob%2Fmaven-dependency-analyzer%2Fjob%2Fmaster%2F)
-][build]
-[![Jenkins Tests](https://img.shields.io/jenkins/tests?jobUrl=https%3A%2F%2Fci-maven.apache.org%2Fjob%2FMaven%2Fjob%2Fmaven-box%2Fjob%2Fmaven-dependency-analyzer%2Fjob%2Fmaster%2F)
-][test-results]
+[![Jenkins Build](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fci-maven.apache.org%2Fjob%2FMaven%2Fjob%2Fmaven-box%2Fjob%2Fmaven-dependency-analyzer%2Fjob%2Fmaster%2F)][build]
+[![Jenkins Tests](https://img.shields.io/jenkins/tests?jobUrl=https%3A%2F%2Fci-maven.apache.org%2Fjob%2FMaven%2Fjob%2Fmaven-box%2Fjob%2Fmaven-dependency-analyzer%2Fjob%2Fmaster%2F)][test-results]
 [![Java CI](https://github.com/apache/maven-dependency-analyzer/actions/workflows/maven-verify.yml/badge.svg)][gh-build]
 
-
-
-You have found a bug, or you have an idea for a cool new feature? Contributing
-code is a great way to give something back to the open source community. Before
-you dig right into the code, there are a few guidelines that we need
-contributors to follow so that we can have a chance of keeping on top of
-things.
+Found a bug or have an idea for a feature? Contributing code is a great way to
+give something back to the open source community. Before you start, read the
+following guidelines. They help maintainers review contributions consistently.
 
 Getting Started
 ---------------
 
+Before you contribute, complete the following steps:
+
 + Make sure you have a [GitHub account](https://github.com/signup/free).
-+ If you're planning to implement a new feature, it makes sense to discuss your changes 
-  on the [dev list][ml-list] first. 
-  This way you can make sure you're not wasting your time on something that isn't 
-  considered to be in Apache Maven's scope.
-+ Submit a ticket for your issue, assuming one does not already exist.
++ If you plan to implement a feature, discuss it on the [dev list][ml-list] first.
+  This helps ensure the feature falls within Apache Maven's scope.
++ Submit a ticket for your issue, if one does not already exist:
   + Clearly describe the issue, including steps to reproduce when it is a bug.
-  + Make sure you fill in the earliest version that you know has the issue.
+  + Include the earliest version in which you observed the issue.
 + Fork the repository on GitHub.
 
 Making and Submitting Changes
 --------------
 
-We accept Pull Requests via GitHub. The [developer mailing list][ml-list] is the
-main channel of communication for contributors.  
-There are some guidelines which will make applying PRs easier for us:
-+ Create a topic branch from where you want to base your work (this is usually the master branch).
-  Push your changes to a topic branch in your fork of the repository.
-+ Make commits of logical units.
-+ Respect the original code style: by using the same [codestyle][code-style],
-  patches should only highlight the actual difference, not being disturbed by any formatting issues:
-  + Only use spaces for indentation.
-  + Create minimal diffs - disable on save actions like reformat source code or organize imports. 
-    If you feel the source code should be reformatted, create a separate PR for this change.
+We accept pull requests through GitHub. The [developer mailing list][ml-list] is
+the main channel of communication for contributors.
+
+The following guidelines make pull requests easier to review:
+
++ Create a topic branch from the branch you want to base your work on, usually `master`.
+  Push your changes to that branch in your fork of the repository.
++ Make logical, self-contained commits.
++ Use the same [code style][code-style] so that patches show only the actual
+  changes and contain no formatting differences:
+  + Use spaces only for indentation.
+  + Create minimal diffs. Disable save actions such as source reformatting and
+    import organization. If you feel the source code should be reformatted,
+    create a separate PR for this change.
   + Check for unnecessary whitespace with `git diff --check` before committing.
-+ Make sure you have added the necessary tests (JUnit/IT) for your changes.
-+ Run all the tests with `mvn -Prun-its verify` to assure nothing else was accidentally broken.
++ Add tests for your changes, including JUnit tests and integration tests (ITs).
++ Run all the tests with `mvn -Prun-its verify` to ensure that nothing else broke.
 + Submit a pull request to the repository in the Apache organization.
 
-If you plan to contribute on a regular basis, please consider filing a [contributor license agreement][cla].
+If you plan to contribute regularly, consider filing a [contributor license agreement][cla].
 
 Additional Resources
 --------------------
 
 + [Contributing patches](https://maven.apache.org/guides/development/guide-maven-development.html#Creating_and_submitting_a_patch)
 + [Contributor License Agreement][cla]
-+ [General GitHub documentation](https://help.github.com/)
++ [General GitHub documentation](https://docs.github.com/)
 + [GitHub pull request documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
-+ [Apache Maven X Account](https://x.com/ASFMavenProject)
-+ [Apache Maven Bluesky Account](https://bsky.app/profile/maven.apache.org)
-+ [Apache Maven Mastodon Account](https://mastodon.social/deck/@ASFMavenProject@fosstodon.org)
++ [Apache Maven X account](https://x.com/ASFMavenProject)
++ [Apache Maven Bluesky account](https://bsky.app/profile/maven.apache.org)
++ [Apache Maven Mastodon account](https://mastodon.social/deck/@ASFMavenProject@fosstodon.org)
 
 [license]: https://www.apache.org/licenses/LICENSE-2.0
 [ml-list]: https://maven.apache.org/mailing-lists.html
