@@ -33,7 +33,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,5 +59,17 @@ class DefaultMainDependencyClassesProviderTest {
         assertNotNull(dependencyUsages);
 
         verify(analyzer).analyzeUsages(new File("target/classes").toURI().toURL(), null);
+    }
+
+    @Test
+    void missingOutputDirectoryIsIgnored() throws Exception {
+        MavenProject project = Mockito.mock(MavenProject.class);
+        Build build = Mockito.mock(Build.class);
+        when(project.getBuild()).thenReturn(build);
+        when(build.getOutputDirectory()).thenReturn("target/does-not-exist");
+
+        assertTrue(provider.getDependencyClasses(project, null).isEmpty());
+
+        verifyNoInteractions(analyzer);
     }
 }

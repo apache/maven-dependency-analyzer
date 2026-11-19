@@ -22,7 +22,7 @@ import javax.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.util.Collections;
 import java.util.Set;
 
 import org.apache.maven.project.MavenProject;
@@ -47,9 +47,15 @@ abstract class DefaultDependencyClassesProvider implements DependencyClassesProv
     public Set<DependencyUsage> getDependencyClasses(MavenProject project, ClassesPatterns excludedClasses)
             throws IOException {
         String classesDirectory = getOutputClassesDirectory(project);
-        URL url = new File(classesDirectory).toURI().toURL();
+        if (classesDirectory == null) {
+            return Collections.emptySet();
+        }
+        File directory = new File(classesDirectory);
+        if (!directory.isDirectory()) {
+            return Collections.emptySet();
+        }
 
-        return dependencyAnalyzer.analyzeUsages(url, excludedClasses);
+        return dependencyAnalyzer.analyzeUsages(directory.toURI().toURL(), excludedClasses);
     }
 
     protected abstract String getOutputClassesDirectory(MavenProject project);
