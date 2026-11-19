@@ -70,27 +70,6 @@ public class ProjectDependencyAnalysis {
     private final Map<String, Dependency> selectedArtifactByUsedClass;
 
     /**
-     * <p>Constructor for ProjectDependencyAnalysis.</p>
-     */
-    public ProjectDependencyAnalysis() {
-        this(null, (Map<Dependency, Set<DependencyUsage>>) null, null, null);
-    }
-
-    /**
-     * <p>Constructor for ProjectDependencyAnalysis to maintain compatibility with old API</p>
-     *
-     * @param usedDeclaredArtifacts artifacts both used and declared
-     * @param usedUndeclaredArtifacts artifacts used but not declared
-     * @param unusedDeclaredArtifacts artifacts declared but not used
-     */
-    public ProjectDependencyAnalysis(
-            Set<Dependency> usedDeclaredArtifacts,
-            Set<Dependency> usedUndeclaredArtifacts,
-            Set<Dependency> unusedDeclaredArtifacts) {
-        this(usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts, Collections.emptySet());
-    }
-
-    /**
      * Constructor for ProjectDependencyAnalysis.
      *
      * @param usedDeclaredArtifacts artifacts both used and declared
