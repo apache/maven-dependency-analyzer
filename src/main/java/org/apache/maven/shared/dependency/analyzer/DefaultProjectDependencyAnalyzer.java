@@ -159,7 +159,14 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
                 usedDeclaredArtifactsWithClasses.put(a, usedArtifacts.get(a));
             }
 
-            Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>(usedArtifacts);
+            // list the used undeclared artifacts in resolution order, like the declared ones
+            Map<Artifact, Set<DependencyUsage>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>();
+            for (Artifact artifact : project.getArtifacts()) {
+                Set<DependencyUsage> usages = usedArtifacts.get(artifact);
+                if (usages != null) {
+                    usedUndeclaredArtifactsWithClasses.put(artifact, usages);
+                }
+            }
             Set<Artifact> usedUndeclaredArtifacts =
                     removeAll(usedUndeclaredArtifactsWithClasses.keySet(), declaredArtifacts);
 

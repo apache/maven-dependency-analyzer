@@ -18,11 +18,13 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -189,6 +191,65 @@ class ProjectDependencyAnalysisTest {
                 "Trying to force use of dependencies which are not declared: [groupId:missing]"
                         + " and declared but already detected as used: [groupId:used]",
                 exception.getMessage());
+    }
+
+    @Test
+    void classesAndUsagesAreSorted() {
+        Artifact undeclared = aTestArtifact("undeclared", Artifact.SCOPE_COMPILE);
+        // HashSet iterates these as c.Zeta, a.Alpha, b.Beta
+        Set<DependencyUsage> usages = new HashSet<>(Arrays.asList(
+                new DependencyUsage("c.Zeta", "my.App"),
+                new DependencyUsage("a.Alpha", "my.Zed"),
+                new DependencyUsage("a.Alpha", "my.App"),
+                new DependencyUsage("b.Beta", "my.App")));
+        Set<String> used = new HashSet<>(Arrays.asList("c.Zeta", "a.Alpha", "b.Beta"));
+        Map<String, Set<Artifact>> candidates = new java.util.HashMap<>();
+        for (String className : used) {
+            candidates.put(className, Collections.emptySet());
+        }
+
+        ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
+                Collections.emptyMap(),
+                Collections.singletonMap(undeclared, usages),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                used,
+                candidates,
+                Collections.emptyMap());
+
+        List<String> sorted = Arrays.asList("a.Alpha", "b.Beta", "c.Zeta");
+        assertIterableEquals(sorted, analysis.getUsedDependencyClasses());
+        assertIterableEquals(sorted, analysis.getUnmappedUsedDependencyClasses());
+        assertIterableEquals(sorted, analysis.getCandidateArtifactsByUsedClass().keySet());
+        assertIterableEquals(
+                sorted, analysis.getUsedUndeclaredArtifactsWithClasses().get(undeclared));
+        assertIterableEquals(
+                Arrays.asList(
+                        new DependencyUsage("a.Alpha", "my.App"),
+                        new DependencyUsage("a.Alpha", "my.Zed"),
+                        new DependencyUsage("b.Beta", "my.App"),
+                        new DependencyUsage("c.Zeta", "my.App")),
+                analysis.getUsedUndeclaredArtifactsWithUsages().get(undeclared));
+        // sorted copies still answer null lookups like the hash-based ones did
+        assertFalse(analysis.getUsedDependencyClasses().contains(null));
+        assertFalse(analysis.getCandidateArtifactsByUsedClass().containsKey(null));
+    }
+
+    @Test
+    void ignoreNonCompileKeepsTheOrderOfTheUnusedDependencies() {
+        List<Artifact> unused = new ArrayList<>();
+        for (char c = 'z'; c >= 'a'; c--) {
+            unused.add(aTestArtifact(String.valueOf(c), Artifact.SCOPE_COMPILE));
+        }
+
+        ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
+                        Collections.emptyMap(),
+                        Collections.emptyMap(),
+                        new LinkedHashSet<>(unused),
+                        Collections.emptySet())
+                .ignoreNonCompile();
+
+        assertIterableEquals(unused, analysis.getUnusedDeclaredArtifacts());
     }
 
     private <T> Set<T> asSet(T... items) {
