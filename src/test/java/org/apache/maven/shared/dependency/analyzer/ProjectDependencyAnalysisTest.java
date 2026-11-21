@@ -21,6 +21,7 @@ package org.apache.maven.shared.dependency.analyzer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -133,21 +135,60 @@ class ProjectDependencyAnalysisTest {
 
     @Test
     void forcingUsageKeepsTheUsagesOfOtherUsedDeclaredDependencies() throws Exception {
-        Artifact used = aTestArtifact("used", Artifact.SCOPE_COMPILE);
-        Artifact forced = aTestArtifact("forced", Artifact.SCOPE_COMPILE);
-        DependencyUsage usage = new DependencyUsage("a.B", "my.App");
+        Artifact first = aTestArtifact("first", Artifact.SCOPE_COMPILE);
+        Artifact second = aTestArtifact("second", Artifact.SCOPE_COMPILE);
+        Artifact forcedA = aTestArtifact("forced-a", Artifact.SCOPE_COMPILE);
+        Artifact forcedB = aTestArtifact("forced-b", Artifact.SCOPE_COMPILE);
+        DependencyUsage firstUsage = new DependencyUsage("a.First", "my.App");
+        DependencyUsage secondUsage = new DependencyUsage("b.Second", "my.Other");
+        Map<Artifact, Set<DependencyUsage>> usedDeclared = new LinkedHashMap<>();
+        usedDeclared.put(first, Collections.singleton(firstUsage));
+        usedDeclared.put(second, Collections.singleton(secondUsage));
+        Set<String> usedClasses = new LinkedHashSet<>(Arrays.asList("a.First", "b.Second"));
+        Map<String, Set<Artifact>> candidates = new LinkedHashMap<>();
+        candidates.put("a.First", Collections.singleton(first));
+        candidates.put("b.Second", Collections.singleton(second));
+        Map<String, Artifact> selected = new LinkedHashMap<>();
+        selected.put("a.First", first);
+        selected.put("b.Second", second);
 
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
-                        Collections.singletonMap(used, Collections.singleton(usage)),
+                        usedDeclared,
                         Collections.emptyMap(),
-                        Collections.singleton(forced),
-                        Collections.emptySet())
-                .forceDeclaredDependenciesUsage(new String[] {"groupId:forced"});
+                        new LinkedHashSet<>(Arrays.asList(forcedA, forcedB)),
+                        Collections.emptySet(),
+                        usedClasses,
+                        candidates,
+                        selected)
+                .forceDeclaredDependenciesUsage(new String[] {"groupId:forced-a", "groupId:forced-b"});
 
         Map<Artifact, Set<DependencyUsage>> usages = analysis.getUsedDeclaredArtifactsWithUsages();
-        assertEquals(Collections.singleton(usage), usages.get(used));
-        assertEquals(Collections.emptySet(), usages.get(forced));
+        assertEquals(Collections.singleton(firstUsage), usages.get(first));
+        assertEquals(Collections.singleton(secondUsage), usages.get(second));
+        assertEquals(Collections.emptySet(), usages.get(forcedA));
+        assertEquals(Collections.emptySet(), usages.get(forcedB));
         assertTrue(analysis.getUnusedDeclaredArtifacts().isEmpty());
+        assertEquals(usedClasses, analysis.getUsedDependencyClasses());
+        assertEquals(candidates, analysis.getCandidateArtifactsByUsedClass());
+        assertEquals(selected, analysis.getSelectedArtifactByUsedClass());
+    }
+
+    @Test
+    void forcingAnAlreadyUsedOrUndeclaredDependencyFails() {
+        Artifact used = aTestArtifact("used", Artifact.SCOPE_COMPILE);
+        ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
+                Collections.singletonMap(used, Collections.singleton(new DependencyUsage("a.B", "my.App"))),
+                Collections.emptyMap(),
+                Collections.emptySet(),
+                Collections.emptySet());
+
+        ProjectDependencyAnalyzerException exception = assertThrows(
+                ProjectDependencyAnalyzerException.class,
+                () -> analysis.forceDeclaredDependenciesUsage(new String[] {"groupId:used", "groupId:missing"}));
+        assertEquals(
+                "Trying to force use of dependencies which are not declared: [groupId:missing]"
+                        + " and declared but already detected as used: [groupId:used]",
+                exception.getMessage());
     }
 
     private <T> Set<T> asSet(T... items) {
