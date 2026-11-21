@@ -169,6 +169,8 @@ class ProjectDependencyAnalysisTest {
         assertEquals(Collections.singleton(secondUsage), usages.get(second));
         assertEquals(Collections.emptySet(), usages.get(forcedA));
         assertEquals(Collections.emptySet(), usages.get(forcedB));
+        // the detected dependencies come first, then the forced ones in the order they were declared
+        assertIterableEquals(Arrays.asList(first, second, forcedA, forcedB), usages.keySet());
         assertTrue(analysis.getUnusedDeclaredArtifacts().isEmpty());
         assertEquals(usedClasses, analysis.getUsedDependencyClasses());
         assertEquals(candidates, analysis.getCandidateArtifactsByUsedClass());
@@ -233,6 +235,53 @@ class ProjectDependencyAnalysisTest {
         // sorted copies still answer null lookups like the hash-based ones did
         assertFalse(analysis.getUsedDependencyClasses().contains(null));
         assertFalse(analysis.getCandidateArtifactsByUsedClass().containsKey(null));
+    }
+
+    @Test
+    void forcingUsageKeepsTheOrderOfTheRemainingUnusedDependencies() throws Exception {
+        List<Artifact> unused = new ArrayList<>();
+        for (char c = 'z'; c >= 'a'; c--) {
+            unused.add(aTestArtifact(String.valueOf(c), Artifact.SCOPE_COMPILE));
+        }
+
+        ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
+                        Collections.emptyMap(),
+                        Collections.emptyMap(),
+                        new LinkedHashSet<>(unused),
+                        Collections.emptySet())
+                .forceDeclaredDependenciesUsage(new String[] {"groupId:m"});
+
+        unused.removeIf(artifact -> "m".equals(artifact.getArtifactId()));
+        assertIterableEquals(unused, analysis.getUnusedDeclaredArtifacts());
+    }
+
+    @Test
+    void nullClassNamesAreAcceptedAndSortedFirst() {
+        Artifact undeclared = aTestArtifact("undeclared", Artifact.SCOPE_COMPILE);
+        Set<String> used = new HashSet<>(Arrays.asList("b.Beta", null, "a.Alpha"));
+        Map<String, Set<Artifact>> candidates = new java.util.HashMap<>();
+        candidates.put("b.Beta", Collections.singleton(undeclared));
+        candidates.put(null, Collections.singleton(undeclared));
+        Map<String, Artifact> selected = new java.util.HashMap<>();
+        selected.put("b.Beta", undeclared);
+        selected.put(null, undeclared);
+
+        ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
+                Collections.emptyMap(),
+                Collections.emptyMap(),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                used,
+                candidates,
+                selected);
+
+        assertIterableEquals(Arrays.asList(null, "a.Alpha", "b.Beta"), analysis.getUsedDependencyClasses());
+        assertIterableEquals(
+                Arrays.asList(null, "b.Beta"),
+                analysis.getCandidateArtifactsByUsedClass().keySet());
+        assertIterableEquals(
+                Arrays.asList(null, "b.Beta"),
+                analysis.getSelectedArtifactByUsedClass().keySet());
     }
 
     @Test

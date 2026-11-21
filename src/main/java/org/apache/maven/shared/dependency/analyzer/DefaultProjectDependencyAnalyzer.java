@@ -114,6 +114,15 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         this.artifactHandlerManager = artifactHandlerManager;
     }
 
+    DefaultProjectDependencyAnalyzer(
+            List<MainDependencyClassesProvider> mainDependencyClassesProviders,
+            List<TestDependencyClassesProvider> testDependencyClassesProviders,
+            ArtifactHandlerManager artifactHandlerManager) {
+        this.mainDependencyClassesProviders = mainDependencyClassesProviders;
+        this.testDependencyClassesProviders = testDependencyClassesProviders;
+        this.artifactHandlerManager = artifactHandlerManager;
+    }
+
     /** {@inheritDoc} */
     @Override
     public ProjectDependencyAnalysis analyze(MavenProject project, Collection<String> excludedClasses)
