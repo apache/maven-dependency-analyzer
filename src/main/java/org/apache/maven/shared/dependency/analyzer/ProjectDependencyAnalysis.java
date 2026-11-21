@@ -311,6 +311,9 @@ public class ProjectDependencyAnalysis {
     /**
      * Force use status of some declared dependencies, to manually fix consequences of bytecode-level analysis which
      * happens to not detect some effective use (constants, annotation with source-retention, javadoc).
+     * <p>
+     * The dependencies already detected as used keep their usages; a newly forced dependency has an empty usage set.
+     * The used classes and their candidate and selected artifacts are kept unchanged.
      *
      * @param forceUsedDependencies dependencies to move from "unused-declared" to "used-declared", with
      *                              <code>groupId:artifactId</code> format
@@ -334,7 +337,7 @@ public class ProjectDependencyAnalysis {
             if (forced.remove(ArtifactKeys.groupArtifactId(artifact))) {
                 // ok, change artifact status from unused-declared to used-declared
                 iter.remove();
-                forcedUsedDeclared.put(artifact, Collections.emptySet());
+                forcedUsedDeclared.putIfAbsent(artifact, Collections.emptySet());
             }
         }
 
