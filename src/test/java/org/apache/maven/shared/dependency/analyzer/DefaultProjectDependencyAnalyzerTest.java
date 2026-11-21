@@ -599,6 +599,27 @@ class DefaultProjectDependencyAnalyzerTest {
     }
 
     @Test
+    void buildUsedDependencyClassesShouldKeepIgnoredClassesThatADependencyProvides() {
+        Artifact dependency = aTestArtifact("dependency");
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(dependency, new HashSet<>(Arrays.asList("java.lang.Object", "my.Helper", "my.Excluded")));
+
+        Set<DependencyUsage> usages = new LinkedHashSet<>(Arrays.asList(
+                new DependencyUsage("java.lang.Object", "my.Helper"),
+                new DependencyUsage("my.Helper", "my.App"),
+                new DependencyUsage("my.Excluded", "my.App"),
+                new DependencyUsage("java.lang.String", "my.App")));
+
+        Set<String> used = DefaultProjectDependencyAnalyzer.buildUsedDependencyClasses(
+                usages,
+                artifactClassMap,
+                className -> className.startsWith("java.") || className.equals("my.Excluded"));
+
+        // a JDK, a project and an excluded class, each also found in the dependency; java.lang.String is not
+        assertIterableEquals(Arrays.asList("java.lang.Object", "my.Helper", "my.Excluded"), used);
+    }
+
+    @Test
     void isPlatformClassShouldRecognizeJdkClassesOnly() {
         assertTrue(DefaultProjectDependencyAnalyzer.isPlatformClass("java.lang.Object"));
         assertTrue(DefaultProjectDependencyAnalyzer.isPlatformClass("java.util.Map$Entry"));

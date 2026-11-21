@@ -290,8 +290,8 @@ public class ProjectDependencyAnalysis {
 
     /**
      * Returns referenced dependency classes that no dependency artifact provides, for example classes of a
-     * dependency that is missing from the build. The project's own classes, JDK classes and excluded classes are left
-     * out.
+     * dependency that is missing from the build. The project's own classes, the classes of the JDK running the
+     * analysis and excluded classes are left out.
      *
      * @return unmapped referenced dependency classes
      * @since 1.18.0
