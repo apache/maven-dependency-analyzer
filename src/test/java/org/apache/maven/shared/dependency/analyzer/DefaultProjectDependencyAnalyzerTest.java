@@ -575,6 +575,42 @@ class DefaultProjectDependencyAnalyzerTest {
     }
 
     @Test
+    void buildUsedDependencyClassesShouldLeaveOutProjectAndPlatformClasses() {
+        Artifact dependency = aTestArtifact("dependency");
+        Map<Artifact, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(dependency, new HashSet<>(Arrays.asList("com.dep.Lib", "javax.annotation.Nonnull")));
+
+        Set<DependencyUsage> usages = new LinkedHashSet<>(Arrays.asList(
+                new DependencyUsage("com.dep.Lib", "my.App"),
+                new DependencyUsage("my.Helper", "my.App"),
+                new DependencyUsage("java.lang.Object", "my.Helper"),
+                new DependencyUsage("javax.annotation.Nonnull", "my.App"),
+                new DependencyUsage("my.Versioned", "my.App"),
+                new DependencyUsage("java.lang.Object", "META-INF.versions.11.my.Versioned"),
+                new DependencyUsage("my.Excluded", "my.App"),
+                new DependencyUsage("com.missing.Gone", "my.App")));
+
+        Set<String> used = DefaultProjectDependencyAnalyzer.buildUsedDependencyClasses(
+                usages,
+                artifactClassMap,
+                className -> className.startsWith("java.") || className.equals("my.Excluded"));
+
+        assertIterableEquals(Arrays.asList("com.dep.Lib", "javax.annotation.Nonnull", "com.missing.Gone"), used);
+    }
+
+    @Test
+    void isPlatformClassShouldRecognizeJdkClassesOnly() {
+        assertTrue(DefaultProjectDependencyAnalyzer.isPlatformClass("java.lang.Object"));
+        assertTrue(DefaultProjectDependencyAnalyzer.isPlatformClass("java.util.Map$Entry"));
+        if (!System.getProperty("java.specification.version").startsWith("1.")) {
+            // jdk.compiler is defined to the application class loader, not the platform loader
+            assertTrue(DefaultProjectDependencyAnalyzer.isPlatformClass("com.sun.source.tree.Tree"));
+        }
+        assertFalse(DefaultProjectDependencyAnalyzer.isPlatformClass(DependencyUsage.class.getName()));
+        assertFalse(DefaultProjectDependencyAnalyzer.isPlatformClass("com.missing.Gone"));
+    }
+
+    @Test
     void buildCandidateArtifactsByUsedClassShouldReturnAllProviders() {
         Artifact first = aTestArtifact("first");
         Artifact second = aTestArtifact("second");

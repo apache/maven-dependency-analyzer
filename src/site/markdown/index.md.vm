@@ -83,8 +83,8 @@ holds the result:
 | `getUnusedDeclaredArtifacts()` | Declared dependencies that the bytecode does not use |
 | `getTestArtifactsWithNonTestScope()` | Compile-scoped dependencies that only tests use and that no other compile or runtime dependency brings in |
 | `getUsedDeclaredArtifactsWithUsages()`, `getUsedUndeclaredArtifactsWithUsages()` | The same artifacts with each used class and the project class (or `web.xml`) that uses it |
-| `getUsedDependencyClasses()`, `getCandidateArtifactsByUsedClass()`, `getSelectedArtifactByUsedClass()` | Every class the bytecode references, every dependency that contains it, and the dependency the analysis credited (since 1.18.0) |
-| `getAmbiguousUsedDependencyClasses()`, `getUnmappedUsedDependencyClasses()` | Referenced classes found in more than one dependency, and referenced classes found in none; the latter include JDK and project classes (since 1.18.0) |
+| `getUsedDependencyClasses()`, `getCandidateArtifactsByUsedClass()`, `getSelectedArtifactByUsedClass()` | Every class the bytecode references that can come from a dependency, every dependency that contains it, and the dependency the analysis credited (since 1.18.0) |
+| `getAmbiguousUsedDependencyClasses()`, `getUnmappedUsedDependencyClasses()` | Referenced classes found in more than one dependency, and referenced classes found in none, leaving out JDK, project and excluded classes (since 1.18.0) |
 
 `ignoreNonCompile()` drops dependencies outside the compile scope from the unused list, and
 `forceDeclaredDependenciesUsage(String[])` moves the given `groupId:artifactId` entries from unused
