@@ -131,6 +131,25 @@ class ProjectDependencyAnalysisTest {
         assertFalse(analysis.getSelectedArtifactByUsedClass().containsKey("a.B"));
     }
 
+    @Test
+    void forcingUsageKeepsTheUsagesOfOtherUsedDeclaredDependencies() throws Exception {
+        Artifact used = aTestArtifact("used", Artifact.SCOPE_COMPILE);
+        Artifact forced = aTestArtifact("forced", Artifact.SCOPE_COMPILE);
+        DependencyUsage usage = new DependencyUsage("a.B", "my.App");
+
+        ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
+                        Collections.singletonMap(used, Collections.singleton(usage)),
+                        Collections.emptyMap(),
+                        Collections.singleton(forced),
+                        Collections.emptySet())
+                .forceDeclaredDependenciesUsage(new String[] {"groupId:forced"});
+
+        Map<Artifact, Set<DependencyUsage>> usages = analysis.getUsedDeclaredArtifactsWithUsages();
+        assertEquals(Collections.singleton(usage), usages.get(used));
+        assertEquals(Collections.emptySet(), usages.get(forced));
+        assertTrue(analysis.getUnusedDeclaredArtifacts().isEmpty());
+    }
+
     private <T> Set<T> asSet(T... items) {
         return new HashSet<>(Arrays.asList(items));
     }

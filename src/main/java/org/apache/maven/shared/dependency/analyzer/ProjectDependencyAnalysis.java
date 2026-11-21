@@ -324,7 +324,8 @@ public class ProjectDependencyAnalysis {
         Set<String> forced = new HashSet<>(Arrays.asList(forceUsedDependencies));
 
         Set<Artifact> forcedUnusedDeclared = new HashSet<>(unusedDeclaredArtifacts);
-        Set<Artifact> forcedUsedDeclared = new HashSet<>(usedDeclaredArtifacts.keySet());
+        // keep the usages of the dependencies detected as used; a forced dependency has none
+        Map<Artifact, Set<DependencyUsage>> forcedUsedDeclared = new LinkedHashMap<>(usedDeclaredArtifacts);
 
         Iterator<Artifact> iter = forcedUnusedDeclared.iterator();
         while (iter.hasNext()) {
@@ -333,7 +334,7 @@ public class ProjectDependencyAnalysis {
             if (forced.remove(ArtifactKeys.groupArtifactId(artifact))) {
                 // ok, change artifact status from unused-declared to used-declared
                 iter.remove();
-                forcedUsedDeclared.add(artifact);
+                forcedUsedDeclared.put(artifact, Collections.emptySet());
             }
         }
 
@@ -361,7 +362,7 @@ public class ProjectDependencyAnalysis {
         }
 
         return new ProjectDependencyAnalysis(
-                mapWithKeys(forcedUsedDeclared),
+                forcedUsedDeclared,
                 usedUndeclaredArtifacts,
                 forcedUnusedDeclared,
                 testArtifactsWithNonTestScope,
