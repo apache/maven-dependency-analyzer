@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -121,6 +122,30 @@ class DefaultProjectDependencyAnalyzerTest {
 
         assertEquals(Collections.emptySet(), artifactClassMap.get(aggregator));
         assertEquals(Collections.singleton("org.example.Library"), artifactClassMap.get(library));
+    }
+
+    @Test
+    void analyzeListsUsedUndeclaredArtifactsInResolutionOrder(@TempDir Path tempDir) throws Exception {
+        List<Artifact> resolved = new ArrayList<>();
+        Set<DependencyUsage> usages = new HashSet<>();
+        for (char c = 'z'; c >= 'a'; c--) {
+            Artifact artifact = aTestArtifact(String.valueOf(c));
+            artifact.setFile(jarWith(tempDir.resolve(c + ".jar"), "lib/" + c + "/Type.class"));
+            resolved.add(artifact);
+            usages.add(new DependencyUsage("lib." + c + ".Type", "my.App"));
+        }
+        MavenProject project = new MavenProject();
+        project.setArtifacts(new LinkedHashSet<>(resolved));
+
+        ProjectDependencyAnalysis analysis = new DefaultProjectDependencyAnalyzer(
+                        Collections.singletonList((p, excluded) -> usages),
+                        Collections.emptyList(),
+                        artifactHandlerManager)
+                .analyze(project, Collections.emptyList());
+
+        assertIterableEquals(resolved, analysis.getUsedUndeclaredArtifacts());
+        assertIterableEquals(
+                resolved, analysis.getUsedUndeclaredArtifactsWithUsages().keySet());
     }
 
     private static File jarWith(Path path, String... entries) throws IOException {

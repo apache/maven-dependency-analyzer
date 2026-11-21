@@ -44,10 +44,13 @@ import org.apache.maven.artifact.Artifact;
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
 public class ProjectDependencyAnalysis {
+    /** Orders class names, with {@code null} first as the hash-based collections accepted it. */
+    private static final Comparator<String> CLASS_ORDER = Comparator.nullsFirst(Comparator.<String>naturalOrder());
+
     /** Orders usages by dependency class, then by the class that uses it. */
     private static final Comparator<DependencyUsage> USAGE_ORDER = Comparator.comparing(
-                    DependencyUsage::getDependencyClass, Comparator.nullsFirst(Comparator.<String>naturalOrder()))
-            .thenComparing(DependencyUsage::getUsedBy, Comparator.nullsFirst(Comparator.<String>naturalOrder()));
+                    DependencyUsage::getDependencyClass, CLASS_ORDER)
+            .thenComparing(DependencyUsage::getUsedBy, CLASS_ORDER);
 
     // fields -----------------------------------------------------------------
 
@@ -203,7 +206,7 @@ public class ProjectDependencyAnalysis {
                     entry.getKey(),
                     entry.getValue().stream()
                             .map(DependencyUsage::getDependencyClass)
-                            .sorted()
+                            .sorted(CLASS_ORDER)
                             .collect(Collectors.toCollection(LinkedHashSet::new)));
         }
 
@@ -467,9 +470,19 @@ public class ProjectDependencyAnalysis {
     }
 
     private static Set<String> safeCopyStrings(Set<String> set) {
-        return set == null
-                ? Collections.emptySet()
-                : Collections.unmodifiableSet(new LinkedHashSet<>(new TreeSet<>(set)));
+        if (set == null) {
+            return Collections.emptySet();
+        }
+
+        Set<String> sorted = new TreeSet<>(CLASS_ORDER);
+        sorted.addAll(set);
+        return Collections.unmodifiableSet(new LinkedHashSet<>(sorted));
+    }
+
+    private static <V> Map<String, V> sortedByClass(Map<String, V> map) {
+        Map<String, V> sorted = new TreeMap<>(CLASS_ORDER);
+        sorted.putAll(map);
+        return sorted;
     }
 
     private static Set<DependencyUsage> sortedUsages(Set<DependencyUsage> usages) {
@@ -499,7 +512,7 @@ public class ProjectDependencyAnalysis {
 
         Map<String, Set<Artifact>> map = new LinkedHashMap<>();
 
-        for (Map.Entry<String, Set<Artifact>> e : new TreeMap<>(origMap).entrySet()) {
+        for (Map.Entry<String, Set<Artifact>> e : sortedByClass(origMap).entrySet()) {
             map.put(e.getKey(), Collections.unmodifiableSet(new LinkedHashSet<>(e.getValue())));
         }
 
@@ -511,7 +524,7 @@ public class ProjectDependencyAnalysis {
             return Collections.emptyMap();
         }
 
-        return Collections.unmodifiableMap(new LinkedHashMap<>(new TreeMap<>(origMap)));
+        return Collections.unmodifiableMap(new LinkedHashMap<>(sortedByClass(origMap)));
     }
 
     private static Map<Artifact, Set<DependencyUsage>> mapWithKeys(Set<Artifact> keys) {
