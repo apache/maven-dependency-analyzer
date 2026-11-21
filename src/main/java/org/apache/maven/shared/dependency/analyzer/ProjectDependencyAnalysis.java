@@ -18,25 +18,37 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 
 /**
  * Project dependencies analysis result.
+ * <p>
+ * Class names, maps keyed by class name and dependency usages are returned sorted; artifacts keep the order in which
+ * they were passed in.
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
 public class ProjectDependencyAnalysis {
+    /** Orders usages by dependency class, then by the class that uses it. */
+    private static final Comparator<DependencyUsage> USAGE_ORDER = Comparator.comparing(
+                    DependencyUsage::getDependencyClass, Comparator.nullsFirst(Comparator.<String>naturalOrder()))
+            .thenComparing(DependencyUsage::getUsedBy, Comparator.nullsFirst(Comparator.<String>naturalOrder()));
+
     // fields -----------------------------------------------------------------
 
     private final Map<Artifact, Set<DependencyUsage>> usedDeclaredArtifacts;
@@ -184,14 +196,15 @@ public class ProjectDependencyAnalysis {
      * @return artifacts used but not declared
      */
     public Map<Artifact, Set<String>> getUsedUndeclaredArtifactsWithClasses() {
-        Map<Artifact, Set<String>> usedUndeclaredArtifactsWithClasses = new HashMap<>();
+        Map<Artifact, Set<String>> usedUndeclaredArtifactsWithClasses = new LinkedHashMap<>();
 
         for (Map.Entry<Artifact, Set<DependencyUsage>> entry : usedUndeclaredArtifacts.entrySet()) {
             usedUndeclaredArtifactsWithClasses.put(
                     entry.getKey(),
                     entry.getValue().stream()
                             .map(DependencyUsage::getDependencyClass)
-                            .collect(Collectors.toSet()));
+                            .sorted()
+                            .collect(Collectors.toCollection(LinkedHashSet::new)));
         }
 
         return usedUndeclaredArtifactsWithClasses;
@@ -295,7 +308,7 @@ public class ProjectDependencyAnalysis {
      * @since 1.3
      */
     public ProjectDependencyAnalysis ignoreNonCompile() {
-        Set<Artifact> filteredUnusedDeclared = new HashSet<>(unusedDeclaredArtifacts);
+        Set<Artifact> filteredUnusedDeclared = new LinkedHashSet<>(unusedDeclaredArtifacts);
         filteredUnusedDeclared.removeIf(artifact -> !artifact.getScope().equals(Artifact.SCOPE_COMPILE));
 
         return new ProjectDependencyAnalysis(
@@ -326,7 +339,7 @@ public class ProjectDependencyAnalysis {
             throws ProjectDependencyAnalyzerException {
         Set<String> forced = new HashSet<>(Arrays.asList(forceUsedDependencies));
 
-        Set<Artifact> forcedUnusedDeclared = new HashSet<>(unusedDeclaredArtifacts);
+        Set<Artifact> forcedUnusedDeclared = new LinkedHashSet<>(unusedDeclaredArtifacts);
         // keep the usages of the dependencies detected as used; a forced dependency has none
         Map<Artifact, Set<DependencyUsage>> forcedUsedDeclared = new LinkedHashMap<>(usedDeclaredArtifacts);
 
@@ -454,7 +467,15 @@ public class ProjectDependencyAnalysis {
     }
 
     private static Set<String> safeCopyStrings(Set<String> set) {
-        return set == null ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(set));
+        return set == null
+                ? Collections.emptySet()
+                : Collections.unmodifiableSet(new LinkedHashSet<>(new TreeSet<>(set)));
+    }
+
+    private static Set<DependencyUsage> sortedUsages(Set<DependencyUsage> usages) {
+        List<DependencyUsage> sorted = new ArrayList<>(usages);
+        sorted.sort(USAGE_ORDER);
+        return Collections.unmodifiableSet(new LinkedHashSet<>(sorted));
     }
 
     private static Map<Artifact, Set<DependencyUsage>> safeCopy(Map<Artifact, Set<DependencyUsage>> origMap) {
@@ -465,7 +486,7 @@ public class ProjectDependencyAnalysis {
         Map<Artifact, Set<DependencyUsage>> map = new LinkedHashMap<>();
 
         for (Map.Entry<Artifact, Set<DependencyUsage>> e : origMap.entrySet()) {
-            map.put(e.getKey(), Collections.unmodifiableSet(new LinkedHashSet<>(e.getValue())));
+            map.put(e.getKey(), sortedUsages(e.getValue()));
         }
 
         return map;
@@ -478,7 +499,7 @@ public class ProjectDependencyAnalysis {
 
         Map<String, Set<Artifact>> map = new LinkedHashMap<>();
 
-        for (Map.Entry<String, Set<Artifact>> e : origMap.entrySet()) {
+        for (Map.Entry<String, Set<Artifact>> e : new TreeMap<>(origMap).entrySet()) {
             map.put(e.getKey(), Collections.unmodifiableSet(new LinkedHashSet<>(e.getValue())));
         }
 
@@ -490,7 +511,7 @@ public class ProjectDependencyAnalysis {
             return Collections.emptyMap();
         }
 
-        return Collections.unmodifiableMap(new LinkedHashMap<>(origMap));
+        return Collections.unmodifiableMap(new LinkedHashMap<>(new TreeMap<>(origMap)));
     }
 
     private static Map<Artifact, Set<DependencyUsage>> mapWithKeys(Set<Artifact> keys) {
