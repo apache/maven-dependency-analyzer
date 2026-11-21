@@ -18,6 +18,10 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,7 +30,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.JarOutputStream;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
@@ -50,6 +56,7 @@ import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.util.artifact.DefaultArtifactTypeRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -89,6 +96,41 @@ class DefaultProjectDependencyAnalyzerTest {
         when(artifactHandlerManager.getArtifactHandler(anyString())).thenReturn(mock(ArtifactHandler.class));
         analyzer = new DefaultProjectDependencyAnalyzer(
                 repositorySystem, Collections.emptyList(), () -> mavenSession, artifactHandlerManager);
+    }
+
+    @Test
+    void buildArtifactClassMapSkipsModuleInfoAndPackageInfoInJars(@TempDir Path tempDir) throws IOException {
+        File aggregatorJar = jarWith(tempDir.resolve("aggregator.jar"), "module-info.class", "META-INF/MANIFEST.MF");
+        File libraryJar = jarWith(
+                tempDir.resolve("library.jar"),
+                "module-info.class",
+                "org/example/package-info.class",
+                "org/example/Library.class",
+                "META-INF/versions/9/module-info.class");
+
+        Artifact aggregator = aTestArtifact("aggregator");
+        aggregator.setFile(aggregatorJar);
+        Artifact library = aTestArtifact("library");
+        library.setFile(libraryJar);
+
+        MavenProject project = new MavenProject();
+        project.setArtifacts(new LinkedHashSet<>(Arrays.asList(aggregator, library)));
+
+        Map<Artifact, Set<String>> artifactClassMap =
+                analyzer.buildArtifactClassMap(project, new ClassesPatterns(Collections.emptyList()));
+
+        assertEquals(Collections.emptySet(), artifactClassMap.get(aggregator));
+        assertEquals(Collections.singleton("org.example.Library"), artifactClassMap.get(library));
+    }
+
+    private static File jarWith(Path path, String... entries) throws IOException {
+        try (JarOutputStream jar = new JarOutputStream(Files.newOutputStream(path))) {
+            for (String entry : entries) {
+                jar.putNextEntry(new ZipEntry(entry));
+                jar.closeEntry();
+            }
+        }
+        return path.toFile();
     }
 
     @Test
