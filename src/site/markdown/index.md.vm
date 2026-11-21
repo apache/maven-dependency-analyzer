@@ -95,8 +95,9 @@ to used. It fails when an entry is not declared or is already used, so stale ent
 - When several artifacts contain a used class, a declared artifact is credited over an undeclared
   one, and among those the first one found. Scope is not considered: a declared test-scoped artifact
   is credited even for a class that main code uses.
-- A declared JAR without classes of its own counts as used when an artifact it brings in directly
-  is used. That artifact is then not reported as used undeclared.
+- A declared JAR without classes of its own, such as `junit-jupiter`, whose only class file is
+  `module-info.class`, counts as used when an artifact it brings in directly is used. That artifact
+  is then not reported as used undeclared.
 - In a `war` project, the filter, listener and servlet classes named in `web.xml` (the war plugin's `webXml`, by default `src/main/webapp/WEB-INF/web.xml`) count as
   used.
 - Inlined constants are detected: javac and ecj record the constant's declaring class in the
