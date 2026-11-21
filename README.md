@@ -14,8 +14,8 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-Contributing to [Apache Maven Dependency Analyzer](https://maven.apache.org/shared/maven-dependency-analyzer/)
-======================
+
+# Apache Maven Dependency Analyzer
 
 [![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)][license]
 [![Maven Central](https://img.shields.io/maven-central/v/org.apache.maven.shared/maven-dependency-analyzer.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/org.apache.maven.shared/maven-dependency-analyzer)
@@ -24,62 +24,28 @@ Contributing to [Apache Maven Dependency Analyzer](https://maven.apache.org/shar
 [![Jenkins Tests](https://img.shields.io/jenkins/tests?jobUrl=https%3A%2F%2Fci-maven.apache.org%2Fjob%2FMaven%2Fjob%2Fmaven-box%2Fjob%2Fmaven-dependency-analyzer%2Fjob%2Fmaster%2F)][test-results]
 [![Java CI](https://github.com/apache/maven-dependency-analyzer/actions/workflows/maven-verify.yml/badge.svg)][gh-build]
 
-Found a bug or have an idea for a feature? Contributing code is a great way to
-give something back to the open source community. Before you start, read the
-following guidelines. They help maintainers review contributions consistently.
+Finds the unused declared and the used undeclared dependencies of a Maven project by reading its
+compiled classes and those of its dependencies. The
+[Maven Dependency Plugin](https://maven.apache.org/plugins/maven-dependency-plugin/) uses it for
+`dependency:analyze`; other plugins inject `ProjectDependencyAnalyzer` and call
+`analyze(project)`.
 
-Getting Started
----------------
+The library requires Java 8 and builds against the Maven 3.9 core APIs, which the calling plugin's
+Maven runtime provides.
 
-Before you contribute, complete the following steps:
+- Documentation: <https://maven.apache.org/shared/maven-dependency-analyzer/>
+- Issues: <https://github.com/apache/maven-dependency-analyzer/issues>
+- Security reports: see [SECURITY.md](SECURITY.md); never a public issue
+- Contributing: see [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md)
 
-+ Make sure you have a [GitHub account](https://github.com/signup/free).
-+ If you plan to implement a feature, discuss it on the [dev list][ml-list] first.
-  This helps ensure the feature falls within Apache Maven's scope.
-+ Submit a ticket for your issue, if one does not already exist:
-  + Clearly describe the issue, including steps to reproduce when it is a bug.
-  + Include the earliest version in which you observed the issue.
-+ Fork the repository on GitHub.
+## Build
 
-Making and Submitting Changes
---------------
-
-We accept pull requests through GitHub. The [developer mailing list][ml-list] is
-the main channel of communication for contributors.
-
-The following guidelines make pull requests easier to review:
-
-+ Create a topic branch from the branch you want to base your work on, usually `master`.
-  Push your changes to that branch in your fork of the repository.
-+ Make logical, self-contained commits.
-+ Use the same [code style][code-style] so that patches show only the actual
-  changes and contain no formatting differences:
-  + Use spaces only for indentation.
-  + Create minimal diffs. Disable save actions such as source reformatting and
-    import organization. If you feel the source code should be reformatted,
-    create a separate PR for this change.
-  + Check for unnecessary whitespace with `git diff --check` before committing.
-+ Add tests for your changes, including JUnit tests and integration tests (ITs).
-+ Run all the tests with `mvn -Prun-its verify` to ensure that nothing else broke.
-+ Submit a pull request to the repository in the Apache organization.
-
-If you plan to contribute regularly, consider filing a [contributor license agreement][cla].
-
-Additional Resources
---------------------
-
-+ [Contributing patches](https://maven.apache.org/guides/development/guide-maven-development.html#Creating_and_submitting_a_patch)
-+ [Contributor License Agreement][cla]
-+ [General GitHub documentation](https://docs.github.com/)
-+ [GitHub pull request documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
-+ [Apache Maven X account](https://x.com/ASFMavenProject)
-+ [Apache Maven Bluesky account](https://bsky.app/profile/maven.apache.org)
-+ [Apache Maven Mastodon account](https://mastodon.social/deck/@ASFMavenProject@fosstodon.org)
+```shell
+mvn verify
+mvn -P run-its verify
+```
 
 [license]: https://www.apache.org/licenses/LICENSE-2.0
-[ml-list]: https://maven.apache.org/mailing-lists.html
-[code-style]: https://maven.apache.org/developers/conventions/code.html
-[cla]: https://www.apache.org/licenses/#clas
 [test-results]: https://ci-maven.apache.org/job/Maven/job/maven-box/job/maven-dependency-analyzer/job/master/lastCompletedBuild/testReport/
 [build]: https://ci-maven.apache.org/job/Maven/job/maven-box/job/maven-dependency-analyzer/job/master/
 [gh-build]: https://github.com/apache/maven-dependency-analyzer/actions/workflows/maven-verify.yml?query=branch%3Amaster

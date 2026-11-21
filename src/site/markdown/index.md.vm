@@ -19,17 +19,102 @@ under the License.
 
 # ${project.name}
 
-Analyzes the dependencies of a project for undeclared or unused artifacts.
+Analyzes the dependencies of a Maven project and reports which declared dependencies are unused
+and which used dependencies are not declared. The
+[Maven Dependency Plugin](https://maven.apache.org/plugins/maven-dependency-plugin/) uses it for the
+`dependency:analyze` goals.
 
-**Warning**: Because analysis is done on the bytecode rather than the source,
-some cases are not detected, including annotations with source-only retention
-and links in Javadoc. This can lead to incorrect results when these are the only uses
-of a dependency. Inlined constants are detected: javac and ecj record the constant's
-declaring class in the constant pool, which the analyzer reads.
+The analysis reads the project's compiled classes and the class files of its resolved
+dependencies, so run it after the `test-compile` phase, with test-scoped dependencies resolved. A missing
+output directory is not an error: run too early, the analysis sees no classes and reports every
+declared dependency as unused.
+The library requires Java 8 and is compiled against the Maven ${mavenVersion} core APIs, which the
+calling plugin's Maven runtime provides.
+
+## Usage
+
+Add the dependency to a Maven plugin:
+
+```xml
+<dependency>
+  <groupId>${project.groupId}</groupId>
+  <artifactId>${project.artifactId}</artifactId>
+  <version>${project.version}</version>
+</dependency>
+```
+
+Inject `ProjectDependencyAnalyzer` and pass it the current project:
+
+```java
+@Mojo(name = "analyze", requiresDependencyResolution = ResolutionScope.TEST)
+public class AnalyzeMojo extends AbstractMojo {
+    @Inject
+    private ProjectDependencyAnalyzer analyzer;
+
+    @Inject
+    private MavenProject project;
+
+    @Override
+    public void execute() throws MojoExecutionException {
+        try {
+            ProjectDependencyAnalysis analysis = analyzer.analyze(project);
+            analysis.getUnusedDeclaredArtifacts().forEach(a -> getLog().warn("Unused declared: " + a));
+            analysis.getUsedUndeclaredArtifacts().forEach(a -> getLog().warn("Used undeclared: " + a));
+        } catch (ProjectDependencyAnalyzerException e) {
+            throw new MojoExecutionException("Dependency analysis failed", e);
+        }
+    }
+}
+```
+
+`analyze(project, excludedClasses)` takes regular expressions of class names to leave out of the
+analysis, both in the project's own classes and in the dependencies.
+
+## Results
+
+`ProjectDependencyAnalysis`
+([javadoc](./apidocs/org/apache/maven/shared/dependency/analyzer/ProjectDependencyAnalysis.html))
+holds the result:
+
+| Method | Returns |
+|---|---|
+| `getUsedDeclaredArtifacts()` | Declared dependencies that the bytecode uses |
+| `getUsedUndeclaredArtifacts()` | Dependencies that the bytecode uses but the POM does not declare, such as transitive ones |
+| `getUnusedDeclaredArtifacts()` | Declared dependencies that the bytecode does not use |
+| `getTestArtifactsWithNonTestScope()` | Compile-scoped dependencies that only tests use and that no other compile or runtime dependency brings in |
+| `getUsedDeclaredArtifactsWithUsages()`, `getUsedUndeclaredArtifactsWithUsages()` | The same artifacts with each used class and the project class (or `web.xml`) that uses it |
+| `getUsedDependencyClasses()`, `getCandidateArtifactsByUsedClass()`, `getSelectedArtifactByUsedClass()` | Every class the bytecode references, every dependency that contains it, and the dependency the analysis credited (since 1.18.0) |
+| `getAmbiguousUsedDependencyClasses()`, `getUnmappedUsedDependencyClasses()` | Referenced classes found in more than one dependency, and referenced classes found in none; the latter include JDK and project classes (since 1.18.0) |
+
+`ignoreNonCompile()` drops dependencies outside the compile scope from the unused list, and
+`forceDeclaredDependenciesUsage(String[])` moves the given `groupId:artifactId` entries from unused
+to used. It fails when an entry is not declared or is already used, so stale entries do not linger.
+
+## How classes are credited
+
+- When several artifacts contain a used class, a declared artifact is credited over an undeclared
+  one, and among those the first one found. Scope is not considered: a declared test-scoped artifact
+  is credited even for a class that main code uses.
+- A declared JAR without classes of its own counts as used when an artifact it brings in directly
+  is used. That artifact is then not reported as used undeclared.
+- In a `war` project, the filter, listener and servlet classes named in `web.xml` (the war plugin's `webXml`, by default `src/main/webapp/WEB-INF/web.xml`) count as
+  used.
+- Inlined constants are detected: javac and ecj record the constant's declaring class in the
+  constant pool, which the analyzer reads.
+
+## Limitations
+
+The analysis works on bytecode, not on source. It cannot see annotations with source-only
+retention, links in Javadoc, or classes named only in strings, such as `Class.forName` arguments
+or `META-INF/services` entries; `web.xml` is the one text file it reads. When these are the only uses of a dependency, it is reported as
+unused; `forceDeclaredDependenciesUsage` is the escape hatch.
+
+## Components
 
 The main component is `ProjectDependencyAnalyzer`
 ([javadoc](./apidocs/org/apache/maven/shared/dependency/analyzer/ProjectDependencyAnalyzer.html)), which uses
 `ClassAnalyzer`
 ([javadoc](./apidocs/org/apache/maven/shared/dependency/analyzer/ClassAnalyzer.html))
-and `DependencyAnalyzer`
-([javadoc](./apidocs/org/apache/maven/shared/dependency/analyzer/DependencyAnalyzer.html)).
+to list the classes in each artifact and `DependencyAnalyzer`
+([javadoc](./apidocs/org/apache/maven/shared/dependency/analyzer/DependencyAnalyzer.html))
+to collect the classes that the project's bytecode references.
