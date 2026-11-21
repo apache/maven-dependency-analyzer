@@ -402,7 +402,7 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
                     while (jarEntries.hasMoreElements()) {
                         String entry = jarEntries.nextElement().getName();
-                        if (entry.endsWith(".class")) {
+                        if (ClassEntries.isClassEntry(entry)) {
                             String className = entry.replace('/', '.');
                             className = className.substring(0, className.length() - ".class".length());
                             if (!excludedClasses.isMatch(className)) {
