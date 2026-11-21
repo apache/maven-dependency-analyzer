@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -186,7 +187,10 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
 
             Set<Artifact> testArtifactsWithNonTestScope = getTestArtifactsWithNonTestScope(project, testOnlyArtifacts);
 
-            Set<String> usedDependencyClasses = buildUsedDependencyClasses(dependencyClasses);
+            Set<String> usedDependencyClasses = buildUsedDependencyClasses(
+                    dependencyClasses,
+                    artifactClassMap,
+                    className -> excludedClassesPatterns.isMatch(className) || isPlatformClass(className));
             Map<String, Set<Artifact>> candidateArtifactsByUsedClass =
                     buildCandidateArtifactsByUsedClass(artifactClassMap, usedDependencyClasses);
             Map<String, Artifact> selectedArtifactByUsedClass =
@@ -493,12 +497,52 @@ public class DefaultProjectDependencyAnalyzer implements ProjectDependencyAnalyz
         return usedArtifacts;
     }
 
-    static Set<String> buildUsedDependencyClasses(Set<DependencyUsage> dependencyClasses) {
+    /**
+     * Collects the referenced classes that can come from a dependency: the project's own classes and the classes
+     * matched by {@code ignoredClass} (JDK and excluded classes) are left out unless a dependency provides them too.
+     */
+    static Set<String> buildUsedDependencyClasses(
+            Set<DependencyUsage> dependencyClasses,
+            Map<Artifact, Set<String>> artifactClassMap,
+            Predicate<String> ignoredClass) {
+        // every analyzed project class references at least its superclass, so it appears as a user
+        Set<String> projectClasses = new HashSet<>();
+        for (DependencyUsage usage : dependencyClasses) {
+            // a class under META-INF/versions/N/ of a multi-release output is named after its path
+            projectClasses.add(usage.getUsedBy().replaceFirst("^META-INF\\.versions\\.\\d+\\.", ""));
+        }
+        Set<String> dependencyProvidedClasses = new HashSet<>();
+        for (Set<String> classes : artifactClassMap.values()) {
+            dependencyProvidedClasses.addAll(classes);
+        }
+
         Set<String> usedDependencyClasses = new LinkedHashSet<>();
         for (DependencyUsage usage : dependencyClasses) {
-            usedDependencyClasses.add(usage.getDependencyClass());
+            String className = usage.getDependencyClass();
+            if (dependencyProvidedClasses.contains(className)
+                    || !(projectClasses.contains(className) || ignoredClass.test(className))) {
+                usedDependencyClasses.add(className);
+            }
         }
         return usedDependencyClasses;
+    }
+
+    /**
+     * Tells whether the JDK running the analysis provides the class itself.
+     */
+    static boolean isPlatformClass(String className) {
+        URL url = ClassLoader.getSystemResource(className.replace('.', '/') + ".class");
+        if (url == null) {
+            return false;
+        }
+        // a JDK module on Java 9 and later, whichever loader defines it
+        if ("jrt".equals(url.getProtocol())) {
+            return true;
+        }
+        // rt.jar and the extension jars under java.home on Java 8, and tools.jar next to a JDK's jre directory
+        File javaHome = new File(System.getProperty("java.home"));
+        File jdkHome = "jre".equals(javaHome.getName()) ? javaHome.getParentFile() : javaHome;
+        return url.toString().startsWith("jar:" + jdkHome.toURI());
     }
 
     static Map<String, Set<Artifact>> buildCandidateArtifactsByUsedClass(

@@ -241,7 +241,9 @@ public class ProjectDependencyAnalysis {
     }
 
     /**
-     * Returns dependency class names referenced by the analyzed bytecode.
+     * Returns the class names referenced by the analyzed bytecode that can come from a dependency. The project's own
+     * classes, the classes of the JDK running the analysis and excluded classes are left out unless a dependency
+     * provides them too.
      *
      * @return dependency class names referenced by the analyzed bytecode
      * @since 1.18.0
@@ -287,7 +289,9 @@ public class ProjectDependencyAnalysis {
     }
 
     /**
-     * Returns referenced dependency classes that could not be mapped to any dependency artifact.
+     * Returns referenced dependency classes that no dependency artifact provides, for example classes of a
+     * dependency that is missing from the build. The project's own classes, JDK classes and excluded classes are left
+     * out.
      *
      * @return unmapped referenced dependency classes
      * @since 1.18.0

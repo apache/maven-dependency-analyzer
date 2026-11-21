@@ -97,6 +97,12 @@ public class MockAnalyzeMojo extends AbstractMojo
                 printWriter.println( "TestArtifactsWithNonTestScope:" );
                 analysis.getTestArtifactsWithNonTestScope().forEach( a -> printWriter.println( " " + a ) );
             }
+
+            File unmapped = new File( output.getParentFile(), "unmapped.txt" );
+            try ( PrintWriter printWriter = new UnixPrintWiter( unmapped ) )
+            {
+                analysis.getUnmappedUsedDependencyClasses().forEach( printWriter::println );
+            }
         }
         catch ( Exception e )
         {
