@@ -36,23 +36,25 @@ import org.apache.maven.project.MavenProject;
 public interface ProjectDependencyAnalyzer {
 
     /**
-     * <p>analyze.</p>
+     * Analyzes the dependencies of a project. The project's main and test classes must be compiled and its
+     * dependencies resolved in the test scope.
      *
-     * @param project a {@link org.apache.maven.project.MavenProject} object
-     * @return a {@link org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis} object
-     * @throws org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException if any
+     * @param project the project to analyze
+     * @return the analysis result
+     * @throws ProjectDependencyAnalyzerException if the classes of the project or of a dependency cannot be read
      */
     default ProjectDependencyAnalysis analyze(MavenProject project) throws ProjectDependencyAnalyzerException {
         return analyze(project, null);
     }
 
     /**
-     * <p>analyze.</p>
+     * Analyzes the dependencies of a project, leaving out the classes that match {@code excludedClasses} both in the
+     * project and in its dependencies.
      *
-     * @param project a {@link org.apache.maven.project.MavenProject} object
-     * @param excludedClasses collection of regular expression of classes name to exclude
-     * @return a {@link org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalysis} object
-     * @throws org.apache.maven.shared.dependency.analyzer.ProjectDependencyAnalyzerException if any
+     * @param project the project to analyze
+     * @param excludedClasses regular expressions of class names to exclude, or {@code null} for none
+     * @return the analysis result
+     * @throws ProjectDependencyAnalyzerException if the classes of the project or of a dependency cannot be read
      */
     ProjectDependencyAnalysis analyze(MavenProject project, Collection<String> excludedClasses)
             throws ProjectDependencyAnalyzerException;
