@@ -17,7 +17,7 @@
  * under the License.
  */
 
-def analysis = new File( basedir, 'project2/target/analysis.txt' ).text
+def analysis = new File(basedir, 'project2/target/analysis.txt').text
 
 def expected = '''
 UsedDeclaredArtifacts:

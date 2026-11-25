@@ -17,7 +17,7 @@
  * under the License.
  */
 
-def analysis = new File( basedir, 'target/analysis.txt' ).text
+def analysis = new File(basedir, 'target/analysis.txt').text
 
 def expected = '''
 UsedDeclaredArtifacts:
@@ -34,8 +34,8 @@ TestArtifactsWithNonTestScope:
 
 assert analysis == expected
 
-def analysisWeb1 = new File( basedir, 'web1/target/analysis.txt' ).text
-def analysisWeb2 = new File( basedir, 'web2/target/analysis.txt' ).text
+def analysisWeb1 = new File(basedir, 'web1/target/analysis.txt').text
+def analysisWeb2 = new File(basedir, 'web2/target/analysis.txt').text
 
 def expectedWeb = '''
 UsedDeclaredArtifacts:

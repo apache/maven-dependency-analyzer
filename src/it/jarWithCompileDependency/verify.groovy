@@ -17,7 +17,7 @@
  * under the License.
  */
 
-def analysis = new File( basedir, 'project2/target/analysis.txt' ).text
+def analysis = new File(basedir, 'project2/target/analysis.txt').text
 
 def expected = '''
 UsedDeclaredArtifacts:
@@ -34,4 +34,4 @@ TestArtifactsWithNonTestScope:
 assert analysis == expected
 
 // the project's own classes and JDK classes are not unmapped dependency classes
-assert new File( basedir, 'project2/target/unmapped.txt' ).text == ''
+assert new File(basedir, 'project2/target/unmapped.txt').text == ''
