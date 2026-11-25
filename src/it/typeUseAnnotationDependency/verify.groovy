@@ -17,7 +17,7 @@
  * under the License.
  */
 
-def analysisUsage = new File( basedir, 'usage/target/analysis.txt' ).text
+def analysisUsage = new File(basedir, 'usage/target/analysis.txt').text
 
 def expectedUsage = '''
 UsedDeclaredArtifacts:
@@ -32,7 +32,7 @@ TestArtifactsWithNonTestScope:
 
 assert analysisUsage == expectedUsage
 
-def analysisUsageLocalVar = new File( basedir, 'usageLocalVar/target/analysis.txt' ).text
+def analysisUsageLocalVar = new File(basedir, 'usageLocalVar/target/analysis.txt').text
 
 def expectedUsageLocalVar = '''
 UsedDeclaredArtifacts:
