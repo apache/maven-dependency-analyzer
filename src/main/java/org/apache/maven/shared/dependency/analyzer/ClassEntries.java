@@ -29,7 +29,8 @@ final class ClassEntries {
     }
 
     static boolean isClassEntry(String name) {
-        if (!name.endsWith(".class")) {
+        // META-INF holds the versioned copies of a multi-release JAR, not classes of their own
+        if (!name.endsWith(".class") || name.startsWith("META-INF/")) {
             return false;
         }
         // not a '-' check: Kotlin names classes like okio/-Util

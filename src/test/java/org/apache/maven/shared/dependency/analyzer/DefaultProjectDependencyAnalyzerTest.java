@@ -137,6 +137,10 @@ class DefaultProjectDependencyAnalyzerTest {
             out.putNextEntry(new ZipEntry("p/-Util.class"));
             out.write(writer.toByteArray());
             out.closeEntry();
+            // the versioned copy of a multi-release JAR is no class of its own
+            out.putNextEntry(new ZipEntry("META-INF/versions/9/p/-Util.class"));
+            out.write(writer.toByteArray());
+            out.closeEntry();
         }
         Artifact library = aTestArtifact("kotlinLibrary");
         library.setFile(jar.toFile());
