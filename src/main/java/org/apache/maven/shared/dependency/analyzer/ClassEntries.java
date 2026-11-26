@@ -29,8 +29,12 @@ final class ClassEntries {
     }
 
     static boolean isClassEntry(String name) {
-        // the '-' check excludes package-info.class and module-info.class
-        return name.endsWith(".class") && name.indexOf('-') == -1;
+        if (!name.endsWith(".class")) {
+            return false;
+        }
+        // not a '-' check: Kotlin names classes like okio/-Util
+        String simpleName = name.substring(name.lastIndexOf('/') + 1);
+        return !simpleName.equals("package-info.class") && !simpleName.equals("module-info.class");
     }
 
     static byte[] readAll(InputStream in) throws IOException {

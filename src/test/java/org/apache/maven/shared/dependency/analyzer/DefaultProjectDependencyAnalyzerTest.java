@@ -59,6 +59,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -122,6 +124,29 @@ class DefaultProjectDependencyAnalyzerTest {
 
         assertEquals(Collections.emptySet(), artifactClassMap.get(aggregator));
         assertEquals(Collections.singleton("org.example.Library"), artifactClassMap.get(library));
+    }
+
+    @Test
+    void buildArtifactClassMapKeepsClassesWithDashInTheirName(@TempDir Path tempDir) throws IOException {
+        // Kotlin emits classes such as okio/-Util
+        Path jar = tempDir.resolve("kotlinLibrary.jar");
+        ClassWriter writer = new ClassWriter(0);
+        writer.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, "p/-Util", null, "java/lang/Object", null);
+        writer.visitEnd();
+        try (JarOutputStream out = new JarOutputStream(Files.newOutputStream(jar))) {
+            out.putNextEntry(new ZipEntry("p/-Util.class"));
+            out.write(writer.toByteArray());
+            out.closeEntry();
+        }
+        Artifact library = aTestArtifact("kotlinLibrary");
+        library.setFile(jar.toFile());
+        MavenProject project = new MavenProject();
+        project.setArtifacts(new LinkedHashSet<>(Collections.singletonList(library)));
+
+        Map<Artifact, Set<String>> artifactClassMap =
+                analyzer.buildArtifactClassMap(project, new ClassesPatterns(Collections.emptyList()));
+
+        assertEquals(Collections.singleton("p.-Util"), artifactClassMap.get(library));
     }
 
     @Test
