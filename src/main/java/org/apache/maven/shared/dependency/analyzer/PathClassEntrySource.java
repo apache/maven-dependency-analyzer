@@ -75,7 +75,8 @@ public final class PathClassEntrySource implements ClassEntrySource {
         List<Path> classFiles;
         try (Stream<Path> walk = Files.walk(path)) {
             classFiles = walk.filter(Files::isRegularFile)
-                    .filter(file -> ClassEntries.isClassEntry(file.getFileName().toString()))
+                    // a directory is the project's own output: package-info.class is analysed as well
+                    .filter(file -> file.getFileName().toString().endsWith(".class"))
                     .collect(Collectors.toList());
         }
         List<ClassEntry> entries = new ArrayList<>(classFiles.size());

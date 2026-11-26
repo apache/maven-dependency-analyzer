@@ -34,6 +34,7 @@ import java.util.zip.ZipEntry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -128,14 +129,18 @@ class ClassFileVisitorUtilsTest {
         Path path = Files.createTempFile(tempDir, "test", ".class");
         URL url = path.toUri().toURL();
 
-        assertThrows(IllegalArgumentException.class, () -> ClassFileVisitorUtils.accept(url, visitor));
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> ClassFileVisitorUtils.accept(url, visitor));
+        assertEquals("Cannot create a class entry source from path: " + path, exception.getMessage());
     }
 
     @Test
     void testAcceptWithUnsupportedScheme() throws Exception {
         URL url = new URL("http://localhost/");
 
-        assertThrows(IllegalArgumentException.class, () -> ClassFileVisitorUtils.accept(url, visitor));
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> ClassFileVisitorUtils.accept(url, visitor));
+        assertEquals("Cannot accept visitor on URL: " + url, exception.getMessage());
     }
 
     private void writeToFile(Path parent, String file, String data) throws IOException {

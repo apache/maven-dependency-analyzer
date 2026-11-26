@@ -18,7 +18,12 @@
  */
 package org.apache.maven.shared.dependency.analyzer.asm;
 
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
+
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -27,7 +32,9 @@ import java.util.Set;
 import org.apache.maven.shared.dependency.analyzer.ClassesPatterns;
 import org.apache.maven.shared.dependency.analyzer.DependencyAnalyzer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -65,5 +72,43 @@ class ASMDependencyAnalyzerTest {
         assertTrue(result.contains("org.apache.maven.artifact.resolver.ArtifactResolutionRequest"));
         assertFalse(result.contains("java.util.regex.Pattern"));
         assertFalse(result.contains("org.apache.maven.shared.dependency.analyzer.testcases.analyze.ClassToExclude"));
+    }
+
+    @Test
+    void packageAnnotationInDirectoryIsAnalyzed(@TempDir Path tempDir) throws Exception {
+        Path src = Files.createDirectories(tempDir.resolve("src"));
+        Path annotationClasses = Files.createDirectories(tempDir.resolve("annotation-classes"));
+        Path classes = Files.createDirectories(tempDir.resolve("classes"));
+
+        write(
+                src.resolve("ann/PackageAnnotation.java"),
+                "package ann;\n"
+                        + "@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)\n"
+                        + "public @interface PackageAnnotation {}\n");
+        write(src.resolve("pkg/package-info.java"), "@ann.PackageAnnotation\npackage pkg;\n");
+
+        compile(annotationClasses, null, src.resolve("ann/PackageAnnotation.java"));
+        compile(classes, annotationClasses, src.resolve("pkg/package-info.java"));
+        assertTrue(Files.isRegularFile(classes.resolve("pkg/package-info.class")));
+        assertFalse(Files.exists(classes.resolve("ann")));
+
+        Set<String> result = analyzer.analyze(classes.toUri().toURL());
+
+        assertTrue(result.contains("ann.PackageAnnotation"), "dependencies found: " + result);
+    }
+
+    private static void write(Path file, String content) throws IOException {
+        Files.createDirectories(file.getParent());
+        Files.write(file, content.getBytes("UTF-8"));
+    }
+
+    private static void compile(Path outputDir, Path classpath, Path source) {
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        assertNotNull(compiler, "tests need a JDK");
+        int status = classpath == null
+                ? compiler.run(null, null, null, "-d", outputDir.toString(), source.toString())
+                : compiler.run(
+                        null, null, null, "-d", outputDir.toString(), "-cp", classpath.toString(), source.toString());
+        assertEquals(0, status, "compilation of " + source);
     }
 }

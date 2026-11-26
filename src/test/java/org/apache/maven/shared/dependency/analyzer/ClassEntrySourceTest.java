@@ -102,6 +102,20 @@ class ClassEntrySourceTest {
         assertEquals(1, names.size());
     }
 
+    @Test
+    void directorySourceKeepsInfoClasses() throws Exception {
+        Path classes = Files.createDirectories(tempDir.resolve("project-classes/a/b"));
+        Files.write(classes.resolve("c.class"), "class a.b.c".getBytes("UTF-8"));
+        Files.write(classes.resolve("package-info.class"), "package".getBytes("UTF-8"));
+        Files.write(classes.getParent().getParent().resolve("module-info.class"), "module".getBytes("UTF-8"));
+
+        Set<String> expected = new HashSet<>(Arrays.asList("a.b.c", "a.b.package-info", "module-info"));
+        assertEquals(
+                expected,
+                new HashSet<>(
+                        classNames(new PathClassEntrySource(classes.getParent().getParent()))));
+    }
+
     private Path createJar() throws IOException {
         Path jar = Files.createTempFile(tempDir, "classes", ".jar");
         try (JarOutputStream out = new JarOutputStream(Files.newOutputStream(jar))) {

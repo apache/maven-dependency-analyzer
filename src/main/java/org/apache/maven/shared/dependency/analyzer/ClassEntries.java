@@ -28,6 +28,10 @@ final class ClassEntries {
         // utility class
     }
 
+    /**
+     * Tells whether a JAR entry is a class to analyse. Not for class directories, which keep every
+     * {@code .class} file.
+     */
     static boolean isClassEntry(String name) {
         // the '-' check excludes package-info.class and module-info.class
         return name.endsWith(".class") && name.indexOf('-') == -1;
