@@ -28,9 +28,9 @@ Finds the unused declared and the used undeclared dependencies of a Maven projec
 compiled classes and those of its dependencies. The
 [Maven Dependency Plugin](https://maven.apache.org/plugins/maven-dependency-plugin/) uses it for
 `dependency:analyze`; other plugins inject `ProjectDependencyAnalyzer` and call
-`analyze(project)`.
+`analyze(project, dependencies)`.
 
-The library requires Java 8 and builds against the Maven 3.9 core APIs, which the calling plugin's
+The library requires Java 17 and builds against the Maven 4 API, which the calling plugin's
 Maven runtime provides.
 
 - Documentation: <https://maven.apache.org/shared/maven-dependency-analyzer/>

@@ -28,7 +28,7 @@ The analysis reads the project's compiled classes and the class files of its res
 dependencies, so run it after the `test-compile` phase, with test-scoped dependencies resolved. A missing
 output directory is not an error: run too early, the analysis sees no classes and reports every
 declared dependency as unused.
-The library requires Java 8 and is compiled against the Maven ${mavenVersion} core APIs, which the
+The library requires Java 17 and is compiled against the Maven ${mavenVersion} API, which the
 calling plugin's Maven runtime provides.
 
 ## Usage
@@ -43,32 +43,41 @@ Add the dependency to a Maven plugin:
 </dependency>
 ```
 
-Inject `ProjectDependencyAnalyzer` and pass it the current project:
+Inject `ProjectDependencyAnalyzer`, resolve the dependencies of the project in the test scope and pass
+both to the analyzer:
 
 ```java
-@Mojo(name = "analyze", requiresDependencyResolution = ResolutionScope.TEST)
-public class AnalyzeMojo extends AbstractMojo {
+@Mojo(name = "analyze")
+public class AnalyzeMojo implements org.apache.maven.api.plugin.Mojo {
     @Inject
     private ProjectDependencyAnalyzer analyzer;
 
     @Inject
-    private MavenProject project;
+    private Project project;
+
+    @Inject
+    private Session session;
+
+    @Inject
+    private Log log;
 
     @Override
-    public void execute() throws MojoExecutionException {
+    public void execute() throws MojoException {
         try {
-            ProjectDependencyAnalysis analysis = analyzer.analyze(project);
-            analysis.getUnusedDeclaredArtifacts().forEach(a -> getLog().warn("Unused declared: " + a));
-            analysis.getUsedUndeclaredArtifacts().forEach(a -> getLog().warn("Used undeclared: " + a));
+            DependencyResolverResult dependencies = session.getService(DependencyResolver.class)
+                    .resolve(session, project, PathScope.TEST_RUNTIME);
+            ProjectDependencyAnalysis analysis = analyzer.analyze(project, dependencies);
+            analysis.getUnusedDeclaredArtifacts().forEach(a -> log.warn("Unused declared: " + a));
+            analysis.getUsedUndeclaredArtifacts().forEach(a -> log.warn("Used undeclared: " + a));
         } catch (ProjectDependencyAnalyzerException e) {
-            throw new MojoExecutionException("Dependency analysis failed", e);
+            throw new MojoException("Dependency analysis failed", e);
         }
     }
 }
 ```
 
-`analyze(project, excludedClasses)` takes regular expressions of class names to leave out of the
-analysis, both in the project's own classes and in the dependencies.
+`analyze(project, dependencies, excludedClasses)` takes regular expressions of class names to leave out
+of the analysis, both in the project's own classes and in the dependencies.
 
 ## Results
 
