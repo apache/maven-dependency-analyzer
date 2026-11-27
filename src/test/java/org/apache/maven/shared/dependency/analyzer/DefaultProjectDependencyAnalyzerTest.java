@@ -18,6 +18,7 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarOutputStream;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
 
 import org.apache.maven.api.Dependency;
 import org.apache.maven.api.DependencyCoordinates;
@@ -94,6 +96,66 @@ class DefaultProjectDependencyAnalyzerTest {
                 mock(ClassAnalyzer.class),
                 Collections.singletonList(mock(MainDependencyClassesProvider.class)),
                 Collections.singletonList(mock(TestDependencyClassesProvider.class)));
+    }
+
+    @Test
+    void buildArtifactClassMapSkipsModuleInfoAndPackageInfoInJars() throws IOException {
+        Dependency aggregator = aTestArtifact("aggregator");
+        Dependency library = aTestArtifact("library");
+        Map<Dependency, Path> resolved = new LinkedHashMap<>();
+        resolved.put(
+                aggregator, jarWith(tempDir.resolve("aggregator.jar"), "module-info.class", "META-INF/MANIFEST.MF"));
+        resolved.put(
+                library,
+                jarWith(
+                        tempDir.resolve("library.jar"),
+                        "module-info.class",
+                        "org/example/package-info.class",
+                        "org/example/Library.class",
+                        "META-INF/versions/9/module-info.class"));
+
+        Map<Dependency, Set<String>> artifactClassMap =
+                analyzer.buildArtifactClassMap(resolved, new ClassesPatterns(Collections.emptyList()));
+
+        assertEquals(Collections.emptySet(), artifactClassMap.get(aggregator));
+        assertEquals(Collections.singleton("org.example.Library"), artifactClassMap.get(library));
+    }
+
+    @Test
+    void analyzeListsUsedUndeclaredArtifactsInResolutionOrder() throws Exception {
+        List<Dependency> resolved = new ArrayList<>();
+        Map<Dependency, Path> paths = new LinkedHashMap<>();
+        Set<DependencyUsage> usages = new HashSet<>();
+        for (char c = 'z'; c >= 'a'; c--) {
+            Dependency dependency = aTestArtifact(String.valueOf(c));
+            resolved.add(dependency);
+            paths.put(dependency, jarWith(tempDir.resolve(c + ".jar"), "lib/" + c + "/Type.class"));
+            usages.add(new DependencyUsage("lib." + c + ".Type", "my.App"));
+        }
+        Node root = rootWithChildren(resolved.toArray(new Dependency[0]));
+        DependencyResolverResult result = mock(DependencyResolverResult.class);
+        when(result.getDependencies()).thenReturn(paths);
+        when(result.getRoot()).thenReturn(root);
+        when(project.getDependencies()).thenReturn(Collections.emptyList());
+        MainDependencyClassesProvider mainProvider = (p, excluded) -> usages;
+        analyzer = new DefaultProjectDependencyAnalyzer(
+                session, mock(ClassAnalyzer.class), Collections.singletonList(mainProvider), Collections.emptyList());
+
+        ProjectDependencyAnalysis analysis = analyzer.analyze(project, result, Collections.emptyList());
+
+        assertIterableEquals(resolved, analysis.getUsedUndeclaredArtifacts());
+        assertIterableEquals(
+                resolved, analysis.getUsedUndeclaredArtifactsWithUsages().keySet());
+    }
+
+    private static Path jarWith(Path path, String... entries) throws IOException {
+        try (JarOutputStream jar = new JarOutputStream(Files.newOutputStream(path))) {
+            for (String entry : entries) {
+                jar.putNextEntry(new ZipEntry(entry));
+                jar.closeEntry();
+            }
+        }
+        return path;
     }
 
     @Test
@@ -414,6 +476,63 @@ class DefaultProjectDependencyAnalyzerTest {
             assertSame(pom, request.getRootArtifact().get());
             assertIterableEquals(managed, request.getManagedDependencies());
         }
+    }
+
+    @Test
+    void buildUsedDependencyClassesShouldLeaveOutProjectAndPlatformClasses() {
+        Dependency dependency = aTestArtifact("dependency");
+        Map<Dependency, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(dependency, new HashSet<>(Arrays.asList("com.dep.Lib", "javax.annotation.Nonnull")));
+
+        Set<DependencyUsage> usages = new LinkedHashSet<>(Arrays.asList(
+                new DependencyUsage("com.dep.Lib", "my.App"),
+                new DependencyUsage("my.Helper", "my.App"),
+                new DependencyUsage("java.lang.Object", "my.Helper"),
+                new DependencyUsage("javax.annotation.Nonnull", "my.App"),
+                new DependencyUsage("my.Versioned", "my.App"),
+                new DependencyUsage("java.lang.Object", "META-INF.versions.11.my.Versioned"),
+                new DependencyUsage("my.Excluded", "my.App"),
+                new DependencyUsage("com.missing.Gone", "my.App")));
+
+        Set<String> used = DefaultProjectDependencyAnalyzer.buildUsedDependencyClasses(
+                usages,
+                artifactClassMap,
+                className -> className.startsWith("java.") || className.equals("my.Excluded"));
+
+        assertIterableEquals(Arrays.asList("com.dep.Lib", "javax.annotation.Nonnull", "com.missing.Gone"), used);
+    }
+
+    @Test
+    void buildUsedDependencyClassesShouldKeepIgnoredClassesThatADependencyProvides() {
+        Dependency dependency = aTestArtifact("dependency");
+        Map<Dependency, Set<String>> artifactClassMap = new LinkedHashMap<>();
+        artifactClassMap.put(dependency, new HashSet<>(Arrays.asList("java.lang.Object", "my.Helper", "my.Excluded")));
+
+        Set<DependencyUsage> usages = new LinkedHashSet<>(Arrays.asList(
+                new DependencyUsage("java.lang.Object", "my.Helper"),
+                new DependencyUsage("my.Helper", "my.App"),
+                new DependencyUsage("my.Excluded", "my.App"),
+                new DependencyUsage("java.lang.String", "my.App")));
+
+        Set<String> used = DefaultProjectDependencyAnalyzer.buildUsedDependencyClasses(
+                usages,
+                artifactClassMap,
+                className -> className.startsWith("java.") || className.equals("my.Excluded"));
+
+        // a JDK, a project and an excluded class, each also found in the dependency; java.lang.String is not
+        assertIterableEquals(Arrays.asList("java.lang.Object", "my.Helper", "my.Excluded"), used);
+    }
+
+    @Test
+    void isPlatformClassShouldRecognizeJdkClassesOnly() {
+        assertTrue(DefaultProjectDependencyAnalyzer.isPlatformClass("java.lang.Object"));
+        assertTrue(DefaultProjectDependencyAnalyzer.isPlatformClass("java.util.Map$Entry"));
+        if (!System.getProperty("java.specification.version").startsWith("1.")) {
+            // jdk.compiler is defined to the application class loader, not the platform loader
+            assertTrue(DefaultProjectDependencyAnalyzer.isPlatformClass("com.sun.source.tree.Tree"));
+        }
+        assertFalse(DefaultProjectDependencyAnalyzer.isPlatformClass(DependencyUsage.class.getName()));
+        assertFalse(DefaultProjectDependencyAnalyzer.isPlatformClass("com.missing.Gone"));
     }
 
     @Test
