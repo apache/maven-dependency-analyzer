@@ -29,8 +29,13 @@ final class ClassEntries {
     }
 
     static boolean isClassEntry(String name) {
-        // the '-' check excludes package-info.class and module-info.class
-        return name.endsWith(".class") && name.indexOf('-') == -1;
+        // META-INF holds the versioned copies of a multi-release JAR, not classes of their own
+        if (!name.endsWith(".class") || name.startsWith("META-INF/")) {
+            return false;
+        }
+        // not a '-' check: Kotlin names classes like okio/-Util
+        String simpleName = name.substring(name.lastIndexOf('/') + 1);
+        return !simpleName.equals("package-info.class") && !simpleName.equals("module-info.class");
     }
 
     static byte[] readAll(InputStream in) throws IOException {
