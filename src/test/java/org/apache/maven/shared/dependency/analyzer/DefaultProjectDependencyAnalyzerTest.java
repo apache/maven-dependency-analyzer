@@ -141,6 +141,9 @@ class DefaultProjectDependencyAnalyzerTest {
             out.putNextEntry(new ZipEntry("META-INF/versions/9/p/-Util.class"));
             out.write(writer.toByteArray());
             out.closeEntry();
+            out.putNextEntry(new ZipEntry("META-INF/versions/9/p/Foo.class"));
+            out.write(writer.toByteArray());
+            out.closeEntry();
         }
         Artifact library = aTestArtifact("kotlinLibrary");
         library.setFile(jar.toFile());
