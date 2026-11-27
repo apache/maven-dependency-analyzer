@@ -28,9 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.api.Dependency;
+import org.apache.maven.api.DependencyScope;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,6 +37,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests <code>ProjectDependencyAnalysis</code>.
@@ -48,10 +49,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ProjectDependencyAnalysisTest {
     @Test
     void testConstructor() {
-        Set<Artifact> usedDeclaredArtifacts = new HashSet<>();
-        Set<Artifact> usedUndeclaredArtifacts = new HashSet<>();
-        Set<Artifact> unusedDeclaredArtifacts = new HashSet<>();
-        Set<Artifact> testArtifactsWithNonTestScope = new HashSet<>();
+        Set<Dependency> usedDeclaredArtifacts = new HashSet<>();
+        Set<Dependency> usedUndeclaredArtifacts = new HashSet<>();
+        Set<Dependency> unusedDeclaredArtifacts = new HashSet<>();
+        Set<Dependency> testArtifactsWithNonTestScope = new HashSet<>();
 
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
                 usedDeclaredArtifacts, usedUndeclaredArtifacts, unusedDeclaredArtifacts, testArtifactsWithNonTestScope);
@@ -63,9 +64,9 @@ class ProjectDependencyAnalysisTest {
 
     @Test
     void ignoreNonCompileShouldFilterOnlyUnusedDeclare() {
-        Artifact artifactCompile = aTestArtifact("test1", Artifact.SCOPE_COMPILE);
-        Artifact artifactProvided = aTestArtifact("test2", Artifact.SCOPE_PROVIDED);
-        Artifact artifactTest = aTestArtifact("test3", Artifact.SCOPE_TEST);
+        Dependency artifactCompile = aTestArtifact("test1", DependencyScope.COMPILE);
+        Dependency artifactProvided = aTestArtifact("test2", DependencyScope.PROVIDED);
+        Dependency artifactTest = aTestArtifact("test3", DependencyScope.TEST);
 
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
                 asSet(artifactCompile, artifactProvided, artifactTest),
@@ -79,8 +80,8 @@ class ProjectDependencyAnalysisTest {
         assertEquals(3, compileOnlyAnalysis.getUsedUndeclaredArtifacts().size());
 
         assertEquals(1, compileOnlyAnalysis.getUnusedDeclaredArtifacts().size());
-        for (Artifact a : compileOnlyAnalysis.getUnusedDeclaredArtifacts()) {
-            assertEquals(Artifact.SCOPE_COMPILE, a.getScope());
+        for (Dependency a : compileOnlyAnalysis.getUnusedDeclaredArtifacts()) {
+            assertEquals(DependencyScope.COMPILE, a.getScope());
         }
 
         assertEquals(3, compileOnlyAnalysis.getTestArtifactsWithNonTestScope().size());
@@ -88,13 +89,13 @@ class ProjectDependencyAnalysisTest {
 
     @Test
     void shouldExposeUsedClassesAndCandidateArtifacts() {
-        Artifact declared = aTestArtifact("declared", Artifact.SCOPE_COMPILE);
-        Artifact other = aTestArtifact("other", Artifact.SCOPE_COMPILE);
+        Dependency declared = aTestArtifact("declared", DependencyScope.COMPILE);
+        Dependency other = aTestArtifact("other", DependencyScope.COMPILE);
         Set<String> used = new HashSet<>(Arrays.asList("a.B", "c.D"));
-        Map<String, Set<Artifact>> candidates = new java.util.LinkedHashMap<>();
+        Map<String, Set<Dependency>> candidates = new java.util.LinkedHashMap<>();
         candidates.put("a.B", new LinkedHashSet<>(Arrays.asList(declared, other)));
         candidates.put("c.D", new LinkedHashSet<>(Collections.singleton(declared)));
-        Map<String, Artifact> selected = new java.util.LinkedHashMap<>();
+        Map<String, Dependency> selected = new java.util.LinkedHashMap<>();
         selected.put("a.B", declared);
         selected.put("c.D", declared);
 
@@ -119,7 +120,7 @@ class ProjectDependencyAnalysisTest {
     @Test
     void shouldReportUnmappedUsedDependencyClasses() {
         Set<String> used = new HashSet<>(Collections.singletonList("a.B"));
-        Map<String, Set<Artifact>> candidates = new java.util.LinkedHashMap<>();
+        Map<String, Set<Dependency>> candidates = new java.util.LinkedHashMap<>();
         candidates.put("a.B", Collections.emptySet());
 
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
@@ -137,20 +138,20 @@ class ProjectDependencyAnalysisTest {
 
     @Test
     void forcingUsageKeepsTheUsagesOfOtherUsedDeclaredDependencies() throws Exception {
-        Artifact first = aTestArtifact("first", Artifact.SCOPE_COMPILE);
-        Artifact second = aTestArtifact("second", Artifact.SCOPE_COMPILE);
-        Artifact forcedA = aTestArtifact("forced-a", Artifact.SCOPE_COMPILE);
-        Artifact forcedB = aTestArtifact("forced-b", Artifact.SCOPE_COMPILE);
+        Dependency first = aTestArtifact("first", DependencyScope.COMPILE);
+        Dependency second = aTestArtifact("second", DependencyScope.COMPILE);
+        Dependency forcedA = aTestArtifact("forced-a", DependencyScope.COMPILE);
+        Dependency forcedB = aTestArtifact("forced-b", DependencyScope.COMPILE);
         DependencyUsage firstUsage = new DependencyUsage("a.First", "my.App");
         DependencyUsage secondUsage = new DependencyUsage("b.Second", "my.Other");
-        Map<Artifact, Set<DependencyUsage>> usedDeclared = new LinkedHashMap<>();
+        Map<Dependency, Set<DependencyUsage>> usedDeclared = new LinkedHashMap<>();
         usedDeclared.put(first, Collections.singleton(firstUsage));
         usedDeclared.put(second, Collections.singleton(secondUsage));
         Set<String> usedClasses = new LinkedHashSet<>(Arrays.asList("a.First", "b.Second"));
-        Map<String, Set<Artifact>> candidates = new LinkedHashMap<>();
+        Map<String, Set<Dependency>> candidates = new LinkedHashMap<>();
         candidates.put("a.First", Collections.singleton(first));
         candidates.put("b.Second", Collections.singleton(second));
-        Map<String, Artifact> selected = new LinkedHashMap<>();
+        Map<String, Dependency> selected = new LinkedHashMap<>();
         selected.put("a.First", first);
         selected.put("b.Second", second);
 
@@ -164,7 +165,7 @@ class ProjectDependencyAnalysisTest {
                         selected)
                 .forceDeclaredDependenciesUsage(new String[] {"groupId:forced-a", "groupId:forced-b"});
 
-        Map<Artifact, Set<DependencyUsage>> usages = analysis.getUsedDeclaredArtifactsWithUsages();
+        Map<Dependency, Set<DependencyUsage>> usages = analysis.getUsedDeclaredArtifactsWithUsages();
         assertEquals(Collections.singleton(firstUsage), usages.get(first));
         assertEquals(Collections.singleton(secondUsage), usages.get(second));
         assertEquals(Collections.emptySet(), usages.get(forcedA));
@@ -179,7 +180,7 @@ class ProjectDependencyAnalysisTest {
 
     @Test
     void forcingAnAlreadyUsedOrUndeclaredDependencyFails() {
-        Artifact used = aTestArtifact("used", Artifact.SCOPE_COMPILE);
+        Dependency used = aTestArtifact("used", DependencyScope.COMPILE);
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
                 Collections.singletonMap(used, Collections.singleton(new DependencyUsage("a.B", "my.App"))),
                 Collections.emptyMap(),
@@ -197,7 +198,7 @@ class ProjectDependencyAnalysisTest {
 
     @Test
     void classesAndUsagesAreSorted() {
-        Artifact undeclared = aTestArtifact("undeclared", Artifact.SCOPE_COMPILE);
+        Dependency undeclared = aTestArtifact("undeclared", DependencyScope.COMPILE);
         // HashSet iterates these as c.Zeta, a.Alpha, b.Beta
         Set<DependencyUsage> usages = new HashSet<>(Arrays.asList(
                 new DependencyUsage("c.Zeta", "my.App"),
@@ -205,7 +206,7 @@ class ProjectDependencyAnalysisTest {
                 new DependencyUsage("a.Alpha", "my.App"),
                 new DependencyUsage("b.Beta", "my.App")));
         Set<String> used = new HashSet<>(Arrays.asList("c.Zeta", "a.Alpha", "b.Beta"));
-        Map<String, Set<Artifact>> candidates = new java.util.HashMap<>();
+        Map<String, Set<Dependency>> candidates = new java.util.HashMap<>();
         for (String className : used) {
             candidates.put(className, Collections.emptySet());
         }
@@ -239,9 +240,9 @@ class ProjectDependencyAnalysisTest {
 
     @Test
     void forcingUsageKeepsTheOrderOfTheRemainingUnusedDependencies() throws Exception {
-        List<Artifact> unused = new ArrayList<>();
+        List<Dependency> unused = new ArrayList<>();
         for (char c = 'z'; c >= 'a'; c--) {
-            unused.add(aTestArtifact(String.valueOf(c), Artifact.SCOPE_COMPILE));
+            unused.add(aTestArtifact(String.valueOf(c), DependencyScope.COMPILE));
         }
 
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
@@ -257,12 +258,12 @@ class ProjectDependencyAnalysisTest {
 
     @Test
     void nullClassNamesAreAcceptedAndSortedFirst() {
-        Artifact undeclared = aTestArtifact("undeclared", Artifact.SCOPE_COMPILE);
+        Dependency undeclared = aTestArtifact("undeclared", DependencyScope.COMPILE);
         Set<String> used = new HashSet<>(Arrays.asList("b.Beta", null, "a.Alpha"));
-        Map<String, Set<Artifact>> candidates = new java.util.HashMap<>();
+        Map<String, Set<Dependency>> candidates = new java.util.HashMap<>();
         candidates.put("b.Beta", Collections.singleton(undeclared));
         candidates.put(null, Collections.singleton(undeclared));
-        Map<String, Artifact> selected = new java.util.HashMap<>();
+        Map<String, Dependency> selected = new java.util.HashMap<>();
         selected.put("b.Beta", undeclared);
         selected.put(null, undeclared);
 
@@ -286,9 +287,9 @@ class ProjectDependencyAnalysisTest {
 
     @Test
     void ignoreNonCompileKeepsTheOrderOfTheUnusedDependencies() {
-        List<Artifact> unused = new ArrayList<>();
+        List<Dependency> unused = new ArrayList<>();
         for (char c = 'z'; c >= 'a'; c--) {
-            unused.add(aTestArtifact(String.valueOf(c), Artifact.SCOPE_COMPILE));
+            unused.add(aTestArtifact(String.valueOf(c), DependencyScope.COMPILE));
         }
 
         ProjectDependencyAnalysis analysis = new ProjectDependencyAnalysis(
@@ -305,8 +306,11 @@ class ProjectDependencyAnalysisTest {
         return new HashSet<>(Arrays.asList(items));
     }
 
-    private Artifact aTestArtifact(String artifactId, String scope) {
-        return new DefaultArtifact(
-                "groupId", artifactId, VersionRange.createFromVersion("1.0"), scope, "jar", "", null);
+    private Dependency aTestArtifact(String artifactId, DependencyScope scope) {
+        Dependency dependency = mock(Dependency.class);
+        when(dependency.getGroupId()).thenReturn("groupId");
+        when(dependency.getArtifactId()).thenReturn(artifactId);
+        when(dependency.getScope()).thenReturn(scope);
+        return dependency;
     }
 }

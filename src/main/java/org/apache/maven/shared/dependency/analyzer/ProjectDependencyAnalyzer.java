@@ -20,7 +20,8 @@ package org.apache.maven.shared.dependency.analyzer;
 
 import java.util.Collection;
 
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.services.DependencyResolverResult;
 
 /**
  * Analyze a project's declared dependencies and effective classes used to find which artifacts are:
@@ -40,11 +41,13 @@ public interface ProjectDependencyAnalyzer {
      * dependencies resolved in the test scope.
      *
      * @param project the project to analyze
+     * @param dependencies the dependencies of the project, as resolved by the dependency resolver
      * @return the analysis result
      * @throws ProjectDependencyAnalyzerException if the classes of the project or of a dependency cannot be read
      */
-    default ProjectDependencyAnalysis analyze(MavenProject project) throws ProjectDependencyAnalyzerException {
-        return analyze(project, null);
+    default ProjectDependencyAnalysis analyze(Project project, DependencyResolverResult dependencies)
+            throws ProjectDependencyAnalyzerException {
+        return analyze(project, dependencies, null);
     }
 
     /**
@@ -52,10 +55,12 @@ public interface ProjectDependencyAnalyzer {
      * project and in its dependencies.
      *
      * @param project the project to analyze
+     * @param dependencies the dependencies of the project, as resolved by the dependency resolver
      * @param excludedClasses regular expressions of class names to exclude, or {@code null} for none
      * @return the analysis result
      * @throws ProjectDependencyAnalyzerException if the classes of the project or of a dependency cannot be read
      */
-    ProjectDependencyAnalysis analyze(MavenProject project, Collection<String> excludedClasses)
+    ProjectDependencyAnalysis analyze(
+            Project project, DependencyResolverResult dependencies, Collection<String> excludedClasses)
             throws ProjectDependencyAnalyzerException;
 }

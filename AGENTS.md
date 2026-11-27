@@ -34,19 +34,18 @@ types are API:
 
 - `ProjectDependencyAnalyzer`, `ClassAnalyzer` and `DependencyAnalyzer` are
   interfaces that callers may implement. A new method must be a `default` method.
-- `ProjectDependencyAnalysis` keeps its deprecated constructors; deprecate,
-  do not remove.
-- Maven core and Resolver are `provided` dependencies pinned to the Maven 3.9
-  line (`mavenVersion`), and Dependabot ignores Maven 3.10 and Resolver 2.x.
-  SLF4J stays on 1.7.x, the line Maven 3 ships, and Mockito on 4.x because 5.x
-  needs Java 11.
+- 2.0 is the first line built on the Maven 4 API (`Project`, `Dependency`,
+  `DependencyResolverResult`); the Maven 3 `MavenProject` and `Artifact` types
+  are gone from the public types, so keep them out of new code.
+- The Maven 4 API is a `provided` dependency pinned to `mavenVersion`, and
+  SLF4J stays on the 2.x line Maven 4 ships.
 
 ## Coding
 
 Use test-first programming. Before fixing a bug or implementing a feature,
 write a test that exposes the bug and verify the test fails.
 
-The bytecode floor is Java 8. Unit tests use JUnit 5 and Mockito; do not add
+The bytecode floor is Java 17. Unit tests use JUnit 5 and Mockito; do not add
 JUnit 4, Hamcrest or AssertJ.
 
 Integration tests live in `src/it`. Each one builds a sample project with the

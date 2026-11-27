@@ -18,13 +18,14 @@
  */
 package org.apache.maven.shared.dependency.analyzer;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.zip.ZipException;
+
+import org.apache.maven.api.di.Named;
+import org.apache.maven.api.di.Singleton;
 
 /**
  * <p>DefaultClassAnalyzer class.</p>
@@ -61,5 +62,24 @@ public class DefaultClassAnalyzer implements ClassAnalyzer {
             ze.initCause(e);
             throw ze;
         }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<String> analyze(Path path, ClassesPatterns excludedClasses) throws IOException {
+        CollectorClassFileVisitor visitor = new CollectorClassFileVisitor(excludedClasses);
+
+        try {
+            ClassFileVisitorUtils.accept(path, visitor);
+        } catch (ZipException e) {
+            // since the current ZipException gives no indication what jar file is corrupted
+            // we prefer to wrap another ZipException for better error visibility
+            ZipException ze =
+                    new ZipException("Cannot process Jar entry on path: " + path + " due to " + e.getMessage());
+            ze.initCause(e);
+            throw ze;
+        }
+
+        return visitor.getClasses();
     }
 }
